@@ -27,9 +27,12 @@
  * row by the country name. It does not use fixed cell positions.
  */
 import ExcelJS from 'exceljs';
-import { OIL_BULLETIN } from '@/config/sources';
+import { inArray } from 'drizzle-orm';
+import { FIXTURE_SOURCE, FUTURE_DATE_TOLERANCE_MS, OIL_BULLETIN } from '@/config/sources';
+import { getDb } from '@/db/client';
+import { marketPrices } from '@/db/schema';
 import { fetchXlsx } from '../http';
-import { getStoredObservedAt, saveIfNewer } from '../market-store';
+import { saveIfNewer } from '../market-store';
 import { addError, finishResult, newResult, type JobContext, type SourceResult } from '../types';
 import { getEurRateOn } from './nbp';
 
@@ -37,7 +40,6 @@ type FuelKey = keyof typeof OIL_BULLETIN.headers;
 const FUEL_KEYS = Object.keys(OIL_BULLETIN.headers) as FuelKey[];
 
 const HEADER_SEARCH_ROWS = 10;
-const MS_PER_DAY = 86_400_000;
 
 interface Bulletin {
   date: string;
@@ -124,6 +126,19 @@ async function parseBulletin(bytes: ArrayBuffer): Promise<Bulletin> {
   return { date, eurPer1000l };
 }
 
+/** True when every fuel row is a real (non-fixture) row at least as new as the bulletin. */
+async function storedPricesAreCurrent(bulletinDate: string): Promise<boolean> {
+  const db = await getDb();
+  const rows = await db
+    .select({ observedAt: marketPrices.observedAt, source: marketPrices.source })
+    .from(marketPrices)
+    .where(inArray(marketPrices.key, FUEL_KEYS));
+  return (
+    rows.length === FUEL_KEYS.length &&
+    rows.every((row) => row.source !== FIXTURE_SOURCE && row.observedAt >= bulletinDate)
+  );
+}
+
 const round4 = (value: number) => Math.round(value * 10_000) / 10_000;
 
 /** Step `oil-bulletin`: petrol, diesel and LPG prices for Poland in PLN per litre. */
@@ -131,13 +146,13 @@ export async function oilBulletinStep(ctx: JobContext): Promise<SourceResult> {
   const result = newResult('oil-bulletin');
   try {
     const bulletin = await parseBulletin(await fetchXlsx(ctx, OIL_BULLETIN.latestPricesUrl));
-    if (Date.parse(`${bulletin.date}T00:00:00Z`) > ctx.now().getTime() + MS_PER_DAY) {
+    if (Date.parse(`${bulletin.date}T00:00:00Z`) > ctx.now().getTime() + FUTURE_DATE_TOLERANCE_MS) {
       throw new Error(`Oil bulletin: the bulletin date ${bulletin.date} is in the future`);
     }
 
     // The NBP request is not needed when the stored prices are already this recent.
-    const stored = await Promise.all(FUEL_KEYS.map((key) => getStoredObservedAt(key)));
-    if (stored.every((observedAt) => observedAt !== null && observedAt >= bulletin.date)) {
+    // Fixture rows are never current: they carry an invented date and are always replaced.
+    if (await storedPricesAreCurrent(bulletin.date)) {
       result.skipped += FUEL_KEYS.length;
       result.notes?.push(`bulletin ${bulletin.date}: stored prices are as new or newer`);
       return finishResult(result);
@@ -162,8 +177,11 @@ export async function oilBulletinStep(ctx: JobContext): Promise<SourceResult> {
 
     const petrol = valid.get('petrol');
     const lpg = valid.get('lpg');
-    if (petrol && lpg && lpg.pln >= petrol.pln) {
-      addError(result, 'lpg', new Error(`LPG price ${lpg.pln} PLN/l is not lower than petrol ${petrol.pln} PLN/l`));
+    if (lpg && (!petrol || lpg.pln >= petrol.pln)) {
+      const reason = petrol
+        ? `is not lower than petrol ${petrol.pln} PLN/l`
+        : 'cannot be checked against petrol, because the petrol price is invalid';
+      addError(result, 'lpg', new Error(`LPG price ${lpg.pln} PLN/l ${reason}`));
       valid.delete('lpg');
     }
 

@@ -7,6 +7,9 @@ export const USER_AGENT = `WheelWise/1.0 (+${siteUrl}/en/methodology)`;
 /** The `source` of the rows loaded from `data/fixtures`. Real data always replaces them. */
 export const FIXTURE_SOURCE = 'fixture';
 
+/** A source date may be this far after the current time (time zones, early publication). */
+export const FUTURE_DATE_TOLERANCE_MS = 86_400_000;
+
 export const HTTP = {
   timeoutMs: 15_000,
   retryDelayMs: 500,

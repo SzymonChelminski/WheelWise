@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { NBP } from '@/config/sources';
+import { FUTURE_DATE_TOLERANCE_MS, NBP } from '@/config/sources';
 import { fetchJson, parseExternal } from '../http';
 import { saveIfNewer } from '../market-store';
 import { addError, finishResult, newResult, type JobContext, type SourceResult } from '../types';
@@ -50,6 +50,9 @@ export async function exchangeRateStep(ctx: JobContext): Promise<SourceResult> {
     const { rates } = parseExternal(ratesSchema, await fetchJson(ctx, NBP.currentUrl), 'NBP current rate');
     const { effectiveDate, mid } = latestRate(rates);
     assertEurPlnRange(mid);
+    if (Date.parse(`${effectiveDate}T00:00:00Z`) > ctx.now().getTime() + FUTURE_DATE_TOLERANCE_MS) {
+      throw new Error(`NBP rate date ${effectiveDate} is in the future`);
+    }
     await saveIfNewer(
       ctx,
       result,

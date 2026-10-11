@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EUROSTAT } from '@/config/sources';
+import { EUROSTAT, FUTURE_DATE_TOLERANCE_MS } from '@/config/sources';
 import { fetchJson, parseExternal } from '../http';
 import { saveIfNewer } from '../market-store';
 import { addError, finishResult, newResult, type JobContext, type SourceResult } from '../types';
@@ -55,13 +55,17 @@ export async function electricityStep(ctx: JobContext): Promise<SourceResult> {
     if (price < min || price > max) {
       throw new Error(`Electricity price ${price} PLN/kWh is outside the valid range ${min}..${max}`);
     }
+    const observedAt = periodStart(period);
+    if (Date.parse(`${observedAt}T00:00:00Z`) > ctx.now().getTime() + FUTURE_DATE_TOLERANCE_MS) {
+      throw new Error(`Eurostat period ${period} is in the future`);
+    }
     await saveIfNewer(
       ctx,
       result,
       {
         key: 'electricity',
         pricePln: price,
-        observedAt: periodStart(period),
+        observedAt,
         source: EUROSTAT.source,
         sourceUrl: EUROSTAT.url,
       },
