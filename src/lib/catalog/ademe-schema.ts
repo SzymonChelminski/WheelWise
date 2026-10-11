@@ -13,6 +13,8 @@ export const ademeRowSchema = z.object({
   Gamme: z.string(),
   Cylindrée: nullableNumber,
   Puissance_maximale: nullableNumber,
+  // The API omits the key when empty; a snapshot stores it as null.
+  Puissance_nominale_électrique: nullableNumber,
   Type_de_boite: z.string(),
   Conso_vitesse_mixte_Min: nullableNumber,
   Conso_vitesse_mixte_Max: nullableNumber,

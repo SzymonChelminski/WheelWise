@@ -56,6 +56,20 @@ export const TRANSMISSION_MAP: Readonly<Record<string, Transmission>> = {
 export const PRICE_EUR_RANGE = { min: 5000, max: 1_000_000 } as const;
 export const POWER_KW_RANGE = { min: 20, max: 1200 } as const;
 
+/**
+ * The dataset has no `Puissance_maximale` for electric cars. Their power is the
+ * highest of: `Puissance_maximale` (when present), horsepower in the commercial
+ * description, kilowatts in the description, and the rated power
+ * (`Puissance_nominale_électrique`, often a continuous rating well below peak).
+ */
+export const ELECTRIC_ENERGY = 'ELECTRIC';
+export const ELECTRIC_POWER_KW_RANGE = { min: 15, max: 1200 } as const;
+export const HORSEPOWER_TO_KW = 0.7355;
+/** Matches "204ch" and "325 ch". Used with `matchAll`, hence the `g` flag. */
+export const DESCRIPTION_HORSEPOWER_PATTERN = /(?<![\d.,])(\d{2,4})\s*ch\b/gi;
+/** Matches "239kW" and "160 kW" but not battery sizes such as "62kWh". */
+export const DESCRIPTION_KILOWATT_PATTERN = /(?<![\d.,])(\d{2,4})\s*kw(?!h)/gi;
+
 /** Plausible WLTP combined consumption; rows outside the range are skipped. */
 export const CONSUMPTION_RANGE = {
   fuelL100: { min: 2, max: 25 },

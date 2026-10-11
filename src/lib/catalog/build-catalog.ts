@@ -4,9 +4,14 @@ import {
   CONSUMPTION_RANGE,
   DEFAULT_BRAND_TIER,
   DEFAULT_VALUE_RETENTION,
+  DESCRIPTION_HORSEPOWER_PATTERN,
+  DESCRIPTION_KILOWATT_PATTERN,
   ELECTRIC_CONSUMPTION_DIVISOR,
+  ELECTRIC_ENERGY,
+  ELECTRIC_POWER_KW_RANGE,
   ENERGY_TO_FUEL_TYPE,
   FRENCH_VAT_RATE,
+  HORSEPOWER_TO_KW,
   PLN_PRICE_ROUNDING,
   POLISH_VAT_RATE,
   POWER_KW_RANGE,
@@ -63,11 +68,12 @@ const MOJIBAKE_MARKERS = /[ÃÂ]/;
  * Re-decodes UTF-8 text that was read as Latin-1 ("CoupÃ©" -> "Coupé").
  * The dataset also holds "Ã " and "Â " where byte 0xA0 (the second byte of
  * "à" and of a no-break space) was turned into a plain space, so a space
- * right after a marker is restored to 0xA0 first.
+ * right after a marker is restored to 0xA0 first. A marker at the very end
+ * (its space was trimmed, as in "ENGAGEÂ Â Â") gets the same treatment.
  */
 function repairEncoding(text: string): string {
   if (!MOJIBAKE_MARKERS.test(text)) return text;
-  const latin1 = text.replace(/([ÃÂ]) /g, '$1 ');
+  const latin1 = text.replace(/([ÃÂ])( |$)/g, '$1\u00a0');
   const bytes = new Uint8Array(latin1.length);
   for (let i = 0; i < latin1.length; i++) {
     const code = latin1.charCodeAt(i);
@@ -133,6 +139,23 @@ function requiredConsumption(
   }
 }
 
+function numbersIn(text: string, pattern: RegExp): number[] {
+  return [...text.matchAll(pattern)].map((match) => Number(match[1]));
+}
+
+/** Power in kW before rounding; null when no source has a value. */
+function resolvePowerKw(row: AdemeRow, isElectric: boolean): number | null {
+  if (!isElectric) return row.Puissance_maximale;
+  const description = cleanText(row.Description_Commerciale);
+  const horsepower = maxOf(numbersIn(description, DESCRIPTION_HORSEPOWER_PATTERN));
+  return maxOf([
+    row.Puissance_maximale,
+    horsepower === null ? null : horsepower * HORSEPOWER_TO_KW,
+    maxOf(numbersIn(description, DESCRIPTION_KILOWATT_PATTERN)),
+    row.Puissance_nominale_électrique,
+  ]);
+}
+
 function mapRow(row: AdemeRow): MapResult {
   const price = row.Prix_véhicule;
   if (price === null || price === 0) return { skip: 'no-price' };
@@ -140,7 +163,11 @@ function mapRow(row: AdemeRow): MapResult {
     return { skip: 'price-out-of-range' };
   }
 
-  if (!inRange(row.Puissance_maximale, POWER_KW_RANGE)) return { skip: 'no-power' };
+  const isElectric = lookupKey(row.Energie) === ELECTRIC_ENERGY;
+  const powerKw = resolvePowerKw(row, isElectric);
+  if (!inRange(powerKw, isElectric ? ELECTRIC_POWER_KW_RANGE : POWER_KW_RANGE)) {
+    return { skip: 'no-power' };
+  }
 
   const energy = lookupKey(row.Energie);
   if (UNSUPPORTED_ENERGIES.has(energy)) return { skip: 'unsupported-energy' };
@@ -171,7 +198,7 @@ function mapRow(row: AdemeRow): MapResult {
       segment,
       fuelType,
       transmission,
-      powerKw: Math.round(row.Puissance_maximale),
+      powerKw: Math.round(powerKw),
       engineCc: fuelType !== 'ev' && cc !== null && Number.isInteger(cc) && cc > 0 ? cc : null,
       priceEur: price,
       fuel: fuelType === 'ev' ? null : fuel,
