@@ -4,6 +4,9 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3
 
 export const USER_AGENT = `WheelWise/1.0 (+${siteUrl}/en/methodology)`;
 
+/** The `source` of the rows loaded from `data/fixtures`. Real data always replaces them. */
+export const FIXTURE_SOURCE = 'fixture';
+
 export const HTTP = {
   timeoutMs: 15_000,
   retryDelayMs: 500,
