@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import type { BrandTier, ValueRetention } from '@/lib/domain/types';
 
-const nullableNumber = z.number().nullable();
+// The live API omits a key when the value is empty; a snapshot stores it as null.
+const nullableNumber = z.number().nullable().default(null);
 
 /** One version of a car in the ADEME "Car Labelling" dataset. Unknown extra fields are ignored. */
 export const ademeRowSchema = z.object({
@@ -13,7 +14,6 @@ export const ademeRowSchema = z.object({
   Gamme: z.string(),
   Cylindrée: nullableNumber,
   Puissance_maximale: nullableNumber,
-  // The API omits the key when empty; a snapshot stores it as null.
   Puissance_nominale_électrique: nullableNumber,
   Type_de_boite: z.string(),
   Conso_vitesse_mixte_Min: nullableNumber,

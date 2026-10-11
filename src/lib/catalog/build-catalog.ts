@@ -2,6 +2,7 @@ import {
   BODY_TYPE_MAP,
   CONSUMPTION_DECIMALS,
   CONSUMPTION_RANGE,
+  CONSUMPTION_ROUNDING_SIGNIFICANT_DIGITS,
   DEFAULT_BRAND_TIER,
   DEFAULT_VALUE_RETENTION,
   DESCRIPTION_HORSEPOWER_PATTERN,
@@ -116,9 +117,11 @@ function roundTo(value: number, step: number): number {
   return Math.round(value / step) * step;
 }
 
+/** Half-up to `CONSUMPTION_DECIMALS` in decimal terms, ignoring floating-point noise. */
 function roundConsumption(value: number): number {
   const factor = 10 ** CONSUMPTION_DECIMALS;
-  return Math.round(value * factor) / factor;
+  const scaled = Number((value * factor).toPrecision(CONSUMPTION_ROUNDING_SIGNIFICANT_DIGITS));
+  return Math.round(scaled) / factor;
 }
 
 function requiredConsumption(
@@ -157,6 +160,10 @@ function resolvePowerKw(row: AdemeRow, isElectric: boolean): number | null {
 }
 
 function mapRow(row: AdemeRow): MapResult {
+  if (!cleanText(row.Marque) || !cleanText(row.Modèle) || !cleanText(row.Description_Commerciale)) {
+    return { skip: 'missing-name' };
+  }
+
   const price = row.Prix_véhicule;
   if (price === null || price === 0) return { skip: 'no-price' };
   if (!Number.isInteger(price) || !inRange(price, PRICE_EUR_RANGE)) {
@@ -226,6 +233,59 @@ function compareRepresentative(a: MappedRow, b: MappedRow): number {
   );
 }
 
+/** Upper-case letters and digits only, without diacritics. */
+function normalizeForMatch(text: string): string {
+  return text
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/\p{M}+/gu, '')
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+function withoutLeadingWord(text: string, word: string): string {
+  const prefix = `${word} `;
+  return text.slice(0, prefix.length).toLowerCase() === prefix.toLowerCase()
+    ? text.slice(prefix.length)
+    : text;
+}
+
+function normalizedWords(text: string): string[] {
+  return text
+    .split(/\s+/)
+    .map(normalizeForMatch)
+    .filter((word) => word !== '');
+}
+
+/**
+ * Display name of a version, shown after the make ("make variant"): drops the
+ * make that the commercial description repeats and adds the model name when
+ * the description lacks it. `make` is the display name, `marque` the
+ * dataset's brand value.
+ *
+ * The model is added only when its first word is not already a word of the
+ * name: for some makes `Modèle` is an engine or trim code of the same family
+ * ("E 200" with the description "E 220 d"), and adding it would repeat the model.
+ */
+export function displayVariant(
+  make: string,
+  marque: string,
+  model: string,
+  description: string,
+): string {
+  let variant = withoutLeadingWord(withoutLeadingWord(description, make), marque).trim();
+  const fullName = `${make} ${variant}`;
+  const modelKey = normalizeForMatch(model);
+  const [modelFirstWord] = normalizedWords(model);
+  if (
+    modelKey &&
+    !normalizeForMatch(fullName).includes(modelKey) &&
+    !normalizedWords(fullName).includes(modelFirstWord)
+  ) {
+    variant = `${model} ${variant}`.trim();
+  }
+  return variant || model;
+}
+
 function groupKey(row: MappedRow): string {
   // Bi-fuel cars are listed twice (petrol mode and LPG mode) with different power.
   const power = row.fuelType === 'lpg' ? null : row.powerKw;
@@ -262,11 +322,16 @@ interface DraftCar {
 function buildCar(rows: MappedRow[], opts: BuildOptions, brand: BrandInfo | undefined): CarInput {
   const representative = [...rows].sort(compareRepresentative)[0];
   const { fuelType } = representative;
-  const isLpg = fuelType === 'lpg';
-
-  const powerKw = isLpg ? Math.max(...rows.map((row) => row.powerKw)) : representative.powerKw;
-  const fuel = isLpg ? maxOf(rows.map((row) => row.fuel)) : representative.fuel;
   const { elec, priceEur } = representative;
+
+  // A bi-fuel version is listed as a petrol-mode row and an LPG-mode row with
+  // the same description; rows with another description are other versions.
+  const sameVersion =
+    fuelType === 'lpg'
+      ? rows.filter((row) => row.description === representative.description)
+      : [representative];
+  const powerKw = Math.max(...sameVersion.map((row) => row.powerKw));
+  const fuel = maxOf(sameVersion.map((row) => row.fuel));
   const make = brand?.displayName ?? titleCase(representative.make);
 
   const listPricePln = roundTo(
@@ -287,7 +352,12 @@ function buildCar(rows: MappedRow[], opts: BuildOptions, brand: BrandInfo | unde
     ),
     make,
     model: representative.model,
-    variant: representative.description,
+    variant: displayVariant(
+      make,
+      representative.make,
+      representative.model,
+      representative.description,
+    ),
     bodyType: representative.bodyType,
     segment: representative.segment,
     fuelType,

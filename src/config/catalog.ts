@@ -88,6 +88,12 @@ export const FRENCH_VAT_RATE = 0.2;
 export const POLISH_VAT_RATE = 0.23;
 export const PLN_PRICE_ROUNDING = 100;
 export const CONSUMPTION_DECIMALS = 1;
+/**
+ * Significant digits kept before rounding consumption, so that binary
+ * floating-point noise does not decide a tie (the mean 11.15 is stored as
+ * 11.149999999999999 and must round half-up to 11.2).
+ */
+export const CONSUMPTION_ROUNDING_SIGNIFICANT_DIGITS = 12;
 
 /** Used for a make that is missing from data/brands.json. */
 export const DEFAULT_BRAND_TIER: BrandTier = 'mainstream';
