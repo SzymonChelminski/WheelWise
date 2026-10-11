@@ -54,3 +54,46 @@ export const EUROSTAT = {
   /** Valid price per kWh in PLN. */
   pricePlnRange: { min: 0.3, max: 5 },
 } as const;
+
+const ademeDatasetApi = 'https://data.ademe.fr/data-fair/api/v1/datasets/ademe-car-labelling';
+const ademeFields = [
+  'Marque',
+  'Modèle',
+  'Description_Commerciale',
+  'Energie',
+  'Carrosserie',
+  'Gamme',
+  'Cylindrée',
+  'Puissance_maximale',
+  'Puissance_nominale_électrique',
+  'Type_de_boite',
+  'Conso_vitesse_mixte_Min',
+  'Conso_vitesse_mixte_Max',
+  'Conso_elec_Min',
+  'Conso_elec_Max',
+  'Prix_véhicule',
+] as const;
+const ademePageSize = 1000;
+
+export const ADEME = {
+  /** The dataset page, stored as the price source of every car. */
+  pageUrl: 'https://data.ademe.fr/datasets/ademe-car-labelling',
+  metadataUrl: ademeDatasetApi,
+  rowsUrl: `${ademeDatasetApi}/lines?${new URLSearchParams({
+    size: String(ademePageSize),
+    select: ademeFields.join(','),
+  })}`,
+  /** Every request, including each `next` link, must stay on this host and path. */
+  host: 'data.ademe.fr',
+  apiPathPrefix: '/data-fair/api/',
+  maxPages: 20,
+  rowsTimeoutMs: 30_000,
+  /** More invalid rows than this share of the download fails the step. */
+  maxInvalidRowShare: 0.05,
+  minValidRows: 1000,
+  minCars: 200,
+  /** The new catalogue must hold at least this share of the currently active cars. */
+  minCarsShareOfActive: 0.5,
+  /** Below this relative difference between the EUR rate used and the rate behind the stored prices, an unchanged dataset is not rewritten. */
+  rateChangeTolerance: 0.005,
+} as const;

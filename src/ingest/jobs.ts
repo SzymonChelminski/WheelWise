@@ -1,3 +1,4 @@
+import { catalogueStep } from './sources/ademe-catalogue';
 import { electricityStep } from './sources/eurostat-electricity';
 import { exchangeRateStep } from './sources/nbp';
 import { oilBulletinStep } from './sources/oil-bulletin';
@@ -8,4 +9,5 @@ export const dailySteps: JobStep[] = [
   { name: 'exchange-rate', run: exchangeRateStep },
   { name: 'oil-bulletin', run: oilBulletinStep },
   { name: 'electricity', run: electricityStep },
+  { name: 'catalogue', run: catalogueStep },
 ];

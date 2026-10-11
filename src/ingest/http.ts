@@ -16,7 +16,12 @@ function describe(url: string): string {
  * GET through `ctx.fetch` with the project User-Agent and a timeout. One retry
  * after a network error or an HTTP 5xx status. Any other non-2xx status throws at once.
  */
-async function request(ctx: JobContext, url: string, accept: string): Promise<Response> {
+async function request(
+  ctx: JobContext,
+  url: string,
+  accept: string,
+  timeoutMs: number,
+): Promise<Response> {
   let failure = new Error(`Request to ${describe(url)} failed`);
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     const remainingMs = ctx.deadline - ctx.now().getTime();
@@ -28,7 +33,7 @@ async function request(ctx: JobContext, url: string, accept: string): Promise<Re
     try {
       response = await ctx.fetch(url, {
         headers: { 'User-Agent': USER_AGENT, Accept: accept },
-        signal: AbortSignal.timeout(Math.min(HTTP.timeoutMs, remainingMs)),
+        signal: AbortSignal.timeout(Math.min(timeoutMs, remainingMs)),
       });
     } catch (error) {
       failure = new Error(`Request to ${describe(url)} failed: ${errorMessage(error)}`);
@@ -54,8 +59,12 @@ async function readBytes(response: Response, url: string, maxBytes: number): Pro
   return bytes;
 }
 
-export async function fetchJson(ctx: JobContext, url: string): Promise<unknown> {
-  const response = await request(ctx, url, 'application/json');
+export async function fetchJson(
+  ctx: JobContext,
+  url: string,
+  timeoutMs: number = HTTP.timeoutMs,
+): Promise<unknown> {
+  const response = await request(ctx, url, 'application/json', timeoutMs);
   const bytes = await readBytes(response, url, HTTP.maxJsonBytes);
   try {
     return JSON.parse(new TextDecoder().decode(bytes));
@@ -69,6 +78,7 @@ export async function fetchXlsx(ctx: JobContext, url: string): Promise<ArrayBuff
     ctx,
     url,
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    HTTP.timeoutMs,
   );
   return readBytes(response, url, HTTP.maxXlsxBytes);
 }
