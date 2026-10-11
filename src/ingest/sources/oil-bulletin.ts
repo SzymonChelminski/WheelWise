@@ -71,7 +71,8 @@ function toIsoDate(value: string | number | Date | null): string {
 
 async function parseBulletin(bytes: ArrayBuffer): Promise<Bulletin> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(Buffer.from(bytes));
+  // exceljs 4.4 types `load` with the pre-generic `Buffer`, which @types/node 22 no longer matches.
+  await workbook.xlsx.load(Buffer.from(bytes) as unknown as Parameters<typeof workbook.xlsx.load>[0]);
   const sheet = workbook.worksheets[0];
   if (!sheet) throw new Error('Oil bulletin: the workbook has no sheet');
 

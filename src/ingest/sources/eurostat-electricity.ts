@@ -34,8 +34,9 @@ function latestValue(data: z.infer<typeof responseSchema>): { period: string; pr
   );
   if (!otherDimensionsSingle) throw new Error('Eurostat response holds more than one series');
 
+  // "YYYY-Sn" strings sort in time order.
   const periods = Object.entries(data.dimension.time.category.index).sort(([a], [b]) =>
-    b.localeCompare(a),
+    a < b ? 1 : -1,
   );
   for (const [period, position] of periods) {
     const price = (data.value as Record<string, number | null | undefined>)[String(position)];
