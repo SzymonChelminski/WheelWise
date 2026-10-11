@@ -1,0 +1,7 @@
+[
+  { "key": "petrol", "pricePln": 6.5, "observedAt": "2026-10-01", "source": "fixture", "sourceUrl": "https://example.org/fixture" },
+  { "key": "diesel", "pricePln": 6.6, "observedAt": "2026-10-01", "source": "fixture", "sourceUrl": "https://example.org/fixture" },
+  { "key": "lpg", "pricePln": 3.1, "observedAt": "2026-10-01", "source": "fixture", "sourceUrl": "https://example.org/fixture" },
+  { "key": "electricity", "pricePln": 1.27, "observedAt": "2026-10-01", "source": "fixture", "sourceUrl": "https://example.org/fixture" },
+  { "key": "eur_pln", "pricePln": 4.3, "observedAt": "2026-10-01", "source": "fixture", "sourceUrl": "https://example.org/fixture" }
+]
