@@ -3,12 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { AssumptionsPanel, type AssumptionField } from "@/components/ui/AssumptionsPanel";
-import { ASSUMPTION_LIMITS, DEFAULT_ASSUMPTIONS, DRIVER_AGE_BANDS } from "@/lib/domain/assumptions";
-import type { Assumptions, DriverAgeBand } from "@/lib/domain/types";
+import { ASSUMPTION_LIMITS, DRIVER_AGE_BANDS } from "@/lib/domain/assumptions";
+import type { DriverAgeBand } from "@/lib/domain/types";
 import { useAssumptions } from "@/lib/state/assumptions-client";
 import { useDebouncedRun, useSyncedDraft } from "../use-draft";
-
-type Estimate = Extract<Assumptions["insurance"], { mode: "estimate" }>;
 
 /** A whole number typed as digits within the limits, or null. Nothing else reaches the cost engine. */
 function parseDigits(raw: string, limits: { min: number; max: number }): number | null {
@@ -29,7 +27,7 @@ function isAgeBand(value: string): value is DriverAgeBand {
  */
 export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
   const t = useTranslations();
-  const { assumptions, setAssumptions } = useAssumptions();
+  const { assumptions, estimate, setAssumptions } = useAssumptions();
   const { run, cancel } = useDebouncedRun();
 
   const latest = useRef(assumptions);
@@ -38,8 +36,6 @@ export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
   }, [assumptions]);
 
   const urlMode = assumptions.insurance.mode;
-  const estimate: Estimate =
-    assumptions.insurance.mode === "estimate" ? assumptions.insurance : DEFAULT_ASSUMPTIONS.insurance as Estimate;
   const premium = assumptions.insurance.mode === "custom" ? assumptions.insurance.annualPremiumPln : null;
 
   const [kmDraft, setKmDraft] = useSyncedDraft(String(assumptions.annualMileageKm));

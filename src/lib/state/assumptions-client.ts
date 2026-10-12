@@ -2,7 +2,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useOptimistic, useRef } from 'react';
 import { z } from 'zod';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { parseAssumptions, serializeAssumptions } from '@/lib/domain/assumptions';
+import { DEFAULT_ASSUMPTIONS, parseAssumptions, serializeAssumptions } from '@/lib/domain/assumptions';
 import { assumptionsSchema } from '@/lib/domain/schemas';
 import type { Assumptions, Period } from '@/lib/domain/types';
 import {
@@ -20,6 +20,18 @@ import { useUrlWriter } from './url-client';
  * cost engine without passing assumptionsSchema.
  */
 export const ASSUMPTIONS_STORAGE_KEY = 'wheelwise.assumptions.v1';
+
+type Estimate = Extract<Assumptions['insurance'], { mode: 'estimate' }>;
+
+/*
+ * The age band and coverage last chosen for the insurance estimate. The URL drops
+ * them while the user's own premium is active; this keeps them for the way back.
+ */
+let lastEstimate: Estimate | null = null;
+
+function remember(assumptions: Assumptions): void {
+  if (assumptions.insurance.mode === 'estimate') lastEstimate = assumptions.insurance;
+}
 
 export interface AssumptionState {
   assumptions: Assumptions;
@@ -66,8 +78,11 @@ export function useAssumptions() {
     (_current, next) => next,
   );
 
+  useEffect(() => remember(fromUrl.assumptions), [fromUrl]);
+
   const commit = useCallback(
     (next: AssumptionState) => {
+      remember(next.assumptions);
       store(next);
       write(
         (params) => {
@@ -91,7 +106,11 @@ export function useAssumptions() {
     [commit, state.assumptions],
   );
 
-  return { assumptions: state.assumptions, period: state.period, setAssumptions, setPeriod };
+  const { insurance } = state.assumptions;
+  const estimate: Estimate =
+    insurance.mode === 'estimate' ? insurance : (lastEstimate ?? (DEFAULT_ASSUMPTIONS.insurance as Estimate));
+
+  return { assumptions: state.assumptions, period: state.period, estimate, setAssumptions, setPeriod };
 }
 
 /** On a page opened without assumption parameters: puts the stored values into the URL, once. */
