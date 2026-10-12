@@ -46,7 +46,9 @@
     },
     "disclaimer": "Koszty są szacunkami, a ceny aut to ceny orientacyjne: francuskie ceny katalogowe przeliczone na złote. Serwis nie jest ofertą handlową ani poradą finansową.",
     "freshnessChecked": "Dane sprawdzone <checked>{checkedDate}</checked>. Ceny paliw z <fuel>{fuelDate}</fuel>, cennik aut z <catalogue>{catalogueDate}</catalogue>.",
-    "freshness": "Ceny paliw z <fuel>{fuelDate}</fuel>, cennik aut z <catalogue>{catalogueDate}</catalogue>."
+    "freshness": "Ceny paliw z <fuel>{fuelDate}</fuel>, cennik aut z <catalogue>{catalogueDate}</catalogue>.",
+    "freshnessCheckedNoCatalogue": "Dane sprawdzone <checked>{checkedDate}</checked>. Ceny paliw z <fuel>{fuelDate}</fuel>.",
+    "freshnessNoCatalogue": "Ceny paliw z <fuel>{fuelDate}</fuel>."
   },
   "search": {
     "label": "Szukaj auta",
@@ -88,6 +90,7 @@
       "F": "F luksusowe"
     },
     "horsepower": "KM",
+    "kilowatt": "kW",
     "consumptionFuel": "l/100 km",
     "consumptionElectric": "kWh/100 km"
   },

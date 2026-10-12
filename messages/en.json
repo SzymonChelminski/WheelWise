@@ -46,7 +46,9 @@
     },
     "disclaimer": "Costs are estimates and car prices are indicative: French list prices converted to złoty. This site is neither a sales offer nor financial advice.",
     "freshnessChecked": "Data checked on <checked>{checkedDate}</checked>. Fuel prices from <fuel>{fuelDate}</fuel>, car price list from <catalogue>{catalogueDate}</catalogue>.",
-    "freshness": "Fuel prices from <fuel>{fuelDate}</fuel>, car price list from <catalogue>{catalogueDate}</catalogue>."
+    "freshness": "Fuel prices from <fuel>{fuelDate}</fuel>, car price list from <catalogue>{catalogueDate}</catalogue>.",
+    "freshnessCheckedNoCatalogue": "Data checked on <checked>{checkedDate}</checked>. Fuel prices from <fuel>{fuelDate}</fuel>.",
+    "freshnessNoCatalogue": "Fuel prices from <fuel>{fuelDate}</fuel>."
   },
   "search": {
     "label": "Search for a car",
@@ -88,6 +90,7 @@
       "F": "F luxury"
     },
     "horsepower": "hp",
+    "kilowatt": "kW",
     "consumptionFuel": "l/100 km",
     "consumptionElectric": "kWh/100 km"
   },

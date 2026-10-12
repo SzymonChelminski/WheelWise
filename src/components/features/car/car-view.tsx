@@ -40,7 +40,7 @@ export function powerText(t: Translate, locale: Locale, car: CarFacts): PowerTex
   const hp = horsepower(car.powerKw, t);
   return {
     short: t(`power.${kind}.short`, { hp }),
-    full: `${t(`power.${kind}.label`)}: ${formatInteger(car.powerKw, locale)} kW (${hp})`,
+    full: `${t(`power.${kind}.label`)}: ${formatInteger(car.powerKw, locale)} ${t("attr.kilowatt")} (${hp})`,
   };
 }
 
