@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { Footer, Header, SiteShell } from "@/components/layout/SiteShell";
-import { CompareBar } from "@/components/ui/CompareBar";
 import { formatDate, type Locale } from "@/components/ui/format";
 import { DataFreshness } from "@/components/ui/Markers";
 import { mockCars, mockDates } from "@/mocks/cars";
 import { copy } from "@/mocks/copy";
 import { carMeta, carName, P } from "../_lib/view";
+import { CompareBarDemo } from "./CompareBarDemo";
 
 export function Freshness({ locale, tone }: { locale: Locale; tone?: "light" | "dark" }) {
   const f = copy[locale].home.freshness(
@@ -26,6 +26,7 @@ export function PreviewCompareBar({
   locale,
   slugs,
   position,
+  hintId,
   showWhenEmpty,
   limitReached,
   defaultExpanded,
@@ -33,37 +34,26 @@ export function PreviewCompareBar({
   locale: Locale;
   slugs: string[];
   position?: "fixed" | "static";
+  /** Id of the bar's hint line; see CompareBar. */
+  hintId?: string;
   showWhenEmpty?: boolean;
   /** The user has just tried to add a fourth car: show the limit message. */
   limitReached?: boolean;
   defaultExpanded?: boolean;
 }) {
-  const t = copy[locale].compareBar;
   const cars = slugs.map((slug) => {
     const car = mockCars.find((item) => item.slug === slug)!;
     return { slug, name: carName(car), meta: carMeta(car, locale) };
   });
   return (
-    <CompareBar
+    <CompareBarDemo
+      locale={locale}
       cars={cars}
-      compareHref={`${P}/compare`}
       position={position}
+      hintId={hintId}
       showWhenEmpty={showWhenEmpty}
+      limitReached={limitReached}
       defaultExpanded={defaultExpanded}
-      notice={limitReached ? t.limit : undefined}
-      labels={{
-        region: t.region,
-        toggle: t.toggle(cars.length),
-        list: t.list,
-        count: t.count(cars.length),
-        compare: t.compare(cars.length),
-        compareIdle: t.compareIdle,
-        needMore: t.needMore,
-        empty: t.empty,
-        full: t.full,
-        remove: t.remove,
-        clear: t.clear,
-      }}
     />
   );
 }

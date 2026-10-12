@@ -3,6 +3,7 @@ import { Container, SkipLink } from "@/components/layout/SiteShell";
 import { Button, type ButtonVariant } from "@/components/ui/Button";
 import { PowerDetail } from "@/components/ui/CarMeta";
 import { CheckboxRow, FilterChip, SegmentedSwitch } from "@/components/ui/Choice";
+import { COMPARE_BAR_HINT_ID } from "@/components/ui/CompareBar";
 import { CompareToggle } from "@/components/ui/CompareToggle";
 import { CostStrip, ValueBar } from "@/components/ui/CostStrip";
 import { EarningsScale } from "@/components/ui/EarningsScale";
@@ -428,6 +429,8 @@ export default async function ComponentsPreview({
               locale={locale}
               slugs={mockCompareThree.slice(0, count)}
               position="static"
+              // The full bar describes the full toggle shown under "Ranking item".
+              hintId={count === 3 ? COMPARE_BAR_HINT_ID : undefined}
               showWhenEmpty
             />
           ))}

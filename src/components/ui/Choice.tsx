@@ -6,7 +6,17 @@ import { Icon } from "./Icon";
  * Choice controls built on native inputs: segmented switch (radio group),
  * filter chip (checkbox) and checkbox row. Native inputs keep keyboard
  * behaviour and form semantics for free.
+ *
+ * The input of a switch segment or a chip is invisible and covers its label
+ * exactly (HIDDEN_INPUT inside a "relative" label). Its box is therefore the
+ * box of the control: it scrolls with the control in any scroll container,
+ * and when it receives focus the browser brings the whole control into view.
+ * Do not replace it with "sr-only": that takes the input out of the label's
+ * box and makes the nearest positioned ancestor scroll instead.
  */
+
+const HIDDEN_INPUT =
+  "absolute inset-0 m-0 size-full cursor-pointer appearance-none opacity-0 disabled:cursor-not-allowed";
 
 const FOCUS_WITHIN =
   "has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-(--focus-ring)";
@@ -59,7 +69,7 @@ export function SegmentedSwitch({
           <label
             key={option.value}
             className={cn(
-              "flex min-h-9 cursor-pointer items-center justify-center rounded-sm text-center text-sm font-medium text-ink transition-colors duration-(--duration-fast)",
+              "relative flex min-h-9 cursor-pointer items-center justify-center rounded-sm text-center text-sm font-medium text-ink transition-colors duration-(--duration-fast)",
               "hover:bg-brand-soft has-[:checked]:bg-brand has-[:checked]:font-semibold has-[:checked]:text-on-brand",
               FOCUS_WITHIN,
               "has-[:focus-visible]:outline-offset-2",
@@ -70,7 +80,7 @@ export function SegmentedSwitch({
               type="radio"
               name={name}
               value={option.value}
-              className="sr-only"
+              className={HIDDEN_INPUT}
               {...(value !== undefined
                 ? { checked: value === option.value, onChange: handle }
                 : { defaultChecked: defaultValue === option.value, onChange: handle })}
@@ -113,7 +123,7 @@ export function FilterChip(props: CheckProps) {
     <label
       data-demo={demo}
       className={cn(
-        "inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full pointer-coarse:min-h-11 border border-line-strong bg-surface px-3.5 text-sm font-medium text-ink transition-colors duration-(--duration-fast)",
+        "relative inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full pointer-coarse:min-h-11 border border-line-strong bg-surface px-3.5 text-sm font-medium text-ink transition-colors duration-(--duration-fast)",
         "hover:border-brand hover:bg-brand-soft",
         "has-[:checked]:border-brand has-[:checked]:bg-brand-tint has-[:checked]:shadow-[inset_0_0_0_1px_var(--color-brand)]",
         FOCUS_WITHIN,
@@ -126,7 +136,7 @@ export function FilterChip(props: CheckProps) {
         name={name}
         value={value}
         disabled={disabled}
-        className="peer sr-only"
+        className={cn("peer", HIDDEN_INPUT)}
         {...inputState(props)}
       />
       <Icon
@@ -160,7 +170,7 @@ export function CheckboxRow(props: CheckProps) {
         name={name}
         value={value}
         disabled={disabled}
-        className="size-5 shrink-0 accent-brand outline-none"
+        className="size-5 shrink-0 scroll-my-3 accent-brand outline-none"
         {...inputState(props)}
       />
       <span className="min-w-0 flex-1 break-words">{children}</span>

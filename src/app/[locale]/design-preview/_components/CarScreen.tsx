@@ -35,6 +35,8 @@ import {
   carName,
   consumption,
   earningsLevels,
+  MOCK_OWNERSHIP_YEARS,
+  ownershipText,
   P,
   powerKind,
   powerValue,
@@ -57,10 +59,10 @@ export function CarScreen({
   const t = copy[locale];
   const costs = mockCosts[car.slug];
   const name = carName(car);
-  const years = t.assumptions.yearOptions[4];
+  const years = ownershipText(MOCK_OWNERSHIP_YEARS, locale);
   const total = formatPln(costs.perMonth.total, locale);
   const residual = t.car.residual(
-    t.assumptions.yearsAfter[4],
+    ownershipText(MOCK_OWNERSHIP_YEARS, locale, "after"),
     formatPln(costs.residualValuePln, locale),
     // residualValuePct is a percentage from 0 to 100; formatPercent takes a share from 0 to 1.
     formatPercent(costs.residualValuePct / 100, locale),

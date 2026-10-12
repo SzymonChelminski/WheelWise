@@ -237,7 +237,7 @@ export function SearchCombobox({
           role="listbox"
           aria-label={labels.label}
           className={cn(
-            "max-h-88 overflow-y-auto overscroll-contain py-1",
+            "relative max-h-88 overflow-y-auto overscroll-contain py-1",
             (loading || shown.length === 0) && "hidden",
           )}
         >

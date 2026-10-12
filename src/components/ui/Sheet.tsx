@@ -8,6 +8,12 @@ import { Icon, type IconName } from "./Icon";
  * Sheet: a modal <dialog>. Bottom sheet below 768 px, right-hand drawer from
  * 768 px (styles: .sheet in globals.css). The native dialog gives the focus
  * trap, Escape to close and focus return to the trigger.
+ *
+ * Only the content list scrolls: the dialog itself is clipped and cannot
+ * scroll, so the title, the close button and the footer stay in place. The
+ * list is a positioned element, which keeps visually hidden content (sr-only
+ * labels and legends) inside it, and it has scroll padding, so a control that
+ * receives focus is brought into view with room for its focus ring.
  */
 export function Sheet({
   open,
@@ -59,7 +65,7 @@ export function Sheet({
           <Icon name="close" size={24} />
         </button>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5">
+      <div className="relative min-h-0 flex-1 scroll-py-4 overflow-y-auto overscroll-contain px-5 py-5">
         {children}
       </div>
       {footer && (

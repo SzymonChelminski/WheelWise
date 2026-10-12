@@ -17,7 +17,7 @@ import {
   type Locale,
 } from "@/components/ui/format";
 import type { SearchOption } from "@/components/ui/SearchCombobox";
-import { mockCars, mockCosts, mockStressSlugs } from "@/mocks/cars";
+import { mockAssumptions, mockCars, mockCosts, mockStressSlugs } from "@/mocks/cars";
 import { copy } from "@/mocks/copy";
 import type { Car, CostBreakdown, CostKey, IncomeRange, Period } from "@/mocks/types";
 
@@ -83,6 +83,23 @@ export function consumption(car: Car, locale: Locale): string {
   if (electric) return `${formatDecimal(car.electricKwh100!, locale)} ${t.consumptionElectric}`;
   return "–";
 }
+
+/**
+ * The ownership period as text: "5 lat" / "5 years", or after "po" / "after"
+ * in the residual-value texts: "5 latach" / "5 years".
+ *
+ * The residual value belongs to one ownership period. On the real pages pass
+ * the period the user chose, and read the value for that period from the cost
+ * breakdown calculated with it (residualValuePln, residualValuePct). The
+ * previews pass the one period the mock costs were calculated for.
+ */
+export function ownershipText(years: number, locale: Locale, form: "plain" | "after" = "plain"): string {
+  const t = copy[locale].assumptions;
+  return (form === "after" ? t.yearsAfter : t.yearOptions)[years - 1];
+}
+
+/** Ownership period behind every amount in src/mocks: the previews cannot change it. */
+export const MOCK_OWNERSHIP_YEARS = mockAssumptions.ownershipYears;
 
 export function shares(costs: CostBreakdown): Record<CostKey, number> {
   const total = costs.perMonth.total;
@@ -154,7 +171,7 @@ export function comparison(
   const cars = slugs.map((slug) => mockCars.find((car) => car.slug === slug)!);
   const costs = cars.map((car) => mockCosts[car.slug]);
   const maps = costs.map((item) => periodMap(item, period));
-  const years = t.assumptions.yearsAfter[4];
+  const years = ownershipText(MOCK_OWNERSHIP_YEARS, locale, "after");
 
   const costRow = (key: CostKey | "total", extra: Partial<ComparisonRow> = {}): ComparisonRow => ({
     key,

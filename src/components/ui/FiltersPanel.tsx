@@ -198,7 +198,7 @@ export function FiltersPanel({
 
       <Group legend={labels.make}>
         <div
-          className="max-h-64 overflow-y-auto overscroll-contain rounded-md border border-line bg-surface p-1"
+          className="relative max-h-64 overflow-y-auto overscroll-contain rounded-md border border-line bg-surface p-1"
         >
           {makes.map((option) => (
             <CheckboxRow key={option.value} {...check("make", option)}>

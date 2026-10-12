@@ -7,7 +7,7 @@ import { RankingItem } from "@/components/ui/RankingItem";
 import { mockAssumptions, mockFilterCounts, mockMakes } from "@/mocks/cars";
 import { copy } from "@/mocks/copy";
 import type { RankedCar } from "@/mocks/types";
-import { carMeta, carName, P, searchOptions, shares } from "../_lib/view";
+import { carMeta, carName, ownershipText, P, searchOptions, shares } from "../_lib/view";
 import { SearchDemo } from "./SearchDemo";
 
 /* Small compositions shared by the preview pages. */
@@ -189,7 +189,7 @@ export function PreviewAssumptions({
 
 export function assumptionsSummary(locale: Locale): string {
   const t = copy[locale].assumptions;
-  return t.summary(formatInteger(mockAssumptions.annualMileageKm, locale), t.yearOptions[4]);
+  return t.summary(formatInteger(mockAssumptions.annualMileageKm, locale), ownershipText(mockAssumptions.ownershipYears, locale));
 }
 
 export function PreviewFilters({ locale, idPrefix }: { locale: Locale; idPrefix: string }) {

@@ -23,10 +23,22 @@ import { Icon } from "./Icon";
  * that into scroll-padding-bottom, so a focused control is never left under
  * the bar (WCAG 2.2 SC 2.4.11), and the footer keeps the same room free.
  * The open list closes on Escape and when focus leaves the bar.
+ *
+ * Focus after a removal: the remove button that had focus leaves the page with
+ * its car, so the bar moves focus itself. It goes to the remove button of the
+ * car that takes the same place in the list (the last car when the removed one
+ * was last). When no car is left, after the last removal or after "clear", it
+ * goes to the page's <main>, the target of the skip link.
  */
 
-/** Id of the hint line. Full compare toggles point to it with aria-describedby. */
+/**
+ * Id of the hint line of the page's comparison bar. Full compare toggles point
+ * to it with aria-describedby. A fixed bar uses it by default.
+ */
 export const COMPARE_BAR_HINT_ID = "compare-bar-hint";
+
+/** Id of the page's <main> (SiteShell): where focus goes when the bar empties. */
+const MAIN_ID = "main";
 
 export interface CompareBarCar {
   slug: string;
@@ -69,6 +81,7 @@ export function CompareBar({
   onRemove,
   onClear,
   position = "fixed",
+  hintId,
   showWhenEmpty = false,
   defaultExpanded = false,
 }: {
@@ -87,17 +100,43 @@ export function CompareBar({
   onClear?: () => void;
   /** "static" places the bar in the flow (preview). */
   position?: "fixed" | "static";
+  /**
+   * Id of the hint line. Default: COMPARE_BAR_HINT_ID for the fixed bar (one per
+   * page), a generated id for a static bar, so several bars never share an id.
+   */
+  hintId?: string;
   showWhenEmpty?: boolean;
   /** Preview only: render with the list open. */
   defaultExpanded?: boolean;
 }) {
   const panelId = useId();
+  const ownHintId = useId();
   const barRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  // Place in the list of the car being removed, -1 while the selection is being cleared, null otherwise.
+  const removedAt = useRef<number | null>(null);
   const [expanded, setExpanded] = useState(defaultExpanded);
   const count = cars.length;
   const fixed = position === "fixed";
   const open = expanded && count > 0;
+  const hintLineId = hintId ?? (fixed ? COMPARE_BAR_HINT_ID : ownHintId);
+
+  // Runs when the selection got shorter after "remove" or "clear": puts focus where the comment above says.
+  useEffect(() => {
+    const index = removedAt.current;
+    if (index === null) return;
+    removedAt.current = null;
+    // The user has already moved on to another control: leave focus there.
+    const active = document.activeElement;
+    if (active && active !== document.body && !barRef.current?.contains(active)) return;
+    const buttons = listRef.current?.querySelectorAll<HTMLButtonElement>("button");
+    if (index >= 0 && buttons && buttons.length > 0) {
+      buttons[Math.min(index, buttons.length - 1)].focus();
+    } else {
+      document.getElementById(MAIN_ID)?.focus({ preventScroll: true });
+    }
+  }, [count]);
 
   useEffect(() => {
     const bar = barRef.current;
@@ -135,6 +174,10 @@ export function CompareBar({
         }
       }}
       onBlur={(event) => {
+        // A remove button that leaves the page with its car also loses focus: keep the list open then.
+        if (removedAt.current !== null && event.relatedTarget === null) return;
+        // Focus went to another control on purpose: a pending removal no longer decides where focus goes.
+        removedAt.current = null;
         if (fixed && !event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
       }}
       className={cn(
@@ -181,17 +224,18 @@ export function CompareBar({
         {count > 0 && (
           <>
             <ul
+              ref={listRef}
               id={panelId}
               role="list"
               aria-label={labels.list}
               className={cn(
                 "gap-2",
                 open
-                  ? "col-span-full row-start-1 grid max-h-[60dvh] overflow-y-auto overscroll-contain pt-1 pb-1 md:grid-flow-col md:auto-cols-fr"
+                  ? "relative col-span-full row-start-1 grid max-h-[60dvh] overflow-y-auto overscroll-contain pt-1 pb-1 md:grid-flow-col md:auto-cols-fr"
                   : "hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:grid lg:auto-cols-fr lg:grid-flow-col",
               )}
             >
-              {cars.map((car) => (
+              {cars.map((car, index) => (
                 <li
                   key={car.slug}
                   className="flex min-w-0 items-start gap-1 rounded-md bg-brand-strong py-1.5 pr-1 pl-3"
@@ -211,7 +255,14 @@ export function CompareBar({
                   <button
                     type="button"
                     aria-label={`${labels.remove}: ${car.name}`}
-                    onClick={onRemove ? () => onRemove(car.slug) : undefined}
+                    onClick={
+                      onRemove
+                        ? () => {
+                            removedAt.current = index;
+                            onRemove(car.slug);
+                          }
+                        : undefined
+                    }
                     className="inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-on-brand-muted transition-colors duration-(--duration-fast) hover:bg-brand hover:text-on-brand pointer-coarse:size-11"
                   >
                     <Icon name="close" size={16} />
@@ -222,7 +273,14 @@ export function CompareBar({
 
             <button
               type="button"
-              onClick={onClear}
+              onClick={
+                onClear
+                  ? () => {
+                      removedAt.current = -1;
+                      onClear();
+                    }
+                  : undefined
+              }
               className={cn(
                 "min-h-11 items-center rounded-md px-2 text-sm font-semibold text-on-brand underline decoration-1 underline-offset-[3px] hover:decoration-2",
                 open
@@ -236,7 +294,7 @@ export function CompareBar({
         )}
 
         <p
-          id={COMPARE_BAR_HINT_ID}
+          id={hintLineId}
           role="status"
           className={cn(
             "col-span-full row-start-4 text-xs empty:hidden",
@@ -267,12 +325,16 @@ export function CompareBar({
             type="button"
             disabled
             className={cn(
-              buttonClass({ variant: "signal", disabled: true }),
-              "col-start-2 row-start-3 hidden sm:inline-flex",
+              buttonClass({
+                variant: "signal",
+                disabled: true,
+                className: "whitespace-nowrap max-sm:px-4",
+              }),
+              "col-start-2 row-start-3",
               !open && "lg:col-start-4 lg:row-span-2 lg:row-start-1",
             )}
           >
-            <Icon name="compare" />
+            <Icon name="compare" className="max-sm:hidden" />
             {labels.compareIdle}
           </button>
         )}
