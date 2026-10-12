@@ -9,7 +9,7 @@ import { useCompare } from "@/lib/state/compare-client";
 import { headerLabels, mainNav } from "./nav";
 
 /**
- * The designer's header, following the URL: the current page is marked, links keep
+ * The page header, following the URL: the current page is marked, links keep
  * the assumption parameters, and the language switcher keeps path and query string.
  */
 export function SiteHeader() {

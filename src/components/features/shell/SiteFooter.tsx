@@ -9,7 +9,7 @@ import { pickAssumptionParams } from "@/lib/state/assumption-params";
 import { useCompare } from "@/lib/state/compare-client";
 import { footerLabels, footerNav } from "./nav";
 
-/** The designer's footer with links that keep the assumption parameters. */
+/** The page footer, with links that keep the assumption parameters. */
 export function SiteFooter({ children }: { children?: ReactNode }) {
   const t = useTranslations();
   const pathname = usePathname();
