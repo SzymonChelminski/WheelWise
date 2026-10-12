@@ -1,24 +1,332 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * WheelWise design tokens. Source of truth: design/DESIGN.md, section "Tokens".
+ * Every name and value here is listed there. Components use these tokens only.
+ */
+@theme {
+  /* Colour: the default Tailwind palette is removed on purpose. */
+  --color-*: initial;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
+  --color-ground: #f1f4f5;
+  --color-surface: #ffffff;
+  --color-sunken: #e6ecee;
+  --color-ink: #0e1f24;
+  --color-ink-muted: #465a61;
+  --color-line: #d3dcdf;
+  --color-line-strong: #73868d;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-brand: #125868;
+  --color-brand-strong: #0e4553;
+  --color-brand-deep: #082f39;
+  --color-brand-soft: #eaf4f6;
+  --color-brand-tint: #cfe6eb;
+  --color-on-brand: #ffffff;
+  --color-on-brand-muted: #bfdce3;
+
+  --color-signal: #ffb81c;
+  --color-signal-strong: #f2a600;
+  --color-on-signal: #0e1f24;
+
+  --color-positive: #17663a;
+  --color-positive-soft: #e2f2e7;
+  --color-caution: #7a4f00;
+  --color-caution-soft: #fff0c7;
+  --color-danger: #b3261e;
+  --color-danger-soft: #fce9e7;
+
+  --color-cost-depreciation: #0e4553;
+  --color-cost-fuel: #c2540a;
+  --color-cost-insurance: #6d4fc2;
+  --color-cost-service: #1f8a5b;
+  --color-cost-parts: #a3731a;
+  --color-cost-fees: #6b7c85;
+
+  --color-scrim: rgb(8 47 57 / 0.55);
+
+  /* Typography */
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-barlow-semi-condensed), var(--font-barlow), ui-sans-serif,
+    system-ui, sans-serif;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  --text-*: initial;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.625rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.5rem;
+  --text-4xl: 3rem;
+  --text-4xl--line-height: 3.125rem;
+
+  /* Shape */
+  --radius-*: initial;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  /* Elevation */
+  --shadow-*: initial;
+  --shadow-popover:
+    0 2px 6px -2px rgb(8 47 57 / 0.14), 0 12px 28px -8px rgb(8 47 57 / 0.24);
+  --shadow-raised:
+    0 -2px 6px -2px rgb(8 47 57 / 0.12), 0 -12px 28px -10px rgb(8 47 57 / 0.22);
+
+  /* Layout. Spacing utilities are multiples of --spacing (p-4 = 1rem). */
+  --spacing: 0.25rem;
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+
+  --container-page: 75rem;
+  --container-prose: 42rem;
+  /* Container-query steps used by RankingItem (@3xl) and EarningsScale (@lg, @4xl). */
+  --container-lg: 32rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 280ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-strip-grow: strip-grow 640ms var(--ease-out-expo) both;
+  --animate-skeleton: skeleton-pulse 1400ms ease-in-out infinite;
+
+  @keyframes strip-grow {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+ * State variants. Each one also matches a data-demo attribute so that the
+ * design preview can show hover, focus and pressed states without a pointer.
+ */
+@custom-variant hover {
+  @media (hover: hover) {
+    &:hover {
+      @slot;
+    }
+  }
+  &[data-demo~="hover"] {
+    @slot;
+  }
+}
+
+@custom-variant active {
+  &:active {
+    @slot;
+  }
+  &[data-demo~="active"] {
+    @slot;
+  }
+}
+
+@layer base {
+  :root {
+    --focus-ring: var(--color-brand);
+    /* Room kept under the footer for the fixed comparison bar; set by SiteShell. */
+    --bar-space: 0rem;
+    color-scheme: light;
+  }
+
+  /* Dark brand surfaces (header, comparison bar) switch the focus ring to amber. */
+  [data-surface="dark"] {
+    --focus-ring: var(--color-signal);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: 1.5rem;
+  }
+
+  /*
+   * WCAG 2.2 SC 2.4.11: a focused control must not end up under the fixed
+   * comparison bar. While the bar is on the page the scrollport ends above it,
+   * so the browser scrolls a newly focused element clear of the bar.
+   * CompareBar measures --bar-height; 6.5rem covers the time before it is known.
+   */
+  html:has([data-compare-bar="fixed"]) {
+    scroll-padding-bottom: calc(var(--bar-height, 6.5rem) + 1rem);
+  }
+
+  body {
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    caret-color: var(--color-brand);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-tint);
+    color: var(--color-ink);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  :focus-visible,
+  [data-demo~="focus"] {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* The focus ring of a field is drawn on its wrapper, see .field-box. */
+  .field-box:focus-within,
+  .field-box[data-demo~="focus"] {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .field-box :focus-visible {
+    outline: none;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  label,
+  summary {
+    touch-action: manipulation;
+  }
+
+  dialog {
+    max-width: none;
+    max-height: none;
+  }
+
+  dialog::backdrop {
+    background-color: var(--color-scrim);
+  }
+}
+
+@layer components {
+  /*
+   * Sheet: bottom sheet below 768px, right-hand drawer from 768px.
+   * Enter and exit use @starting-style, so the closed state needs no JavaScript.
+   */
+  .sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 90dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-raised);
+    overscroll-behavior: contain;
+    transform: translateY(100%);
+    transition:
+      transform var(--duration-slow) var(--ease-out-expo),
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  .sheet[open] {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .sheet[open] {
+      transform: translateY(100%);
+    }
+  }
+
+  .sheet::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--duration-slow) ease-out,
+      overlay var(--duration-slow) allow-discrete,
+      display var(--duration-slow) allow-discrete;
+  }
+
+  .sheet[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .sheet[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .sheet {
+      inset: 0 0 0 auto;
+      width: 26rem;
+      height: 100dvh;
+      max-height: none;
+      border-radius: 0;
+      box-shadow: var(--shadow-popover);
+      transform: translateX(100%);
+    }
+
+    .sheet[open] {
+      transform: translateX(0);
+    }
+
+    @starting-style {
+      .sheet[open] {
+        transform: translateX(100%);
+      }
+    }
+  }
+}
+
+/* WCAG 2.3.3: no motion when the user asks for none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  ::backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

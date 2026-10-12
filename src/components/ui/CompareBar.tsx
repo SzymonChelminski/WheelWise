@@ -1,0 +1,282 @@
+"use client";
+
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
+import { buttonClass } from "./Button";
+import { CarName, nameWrapClass } from "./CarName";
+import { cn } from "./cn";
+import { Icon } from "./Icon";
+
+/*
+ * Comparison bar: pinned to the bottom of the viewport while 1 to 3 cars are
+ * selected. With 0 cars it is not rendered on real pages (showWhenEmpty is for
+ * the preview).
+ *
+ * One pattern at every width: the count is a disclosure button. Opening it
+ * lists the selected cars above the bar with their whole names, attributes, a
+ * remove button each, and "clear". From 1024 px the closed bar also shows the
+ * cars in one row, names cut to one line; the open list is where a cut name
+ * can be read in full.
+ *
+ * The component keeps UI state only (open or closed). While it is fixed and
+ * closed it publishes its height as --bar-height on <html>; globals.css turns
+ * that into scroll-padding-bottom, so a focused control is never left under
+ * the bar (WCAG 2.2 SC 2.4.11), and the footer keeps the same room free.
+ * The open list closes on Escape and when focus leaves the bar.
+ */
+
+/** Id of the hint line. Full compare toggles point to it with aria-describedby. */
+export const COMPARE_BAR_HINT_ID = "compare-bar-hint";
+
+export interface CompareBarCar {
+  slug: string;
+  /** make + " " + variant */
+  name: string;
+  /** Attributes, normally <CarMeta>: body type, fuel, gearbox, power. Two cars can share a name. */
+  meta: ReactNode;
+}
+
+export interface CompareBarLabels {
+  /** Landmark name: "Porównanie". */
+  region: string;
+  /** Visible text of the disclosure button: "Wybrane: 2 z 3". */
+  toggle: string;
+  /** Announced when the selection changes: "Wybrano 2 z 3 aut". */
+  count: string;
+  /** Accessible name of the list: "Wybrane auta". */
+  list: string;
+  /** "Porównaj 2 auta" (already pluralised). Used when 2 or 3 cars are selected. */
+  compare: string;
+  /** Label of the disabled action with 0 or 1 car: "Porównaj". */
+  compareIdle: string;
+  /** Hint with 1 car: "Dodaj jeszcze jedno auto, aby porównać." */
+  needMore: string;
+  /** Hint with 0 cars: "Dodaj 2 lub 3 auta przyciskiem „Porównaj”." */
+  empty: string;
+  /** Hint with 3 cars: "Komplet. Usuń auto, aby dodać inne." */
+  full: string;
+  /** "Usuń z porównania" (the car name is appended). */
+  remove: string;
+  /** "Wyczyść" */
+  clear: string;
+}
+
+export function CompareBar({
+  cars,
+  compareHref,
+  labels,
+  notice,
+  onRemove,
+  onClear,
+  position = "fixed",
+  showWhenEmpty = false,
+  defaultExpanded = false,
+}: {
+  /** 0 to 3 selected cars. */
+  cars: CompareBarCar[];
+  /** Link to /compare?cars=... */
+  compareHref: string;
+  labels: CompareBarLabels;
+  /**
+   * Message shown in place of the hint after the user tried to add a fourth car:
+   * "Porównanie mieści 3 auta. Usuń jedno, aby dodać kolejne." Keep it until the
+   * selection changes; it is announced as a status message.
+   */
+  notice?: string;
+  onRemove?: (slug: string) => void;
+  onClear?: () => void;
+  /** "static" places the bar in the flow (preview). */
+  position?: "fixed" | "static";
+  showWhenEmpty?: boolean;
+  /** Preview only: render with the list open. */
+  defaultExpanded?: boolean;
+}) {
+  const panelId = useId();
+  const barRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const count = cars.length;
+  const fixed = position === "fixed";
+  const open = expanded && count > 0;
+
+  useEffect(() => {
+    const bar = barRef.current;
+    if (!fixed || !bar || open) return;
+    const root = document.documentElement;
+    const publish = () => root.style.setProperty("--bar-height", `${bar.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [fixed, open, count]);
+
+  useEffect(() => {
+    if (!fixed) return;
+    return () => {
+      document.documentElement.style.removeProperty("--bar-height");
+    };
+  }, [fixed]);
+
+  if (count === 0 && !showWhenEmpty) return null;
+  const ready = count >= 2;
+  const hint =
+    notice ?? (count === 0 ? labels.empty : count === 1 ? labels.needMore : count >= 3 ? labels.full : "");
+
+  return (
+    <aside
+      ref={barRef}
+      aria-label={labels.region}
+      data-surface="dark"
+      data-compare-bar={position}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) {
+          setExpanded(false);
+          toggleRef.current?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (fixed && !event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
+      }}
+      className={cn(
+        "bg-brand-deep text-on-brand shadow-raised",
+        fixed ? "fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)]" : "rounded-lg",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto grid max-w-page grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-4 py-2 md:px-6 lg:px-8",
+          !open && "lg:grid-cols-[13rem_minmax(0,1fr)_auto_auto] lg:gap-x-4",
+        )}
+      >
+        {count > 0 ? (
+          <button
+            ref={toggleRef}
+            type="button"
+            aria-expanded={open}
+            aria-controls={panelId}
+            onClick={() => setExpanded(!open)}
+            className={cn(
+              "col-start-1 row-start-3 -ml-2 inline-flex min-h-11 items-center gap-1.5 justify-self-start rounded-md px-2 font-display text-lg leading-6 font-semibold whitespace-nowrap text-on-brand transition-colors duration-(--duration-fast) hover:bg-brand-strong",
+              !open && "lg:row-start-1",
+            )}
+          >
+            {labels.toggle}
+            <Icon
+              name="chevron-down"
+              className={cn(
+                "text-on-brand-muted transition-transform duration-(--duration-fast)",
+                !open && "rotate-180",
+              )}
+            />
+          </button>
+        ) : (
+          <p className="col-start-1 row-start-3 flex min-h-11 items-center font-display text-lg leading-6 font-semibold">
+            {labels.toggle}
+          </p>
+        )}
+        <p aria-live="polite" className="sr-only">
+          {labels.count}
+        </p>
+
+        {count > 0 && (
+          <>
+            <ul
+              id={panelId}
+              role="list"
+              aria-label={labels.list}
+              className={cn(
+                "gap-2",
+                open
+                  ? "col-span-full row-start-1 grid max-h-[60dvh] overflow-y-auto overscroll-contain pt-1 pb-1 md:grid-flow-col md:auto-cols-fr"
+                  : "hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:grid lg:auto-cols-fr lg:grid-flow-col",
+              )}
+            >
+              {cars.map((car) => (
+                <li
+                  key={car.slug}
+                  className="flex min-w-0 items-start gap-1 rounded-md bg-brand-strong py-1.5 pr-1 pl-3"
+                >
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <p
+                      className={cn(
+                        "text-sm font-semibold text-on-brand",
+                        open ? nameWrapClass : "truncate",
+                      )}
+                    >
+                      {/* A <wbr> would break the single cut line, so the closed row prints plain text. */}
+                      {open ? <CarName>{car.name}</CarName> : car.name}
+                    </p>
+                    <p className="text-xs text-on-brand-muted">{car.meta}</p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`${labels.remove}: ${car.name}`}
+                    onClick={onRemove ? () => onRemove(car.slug) : undefined}
+                    className="inline-flex size-8 shrink-0 items-center justify-center rounded-sm text-on-brand-muted transition-colors duration-(--duration-fast) hover:bg-brand hover:text-on-brand pointer-coarse:size-11"
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              type="button"
+              onClick={onClear}
+              className={cn(
+                "min-h-11 items-center rounded-md px-2 text-sm font-semibold text-on-brand underline decoration-1 underline-offset-[3px] hover:decoration-2",
+                open
+                  ? "col-span-full row-start-2 -ml-2 inline-flex justify-self-start"
+                  : "hidden lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:inline-flex",
+              )}
+            >
+              {labels.clear}
+            </button>
+          </>
+        )}
+
+        <p
+          id={COMPARE_BAR_HINT_ID}
+          role="status"
+          className={cn(
+            "col-span-full row-start-4 text-xs empty:hidden",
+            notice
+              ? "flex items-start gap-1.5 pb-1.5 font-semibold text-on-brand"
+              : "pb-1.5 text-on-brand-muted",
+            !open && "lg:col-span-1 lg:col-start-1 lg:row-start-2",
+          )}
+        >
+          {notice && <Icon name="alert" size={16} className="shrink-0 text-signal" />}
+          {hint}
+        </p>
+
+        {ready ? (
+          <Link
+            href={compareHref}
+            className={cn(
+              buttonClass({ variant: "signal", className: "whitespace-nowrap max-sm:px-4" }),
+              "col-start-2 row-start-3",
+              !open && "lg:col-start-4 lg:row-span-2 lg:row-start-1",
+            )}
+          >
+            <Icon name="compare" className="max-sm:hidden" />
+            {labels.compare}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className={cn(
+              buttonClass({ variant: "signal", disabled: true }),
+              "col-start-2 row-start-3 hidden sm:inline-flex",
+              !open && "lg:col-start-4 lg:row-span-2 lg:row-start-1",
+            )}
+          >
+            <Icon name="compare" />
+            {labels.compareIdle}
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}

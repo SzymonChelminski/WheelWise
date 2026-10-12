@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import { fontVariables } from "@/components/ui/fonts";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -15,8 +16,8 @@ export default async function LocaleLayout({
   const locale = await getLocale();
 
   return (
-    <html lang={locale}>
-      <body>
+    <html lang={locale} className={fontVariables}>
+      <body className="bg-ground font-sans text-base text-ink antialiased">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
