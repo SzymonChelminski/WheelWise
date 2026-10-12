@@ -2,8 +2,9 @@
 
 import { MetricSelector, type MetricOption } from "@/components/ui/MetricSelector";
 import { useRouter } from "@/i18n/navigation";
+import { forgetPendingWrites } from "@/lib/state/url-client";
 
-/** The designer's metric selector; the narrow-screen select navigates like the links do. */
+/** The metric selector: links from 768 px, and a select below that which navigates like the links do. */
 export function MetricSelectorControl({
   metrics,
   current,
@@ -25,7 +26,9 @@ export function MetricSelectorControl({
       className={className}
       onSelectChange={(key) => {
         const target = metrics.find((metric) => metric.key === key);
-        if (target) router.push(target.href);
+        if (!target) return;
+        forgetPendingWrites();
+        router.push(target.href);
       }}
     />
   );

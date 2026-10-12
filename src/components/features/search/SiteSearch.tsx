@@ -6,6 +6,7 @@ import { SearchCombobox } from "@/components/ui/SearchCombobox";
 import { useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/lib/format";
 import { pickAssumptionParams, withQuery } from "@/lib/state/assumption-params";
+import { forgetPendingWrites } from "@/lib/state/url-client";
 import { carMeta, carName } from "../car/car-view";
 import { useSearchIndex } from "../shell/SearchIndexProvider";
 import { createCarSearch } from "./car-search";
@@ -48,7 +49,9 @@ export function SiteSearch({ size, className }: { size?: "md" | "lg"; className?
       onSubmit={(event) => {
         event.preventDefault();
         const text = query.trim();
-        if (text) router.push(withQuery("/rankings", new URLSearchParams({ q: text }), carried()));
+        if (!text) return;
+        forgetPendingWrites();
+        router.push(withQuery("/rankings", new URLSearchParams({ q: text }), carried()));
       }}
     >
       <SearchCombobox
@@ -63,7 +66,10 @@ export function SiteSearch({ size, className }: { size?: "md" | "lg"; className?
         options={options}
         query={query}
         onQueryChange={setQuery}
-        onSelect={(option) => router.push(withQuery(option.href, carried()))}
+        onSelect={(option) => {
+          forgetPendingWrites();
+          router.push(withQuery(option.href, carried()));
+        }}
         statusText={t("search.status", { count: options.length })}
         size={size}
         className={className}
