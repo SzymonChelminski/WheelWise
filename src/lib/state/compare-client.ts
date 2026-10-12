@@ -8,7 +8,7 @@ import { z } from 'zod';
 export const COMPARE_STORAGE_KEY = 'wheelwise.compare.v1';
 export const COMPARE_LIMIT = 3;
 
-const storedSchema = z.array(z.string().min(1).max(200)).max(COMPARE_LIMIT);
+const storedSchema = z.array(z.string().min(1).max(200));
 
 const EMPTY: readonly string[] = [];
 
@@ -27,7 +27,10 @@ function parse(raw: string | null): readonly string[] {
   if (raw === null) return EMPTY;
   try {
     const parsed = storedSchema.safeParse(JSON.parse(raw));
-    return parsed.success && parsed.data.length > 0 ? parsed.data : EMPTY;
+    if (!parsed.success) return EMPTY;
+    // A car counts once, whatever the stored list says; the limit applies to the cars left.
+    const slugs = [...new Set(parsed.data)];
+    return slugs.length > 0 && slugs.length <= COMPARE_LIMIT ? slugs : EMPTY;
   } catch {
     return EMPTY;
   }
