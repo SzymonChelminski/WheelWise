@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { AssumptionsSummary } from "@/components/ui/AssumptionsPanel";
-import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/Feedback";
 import { EstimateNote, InfoNote } from "@/components/ui/Markers";
 import { RankingList } from "@/components/ui/RankingItem";
@@ -37,6 +36,7 @@ import {
   type RankingParams,
 } from "./params";
 import { RankingFilters, type FilterOptionData, type FilterOptions } from "./RankingFilters";
+import { RESULTS_HEADING_ID, ResultsFocus, ResultsLink } from "./results-focus";
 import { isPeriodIndependent, metricAmount, RankingRow } from "./RankingRow";
 
 function countBy(values: string[], order?: readonly string[]): FilterOptionData[] {
@@ -121,6 +121,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
 
   return (
     <>
+      <ResultsFocus signature={toSearchParams(raw).toString()} />
       <MetricSelectorControl
         className="mt-6"
         current={metric}
@@ -159,7 +160,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
 
           <div className="mt-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
             <div>
-              <h2 id="ranking-title" className={h2Class}>
+              <h2 id={RESULTS_HEADING_ID} tabIndex={-1} className={h2Class}>
                 {title}
               </h2>
               <p className="mt-0.5 text-sm text-ink-muted" aria-live="polite">
@@ -190,9 +191,9 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 title={t("rankings.emptyTitle")}
                 headingLevel="h3"
                 actions={
-                  <ButtonLink variant="secondary" href={rankingsHref({ metric, extra: carry })}>
+                  <ResultsLink href={rankingsHref({ metric, extra: carry })} focus="heading">
                     {t("filters.clear")}
-                  </ButtonLink>
+                  </ResultsLink>
                 }
               >
                 <p>{t("rankings.emptyText")}</p>
@@ -223,10 +224,9 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                     })}
                   </p>
                   {visible.length < ranked.length && (
-                    <ButtonLink
-                      variant="secondary"
+                    <ResultsLink
                       replace
-                      scroll={false}
+                      focus="new-rows"
                       href={rankingsHref({
                         metric,
                         limit: limit + PAGE_SIZE,
@@ -235,7 +235,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                       })}
                     >
                       {t("rankings.showMore")}
-                    </ButtonLink>
+                    </ResultsLink>
                   )}
                 </div>
                 <div className="mt-6 space-y-3">

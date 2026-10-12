@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ActiveFilters } from "@/components/ui/FiltersPanel";
 import { useUrlWriter } from "@/lib/state/url-client";
 import { FILTER_PARAMS, listValues, setListValues } from "./params";
+import { focusChipAfterUpdate, focusHeadingAfterUpdate } from "./results-focus";
 
 export interface ActiveFilterItem {
   /** "make:Audi", "fuel:ev", "gear", "pmin", "pmax" or "q". */
@@ -23,6 +24,7 @@ export function ActiveFiltersControl({
   const { write } = useUrlWriter();
 
   function remove(key: string) {
+    focusChipAfterUpdate(items.findIndex((item) => item.key === key));
     const separator = key.indexOf(":");
     const param = separator < 0 ? key : key.slice(0, separator);
     const value = separator < 0 ? undefined : key.slice(separator + 1);
@@ -40,6 +42,7 @@ export function ActiveFiltersControl({
   }
 
   function clear() {
+    focusHeadingAfterUpdate();
     write((params) => {
       for (const param of FILTER_PARAMS) params.delete(param);
       params.delete("limit");
@@ -47,12 +50,14 @@ export function ActiveFiltersControl({
   }
 
   return (
-    <ActiveFilters
-      className={className}
-      items={items}
-      labels={{ list: t("activeList"), remove: t("remove"), clear: t("clear") }}
-      onRemove={remove}
-      onClear={clear}
-    />
+    <div data-active-filters className="contents">
+      <ActiveFilters
+        className={className}
+        items={items}
+        labels={{ list: t("activeList"), remove: t("remove"), clear: t("clear") }}
+        onRemove={remove}
+        onClear={clear}
+      />
+    </div>
   );
 }
