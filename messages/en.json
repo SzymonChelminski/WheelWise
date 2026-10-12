@@ -1,5 +1,264 @@
 {
+  "meta": {
+    "home": {
+      "title": "WheelWise: what does a new car really cost?",
+      "description": "See the monthly cost of any new car: depreciation, fuel, insurance, servicing, parts and fees. Compare models and find out what income keeps a car within budget."
+    },
+    "rankings": {
+      "title": "New car rankings: prices and cost of ownership | WheelWise",
+      "description": "Nine rankings of new cars: purchase price, total cost, depreciation, maintenance, servicing, parts, fuel consumption, fuel cost and insurance. Filter by make, body type and powertrain."
+    }
+  },
+  "common": {
+    "skip": "Skip to content",
+    "estimateSr": "about",
+    "indicative": "indicative price",
+    "perMonth": "per month",
+    "perYear": "per year",
+    "close": "Close",
+    "retry": "Try again",
+    "home": "Home",
+    "howWeCount": "How we calculate",
+    "cars": "{count, plural, one {# car} other {# cars}}"
+  },
+  "header": {
+    "homeLink": "WheelWise, home",
+    "nav": "Main navigation",
+    "rankings": "Rankings",
+    "compare": "Compare",
+    "methodology": "How we calculate",
+    "compareCount": "in comparison: {count}",
+    "language": "Language",
+    "languageNames": {
+      "pl": "Polski",
+      "en": "English"
+    }
+  },
+  "footer": {
+    "about": "WheelWise shows what a new car costs once it leaves the showroom: depreciation, fuel, insurance, servicing, parts and fees.",
+    "nav": "Footer navigation",
+    "sourcesTitle": "Data sources",
+    "sources": {
+      "catalogue": "ADEME Car Labelling: car catalogue, prices, consumption (Licence Ouverte 2.0)",
+      "fuel": "European Commission, Weekly Oil Bulletin: fuel prices",
+      "electricity": "Eurostat: household electricity price",
+      "exchange": "Narodowy Bank Polski: euro exchange rate"
+    },
+    "disclaimer": "Costs are estimates and car prices are indicative: French list prices converted to złoty. This site is neither a sales offer nor financial advice.",
+    "freshnessChecked": "Data checked on <checked>{checkedDate}</checked>. Fuel prices from <fuel>{fuelDate}</fuel>, car price list from <catalogue>{catalogueDate}</catalogue>.",
+    "freshness": "Fuel prices from <fuel>{fuelDate}</fuel>, car price list from <catalogue>{catalogueDate}</catalogue>."
+  },
+  "search": {
+    "label": "Search for a car",
+    "placeholder": "Make or model, e.g. Clio…",
+    "clear": "Clear",
+    "noResultsTitle": "We don’t have that car",
+    "noResultsHint": "Check the spelling or type the make only. The catalogue lists new cars only.",
+    "loading": "Searching…",
+    "status": "{count, plural, =0 {No results} one {# result} other {# results}}"
+  },
+  "attr": {
+    "body": {
+      "sedan_hatchback": "saloon / hatchback",
+      "estate": "estate",
+      "suv": "SUV",
+      "coupe": "coupé",
+      "convertible": "convertible",
+      "mpv": "MPV",
+      "van": "van"
+    },
+    "fuel": {
+      "petrol": "petrol",
+      "diesel": "diesel",
+      "lpg": "LPG",
+      "hybrid": "hybrid",
+      "phev": "plug-in hybrid",
+      "ev": "electric"
+    },
+    "transmission": {
+      "manual": "manual gearbox",
+      "automatic": "automatic"
+    },
+    "segment": {
+      "A": "A mini",
+      "B": "B small",
+      "C": "C compact",
+      "D": "D mid-size",
+      "E": "E executive",
+      "F": "F luxury"
+    },
+    "horsepower": "hp",
+    "consumptionFuel": "l/100 km",
+    "consumptionElectric": "kWh/100 km"
+  },
+  "power": {
+    "plain": {
+      "label": "Power",
+      "short": "{hp}"
+    },
+    "engine": {
+      "label": "Combustion engine power",
+      "short": "engine {hp}"
+    },
+    "source": {
+      "label": "Power per source data",
+      "short": "{hp} per source"
+    },
+    "listNote": "Power of electric cars is given per source data (usually rated power); for hybrids it is the power of the combustion engine alone.",
+    "methodologyLink": "Where power figures come from",
+    "methodologyAnchor": "power"
+  },
+  "metrics": {
+    "price": {
+      "label": "Purchase price",
+      "description": "The cheapest new cars by indicative price."
+    },
+    "totalCost": {
+      "label": "Total cost",
+      "description": "Every cost added up, depreciation included."
+    },
+    "depreciation": {
+      "label": "Depreciation",
+      "description": "Which cars lose value most slowly."
+    },
+    "maintenance": {
+      "label": "Maintenance",
+      "description": "Servicing, parts and fees together."
+    },
+    "service": {
+      "label": "Servicing",
+      "description": "Inspections and scheduled service."
+    },
+    "parts": {
+      "label": "Parts and wear",
+      "description": "Tyres, brakes and other wear parts."
+    },
+    "fuelConsumption": {
+      "label": "Fuel consumption",
+      "description": "Litres per 100 km, WLTP figures."
+    },
+    "fuelCost": {
+      "label": "Fuel cost",
+      "description": "Fuel or electricity at your mileage."
+    },
+    "insurance": {
+      "label": "Insurance",
+      "description": "Third-party or comprehensive, for your age."
+    }
+  },
+  "period": {
+    "legend": "Cost period",
+    "month": "Monthly",
+    "year": "Yearly"
+  },
+  "assumptions": {
+    "title": "Assumptions",
+    "change": "Change",
+    "done": "Done",
+    "summaryEstimate": "{km} km a year, {years}, {coverage}, driver aged {age}",
+    "summaryCustom": "{km} km a year, {years}, premium {premium} a year",
+    "mileage": "Yearly mileage",
+    "mileageUnit": "km",
+    "mileageHint": "From 1,000 to 100,000 km.",
+    "mileageError": "Enter a mileage from 1,000 to 100,000 km, digits only.",
+    "years": "How long you will keep the car",
+    "yearsValue": "{count, plural, one {# year} other {# years}}",
+    "insurance": "Insurance",
+    "insuranceEstimate": "Estimate it for me",
+    "insuranceCustom": "I know my premium",
+    "ageBand": "Driver’s age",
+    "ageBands": {
+      "18-24": "18–24 years",
+      "25-34": "25–34 years",
+      "35-44": "35–44 years",
+      "45-54": "45–54 years",
+      "55-59": "55–59 years",
+      "60-64": "60–64 years",
+      "65-69": "65–69 years",
+      "70-74": "70–74 years",
+      "75+": "75 years and over"
+    },
+    "coverage": "Cover",
+    "coverageOc": "OC only",
+    "coverageOcAc": "OC + AC",
+    "coverageShort": {
+      "oc": "OC",
+      "oc_ac": "OC + AC"
+    },
+    "premium": "Yearly premium",
+    "premiumUnit": "zł",
+    "premiumHint": "The amount from your policy or quote, for a full year.",
+    "premiumError": "Enter a premium from 0 to 100,000 zł, digits only."
+  },
+  "filters": {
+    "title": "Filters",
+    "apply": "Show {count, plural, one {# car} other {# cars}}",
+    "query": "Make or model",
+    "queryPlaceholder": "e.g. Clio…",
+    "price": "Indicative price",
+    "priceMin": "From",
+    "priceMax": "To",
+    "priceUnit": "zł",
+    "priceError": "“From” is higher than “To”. Swap them or correct one of them.",
+    "body": "Body type",
+    "fuel": "Powertrain",
+    "transmission": "Gearbox",
+    "transmissionAny": "Any",
+    "transmissionManual": "Manual",
+    "transmissionAutomatic": "Automatic",
+    "segment": "Segment",
+    "make": "Make",
+    "activeList": "Active filters",
+    "remove": "Remove filter",
+    "clear": "Clear filters",
+    "activeQuery": "“{query}”",
+    "activePriceMin": "from {price}",
+    "activePriceMax": "up to {price}"
+  },
+  "compareToggle": {
+    "add": "Compare",
+    "added": "In comparison",
+    "fullHint": "A comparison holds 3 cars. Remove one to add another."
+  },
+  "compareBar": {
+    "region": "Comparison",
+    "toggle": "Selected: {count} of 3",
+    "list": "Selected cars",
+    "limit": "A comparison holds 3 cars. Remove one to add another.",
+    "count": "{count} of 3 cars selected",
+    "compare": "Compare {count} cars",
+    "compareIdle": "Compare",
+    "needMore": "Add one more car to compare.",
+    "empty": "Add 2 or 3 cars with the “Compare” button.",
+    "full": "Full. Remove a car to add another.",
+    "remove": "Remove from comparison",
+    "clear": "Clear"
+  },
   "home": {
-    "title": "WheelWise"
+    "title": "What does a new car really cost?",
+    "intro": "The showroom price is only the start. See the monthly cost of any new car, compare models and find out what income keeps a car within budget.",
+    "topPriceTitle": "Cheapest to buy",
+    "topPriceLink": "Full price ranking",
+    "topCostTitle": "Lowest total cost",
+    "topCostNoteMonth": "Per month, at {km} km a year over {years}.",
+    "topCostNoteYear": "Per year, at {km} km a year over {years}.",
+    "topCostLink": "Full cost ranking",
+    "allRankingsTitle": "All rankings",
+    "estimateNote": "marks an estimate. Car prices are indicative."
+  },
+  "rankings": {
+    "title": "New car rankings",
+    "metricLabel": "Rank by",
+    "listTitle": "{metric}, {period}",
+    "showing": "Showing {shown} of {total}",
+    "showMore": "Show 10 more",
+    "estimateNote": "marks an estimate for your assumptions.",
+    "priceNote": "Car prices are indicative: they are French list prices converted to złoty.",
+    "consumptionCaption": "WLTP",
+    "consumptionNote": "This ranking shows litres per 100 km for combustion and hybrid cars. Plug-in hybrids are left out, because their consumption depends on how often you charge them. Electric cars appear in kWh per 100 km when “electric” is the only powertrain selected in the filters.",
+    "consumptionNoteElectric": "This ranking shows the electricity use of electric cars in kWh per 100 km. To go back to litres per 100 km, change the “Powertrain” filter.",
+    "emptyTitle": "No car matches these filters",
+    "emptyText": "Widen the price range or switch some filters off. The catalogue lists new cars only.",
+    "loading": "Loading the ranking…"
   }
 }

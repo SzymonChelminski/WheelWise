@@ -1,5 +1,264 @@
 {
+  "meta": {
+    "home": {
+      "title": "WheelWise: ile naprawdę kosztuje nowe auto?",
+      "description": "Sprawdź miesięczny koszt każdego nowego auta: utrata wartości, paliwo, ubezpieczenie, serwis, części i opłaty. Porównaj modele i zobacz, przy jakich zarobkach auto mieści się w budżecie."
+    },
+    "rankings": {
+      "title": "Rankingi nowych aut: ceny i koszty posiadania | WheelWise",
+      "description": "Dziewięć rankingów nowych aut: cena zakupu, całkowity koszt, utrata wartości, utrzymanie, serwis, części, zużycie paliwa, koszt paliwa i ubezpieczenie. Filtruj po marce, nadwoziu i napędzie."
+    }
+  },
+  "common": {
+    "skip": "Przejdź do treści",
+    "estimateSr": "około",
+    "indicative": "cena orientacyjna",
+    "perMonth": "miesięcznie",
+    "perYear": "rocznie",
+    "close": "Zamknij",
+    "retry": "Spróbuj ponownie",
+    "home": "Strona główna",
+    "howWeCount": "Jak liczymy",
+    "cars": "{count, plural, one {# auto} few {# auta} other {# aut}}"
+  },
+  "header": {
+    "homeLink": "WheelWise, strona główna",
+    "nav": "Główna nawigacja",
+    "rankings": "Rankingi",
+    "compare": "Porównanie",
+    "methodology": "Jak liczymy",
+    "compareCount": "w porównaniu: {count}",
+    "language": "Język",
+    "languageNames": {
+      "pl": "Polski",
+      "en": "English"
+    }
+  },
+  "footer": {
+    "about": "WheelWise pokazuje, ile kosztuje nowe auto po wyjechaniu z salonu: utrata wartości, paliwo, ubezpieczenie, serwis, części i opłaty.",
+    "nav": "Nawigacja w stopce",
+    "sourcesTitle": "Źródła danych",
+    "sources": {
+      "catalogue": "ADEME Car Labelling: katalog aut, ceny, zużycie (Licence Ouverte 2.0)",
+      "fuel": "Komisja Europejska, Weekly Oil Bulletin: ceny paliw",
+      "electricity": "Eurostat: cena prądu dla gospodarstw domowych",
+      "exchange": "Narodowy Bank Polski: kurs euro"
+    },
+    "disclaimer": "Koszty są szacunkami, a ceny aut to ceny orientacyjne: francuskie ceny katalogowe przeliczone na złote. Serwis nie jest ofertą handlową ani poradą finansową.",
+    "freshnessChecked": "Dane sprawdzone <checked>{checkedDate}</checked>. Ceny paliw z <fuel>{fuelDate}</fuel>, cennik aut z <catalogue>{catalogueDate}</catalogue>.",
+    "freshness": "Ceny paliw z <fuel>{fuelDate}</fuel>, cennik aut z <catalogue>{catalogueDate}</catalogue>."
+  },
+  "search": {
+    "label": "Szukaj auta",
+    "placeholder": "Marka lub model, np. Clio…",
+    "clear": "Wyczyść",
+    "noResultsTitle": "Nie mamy takiego auta",
+    "noResultsHint": "Sprawdź pisownię albo wpisz samą markę. W katalogu są tylko auta nowe.",
+    "loading": "Szukam…",
+    "status": "{count, plural, =0 {Brak wyników} one {# wynik} few {# wyniki} other {# wyników}}"
+  },
+  "attr": {
+    "body": {
+      "sedan_hatchback": "sedan / hatchback",
+      "estate": "kombi",
+      "suv": "SUV",
+      "coupe": "coupé",
+      "convertible": "kabriolet",
+      "mpv": "minivan",
+      "van": "van"
+    },
+    "fuel": {
+      "petrol": "benzyna",
+      "diesel": "diesel",
+      "lpg": "LPG",
+      "hybrid": "hybryda",
+      "phev": "hybryda plug-in",
+      "ev": "elektryczny"
+    },
+    "transmission": {
+      "manual": "skrzynia manualna",
+      "automatic": "automat"
+    },
+    "segment": {
+      "A": "A mini",
+      "B": "B miejskie",
+      "C": "C kompaktowe",
+      "D": "D średnie",
+      "E": "E wyższe",
+      "F": "F luksusowe"
+    },
+    "horsepower": "KM",
+    "consumptionFuel": "l/100 km",
+    "consumptionElectric": "kWh/100 km"
+  },
+  "power": {
+    "plain": {
+      "label": "Moc",
+      "short": "{hp}"
+    },
+    "engine": {
+      "label": "Moc silnika spalinowego",
+      "short": "silnik spalinowy {hp}"
+    },
+    "source": {
+      "label": "Moc według danych źródłowych",
+      "short": "{hp} wg źródła"
+    },
+    "listNote": "Moc aut elektrycznych podajemy według danych źródłowych (zwykle moc znamionowa), a moc hybryd to moc samego silnika spalinowego.",
+    "methodologyLink": "Skąd bierzemy moc",
+    "methodologyAnchor": "moc"
+  },
+  "metrics": {
+    "price": {
+      "label": "Cena zakupu",
+      "description": "Najtańsze nowe auta według ceny orientacyjnej."
+    },
+    "totalCost": {
+      "label": "Całkowity koszt",
+      "description": "Wszystkie koszty razem, z utratą wartości."
+    },
+    "depreciation": {
+      "label": "Utrata wartości",
+      "description": "Które auta najwolniej tanieją."
+    },
+    "maintenance": {
+      "label": "Utrzymanie",
+      "description": "Serwis, części i opłaty razem."
+    },
+    "service": {
+      "label": "Serwis",
+      "description": "Przeglądy i obsługa okresowa."
+    },
+    "parts": {
+      "label": "Części i eksploatacja",
+      "description": "Opony, hamulce i inne części zużywalne."
+    },
+    "fuelConsumption": {
+      "label": "Zużycie paliwa",
+      "description": "Litry na 100 km według WLTP."
+    },
+    "fuelCost": {
+      "label": "Koszt paliwa",
+      "description": "Paliwo lub prąd przy Twoim przebiegu."
+    },
+    "insurance": {
+      "label": "Ubezpieczenie",
+      "description": "OC albo OC z AC dla Twojego wieku."
+    }
+  },
+  "period": {
+    "legend": "Okres kosztów",
+    "month": "Miesięcznie",
+    "year": "Rocznie"
+  },
+  "assumptions": {
+    "title": "Założenia",
+    "change": "Zmień",
+    "done": "Gotowe",
+    "summaryEstimate": "{km} km rocznie, {years}, {coverage}, kierowca {age}",
+    "summaryCustom": "{km} km rocznie, {years}, składka {premium} rocznie",
+    "mileage": "Roczny przebieg",
+    "mileageUnit": "km",
+    "mileageHint": "Od 1 000 do 100 000 km.",
+    "mileageError": "Wpisz przebieg od 1 000 do 100 000 km, samymi cyframi.",
+    "years": "Jak długo zatrzymasz auto",
+    "yearsValue": "{count, plural, one {# rok} few {# lata} other {# lat}}",
+    "insurance": "Ubezpieczenie",
+    "insuranceEstimate": "Oszacuj za mnie",
+    "insuranceCustom": "Znam swoją składkę",
+    "ageBand": "Wiek kierowcy",
+    "ageBands": {
+      "18-24": "18–24 lata",
+      "25-34": "25–34 lata",
+      "35-44": "35–44 lata",
+      "45-54": "45–54 lata",
+      "55-59": "55–59 lat",
+      "60-64": "60–64 lata",
+      "65-69": "65–69 lat",
+      "70-74": "70–74 lata",
+      "75+": "75 lat i więcej"
+    },
+    "coverage": "Zakres ochrony",
+    "coverageOc": "Samo OC",
+    "coverageOcAc": "OC + AC",
+    "coverageShort": {
+      "oc": "OC",
+      "oc_ac": "OC + AC"
+    },
+    "premium": "Roczna składka",
+    "premiumUnit": "zł",
+    "premiumHint": "Kwota z Twojej polisy lub oferty, za cały rok.",
+    "premiumError": "Wpisz składkę od 0 do 100 000 zł, samymi cyframi."
+  },
+  "filters": {
+    "title": "Filtry",
+    "apply": "Pokaż {count, plural, one {# auto} few {# auta} other {# aut}}",
+    "query": "Marka lub model",
+    "queryPlaceholder": "np. Clio…",
+    "price": "Cena orientacyjna",
+    "priceMin": "Od",
+    "priceMax": "Do",
+    "priceUnit": "zł",
+    "priceError": "Cena „od” jest wyższa niż „do”. Zamień je albo popraw jedną z nich.",
+    "body": "Nadwozie",
+    "fuel": "Napęd",
+    "transmission": "Skrzynia biegów",
+    "transmissionAny": "Dowolna",
+    "transmissionManual": "Manualna",
+    "transmissionAutomatic": "Automat",
+    "segment": "Segment",
+    "make": "Marka",
+    "activeList": "Włączone filtry",
+    "remove": "Usuń filtr",
+    "clear": "Wyczyść filtry",
+    "activeQuery": "„{query}”",
+    "activePriceMin": "od {price}",
+    "activePriceMax": "do {price}"
+  },
+  "compareToggle": {
+    "add": "Porównaj",
+    "added": "W porównaniu",
+    "fullHint": "Porównanie mieści 3 auta. Usuń jedno, aby dodać kolejne."
+  },
+  "compareBar": {
+    "region": "Porównanie",
+    "toggle": "Wybrane: {count} z 3",
+    "list": "Wybrane auta",
+    "limit": "Porównanie mieści 3 auta. Usuń jedno, aby dodać kolejne.",
+    "count": "Wybrano {count} z 3 aut",
+    "compare": "Porównaj {count} auta",
+    "compareIdle": "Porównaj",
+    "needMore": "Dodaj jeszcze jedno auto, aby porównać.",
+    "empty": "Dodaj 2 lub 3 auta przyciskiem „Porównaj”.",
+    "full": "Komplet. Usuń auto, aby dodać inne.",
+    "remove": "Usuń z porównania",
+    "clear": "Wyczyść"
+  },
   "home": {
-    "title": "WheelWise"
+    "title": "Ile naprawdę kosztuje nowe auto?",
+    "intro": "Cena w salonie to dopiero początek. Sprawdź miesięczny koszt każdego nowego auta, porównaj modele i zobacz, przy jakich zarobkach auto mieści się w budżecie.",
+    "topPriceTitle": "Najtańsze w zakupie",
+    "topPriceLink": "Cały ranking cen",
+    "topCostTitle": "Najniższy całkowity koszt",
+    "topCostNoteMonth": "Miesięcznie, przy {km} km rocznie przez {years}.",
+    "topCostNoteYear": "Rocznie, przy {km} km rocznie przez {years}.",
+    "topCostLink": "Cały ranking kosztów",
+    "allRankingsTitle": "Wszystkie rankingi",
+    "estimateNote": "oznacza szacunek. Ceny aut są orientacyjne."
+  },
+  "rankings": {
+    "title": "Rankingi nowych aut",
+    "metricLabel": "Ranking według",
+    "listTitle": "{metric}, {period}",
+    "showing": "Pokazano {shown} z {total}",
+    "showMore": "Pokaż kolejne 10",
+    "estimateNote": "oznacza szacunek dla Twoich założeń.",
+    "priceNote": "Ceny aut są orientacyjne: to francuskie ceny katalogowe przeliczone na złote.",
+    "consumptionCaption": "WLTP",
+    "consumptionNote": "Ten ranking pokazuje litry na 100 km dla aut spalinowych i hybryd. Nie ma w nim hybryd plug-in, bo ich zużycie zależy od tego, jak często je ładujesz. Auta elektryczne zobaczysz w kWh na 100 km, gdy w filtrze „Napęd” zostawisz tylko „elektryczny”.",
+    "consumptionNoteElectric": "Ten ranking pokazuje zużycie prądu aut elektrycznych w kWh na 100 km. Aby wrócić do litrów na 100 km, zmień filtr „Napęd”.",
+    "emptyTitle": "Żadne auto nie pasuje do tych filtrów",
+    "emptyText": "Poszerz zakres cen albo wyłącz część filtrów. W katalogu są tylko auta nowe.",
+    "loading": "Wczytuję ranking…"
   }
 }
