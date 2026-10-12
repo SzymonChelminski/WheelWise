@@ -1,0 +1,92 @@
+{
+  "total": 12,
+  "next": "https://data.ademe.fr/data-fair/api/v1/datasets/ademe-car-labelling/lines?size=1000&select=Marque%2CMod%C3%A8le%2CDescription_Commerciale%2CEnergie%2CCarrosserie%2CGamme%2CCylindr%C3%A9e%2CPuissance_maximale%2CPuissance_nominale_%C3%A9lectrique%2CType_de_boite%2CConso_vitesse_mixte_Min%2CConso_vitesse_mixte_Max%2CConso_elec_Min%2CConso_elec_Max%2CPrix_v%C3%A9hicule&after=6",
+  "results": [
+    {
+      "Marque": "RENAULT",
+      "Modèle": "KANGOO",
+      "Description_Commerciale": "KANGOO (130ch)",
+      "Energie": "ESSENCE",
+      "Carrosserie": "COMBISPACE",
+      "Gamme": "INFERIEURE",
+      "Cylindrée": 1332,
+      "Puissance_maximale": 96,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 6.656,
+      "Conso_vitesse_mixte_Max": 7.871,
+      "Prix_véhicule": 31000
+    },
+    {
+      "Marque": "MAZDA",
+      "Modèle": "MX-30",
+      "Description_Commerciale": "MX-30 e-SKYACTIV (145ch)",
+      "Energie": "ELECTRIC",
+      "Carrosserie": "TS TERRAINS/CHEMINS",
+      "Gamme": "INFERIEURE",
+      "Cylindrée": 0,
+      "Puissance_nominale_électrique": 80.9,
+      "Type_de_boite": "VARIATION ELECTRIQUE",
+      "Conso_elec_Max": 179,
+      "Prix_véhicule": 38510
+    },
+    {
+      "Marque": "B.M.W.",
+      "Modèle": "218",
+      "Description_Commerciale": "218i Active Tourer",
+      "Energie": "ESSENCE",
+      "Carrosserie": "MONOSPACE COMPACT",
+      "Gamme": "MOYENNE INFERIEURE",
+      "Cylindrée": 1499,
+      "Puissance_maximale": 100,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 6.194,
+      "Conso_vitesse_mixte_Max": 6.942,
+      "Prix_véhicule": 36688
+    },
+    {
+      "Marque": "SKODA",
+      "Modèle": "OCTAVIA",
+      "Description_Commerciale": "OCTAVIA Berline 2.0 TDI (150ch) DSG7",
+      "Energie": "GAZOLE",
+      "Carrosserie": "BERLINE",
+      "Gamme": "MOYENNE SUPERIEURE",
+      "Cylindrée": 1968,
+      "Puissance_maximale": 110,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 4.192,
+      "Conso_vitesse_mixte_Max": 5.236,
+      "Prix_véhicule": 35218
+    },
+    {
+      "Marque": "JEEP",
+      "Modèle": "COMPASS",
+      "Description_Commerciale": "1.3 Turbo T4 (240ch) BVA6 4xe Upland / Trailhawk / S",
+      "Energie": "ELEC+ESSENC HR",
+      "Carrosserie": "TS TERRAINS/CHEMINS",
+      "Gamme": "MOYENNE SUPERIEURE",
+      "Cylindrée": 1332,
+      "Puissance_maximale": 132,
+      "Puissance_nominale_électrique": 44,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 1.843,
+      "Conso_vitesse_mixte_Max": 2.047,
+      "Conso_elec_Min": 160.4,
+      "Conso_elec_Max": 167.5,
+      "Prix_véhicule": 50100
+    },
+    {
+      "Marque": "B.M.W.",
+      "Modèle": "540",
+      "Description_Commerciale": "540d xDrive Touring",
+      "Energie": "GAZ+ELEC HNR",
+      "Carrosserie": "BREAK",
+      "Gamme": "LUXE",
+      "Cylindrée": 2993,
+      "Puissance_maximale": 250,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 5.822,
+      "Conso_vitesse_mixte_Max": 6.653,
+      "Prix_véhicule": 77588
+    }
+  ]
+}

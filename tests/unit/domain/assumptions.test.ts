@@ -126,7 +126,8 @@ describe('parseAssumptions - age', () => {
     });
   });
 
-  it.each(['teen', '30', '75', '18-25', '35-44 ', '75 '])(
+  // The padded values would be valid bands other than the default if the parser trimmed them.
+  it.each(['teen', '30', '75', '18-25', '18-24 ', ' 18-24', '75+ '])(
     'age=%j is invalid and falls back to 35-44',
     (raw) => {
       expect(parseAssumptions({ age: raw }).assumptions.insurance).toEqual({

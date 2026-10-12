@@ -1,0 +1,14 @@
+{
+  "id": "ademe-car-labelling",
+  "slug": "ademe-car-labelling",
+  "title": "ADEME - Car Labelling",
+  "count": 3604,
+  "license": {
+    "title": "Licence Ouverte / Open Licence",
+    "href": "https://www.etalab.gouv.fr/licence-ouverte-open-licence"
+  },
+  "updatedAt": "2026-09-14T23:00:09.295Z",
+  "dataUpdatedAt": "2026-09-14T23:00:09.295Z",
+  "href": "https://data.ademe.fr/data-fair/api/v1/datasets/ademe-car-labelling",
+  "page": "https://data.ademe.fr/datasets/ademe-car-labelling"
+}

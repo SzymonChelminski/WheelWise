@@ -1,0 +1,89 @@
+{
+  "total": 12,
+  "results": [
+    {
+      "Marque": "CITROEN",
+      "Modèle": "BERLINGO",
+      "Description_Commerciale": "e-BERLINGO M (57Kw)",
+      "Energie": "ELECTRIC",
+      "Carrosserie": "COMBISPACE",
+      "Gamme": "INFERIEURE",
+      "Cylindrée": 0,
+      "Puissance_nominale_électrique": 57,
+      "Type_de_boite": "VARIATION ELECTRIQUE",
+      "Conso_elec_Min": 186.7,
+      "Conso_elec_Max": 227,
+      "Prix_véhicule": 38150
+    },
+    {
+      "Marque": "B.M.W.",
+      "Modèle": "X3",
+      "Description_Commerciale": "X3 xDrive20d",
+      "Energie": "GAZ+ELEC HNR",
+      "Carrosserie": "TS TERRAINS/CHEMINS",
+      "Gamme": "SUPERIEURE",
+      "Cylindrée": 1995,
+      "Puissance_maximale": 140,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 5.621,
+      "Conso_vitesse_mixte_Max": 6.637,
+      "Prix_véhicule": 59100
+    },
+    {
+      "Marque": "B.M.W.",
+      "Modèle": "420",
+      "Description_Commerciale": "420i Coupe",
+      "Energie": "ESSENCE",
+      "Carrosserie": "COUPE",
+      "Gamme": "MOYENNE SUPERIEURE",
+      "Cylindrée": 1998,
+      "Puissance_maximale": 135,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 6.231,
+      "Conso_vitesse_mixte_Max": 7.201,
+      "Prix_véhicule": 53100
+    },
+    {
+      "Marque": "ALFA ROMEO",
+      "Modèle": "GIULIA",
+      "Description_Commerciale": "GIULIA 2.0 T Essence (200ch) AT8",
+      "Energie": "ESSENCE",
+      "Carrosserie": "BERLINE",
+      "Gamme": "SUPERIEURE",
+      "Cylindrée": 1995,
+      "Puissance_maximale": 148,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 7.176,
+      "Conso_vitesse_mixte_Max": 7.704,
+      "Prix_véhicule": 51625
+    },
+    {
+      "Marque": "RENAULT",
+      "Modèle": "KANGOO",
+      "Description_Commerciale": "KANGOO (130ch)",
+      "Energie": "ESSENCE",
+      "Carrosserie": "COMBISPACE",
+      "Gamme": "INFERIEURE",
+      "Cylindrée": 1332,
+      "Puissance_maximale": 96,
+      "Type_de_boite": "AUTOMATIQUE",
+      "Conso_vitesse_mixte_Min": 6.656,
+      "Conso_vitesse_mixte_Max": 7.871,
+      "Prix_véhicule": 31000
+    },
+    {
+      "Marque": "OPEL",
+      "Modèle": "CORSA",
+      "Description_Commerciale": "CORSA-E (57Kw)",
+      "Energie": "ELECTRIC",
+      "Carrosserie": "BERLINE",
+      "Gamme": "INFERIEURE",
+      "Cylindrée": 0,
+      "Puissance_nominale_électrique": 57,
+      "Type_de_boite": "VARIATION ELECTRIQUE",
+      "Conso_elec_Min": 149.8,
+      "Conso_elec_Max": 161.5,
+      "Prix_véhicule": 37600
+    }
+  ]
+}

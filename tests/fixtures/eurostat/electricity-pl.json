@@ -1,0 +1,126 @@
+{
+  "version": "2.0",
+  "class": "dataset",
+  "label": "Electricity prices for household consumers - bi-annual data",
+  "source": "ESTAT",
+  "updated": "2026-10-09T11:00:00+0200",
+  "value": {
+    "0": 1.1505,
+    "1": 1.2724
+  },
+  "status": {
+    "1": "p"
+  },
+  "id": [
+    "freq",
+    "siec",
+    "nrg_cons",
+    "unit",
+    "tax",
+    "currency",
+    "geo",
+    "time"
+  ],
+  "size": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2
+  ],
+  "dimension": {
+    "freq": {
+      "label": "Time frequency",
+      "category": {
+        "index": {
+          "S": 0
+        },
+        "label": {
+          "S": "Half-yearly, semesterly"
+        }
+      }
+    },
+    "siec": {
+      "label": "Standard international energy product classification (SIEC)",
+      "category": {
+        "index": {
+          "E7000": 0
+        },
+        "label": {
+          "E7000": "Electricity"
+        }
+      }
+    },
+    "nrg_cons": {
+      "label": "Energy consumption",
+      "category": {
+        "index": {
+          "KWH2500-4999": 0
+        },
+        "label": {
+          "KWH2500-4999": "Consumption from 2 500 kWh to 4 999 kWh - band DC"
+        }
+      }
+    },
+    "unit": {
+      "label": "Unit of measure",
+      "category": {
+        "index": {
+          "KWH": 0
+        },
+        "label": {
+          "KWH": "Kilowatt-hour"
+        }
+      }
+    },
+    "tax": {
+      "label": "Taxes",
+      "category": {
+        "index": {
+          "I_TAX": 0
+        },
+        "label": {
+          "I_TAX": "All taxes and levies included"
+        }
+      }
+    },
+    "currency": {
+      "label": "Currency",
+      "category": {
+        "index": {
+          "NAC": 0
+        },
+        "label": {
+          "NAC": "National currency"
+        }
+      }
+    },
+    "geo": {
+      "label": "Geopolitical entity (reporting)",
+      "category": {
+        "index": {
+          "PL": 0
+        },
+        "label": {
+          "PL": "Poland"
+        }
+      }
+    },
+    "time": {
+      "label": "Time",
+      "category": {
+        "index": {
+          "2025-S2": 0,
+          "2026-S1": 1
+        },
+        "label": {
+          "2025-S2": "2025-S2",
+          "2026-S1": "2026-S1"
+        }
+      }
+    }
+  }
+}

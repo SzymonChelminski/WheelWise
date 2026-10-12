@@ -6,7 +6,7 @@ import { custom, makeAssumptions, makeCar, makeCarOfFuel, makePrices } from '../
 const slugs = (ranked: RankedCar[]) => ranked.map((entry) => entry.car.slug);
 
 // ---------------------------------------------------------------------------
-// Behaviour 14: order, tie-break and value of each of the nine metrics
+// Order, tie-break and value of each of the nine metrics
 // ---------------------------------------------------------------------------
 //
 // Every case ranks three cars: two identical reference cars ("a-tie", "b-tie") and one
@@ -184,7 +184,7 @@ describe('rankCars - the nine metrics', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Behaviour 15: filters
+// Filters
 // ---------------------------------------------------------------------------
 
 const CATALOG: Car[] = [
@@ -314,6 +314,14 @@ describe('rankCars - filters, one at a time', () => {
     expect(filtered({ makes: ['Toyota Corolla'] })).toEqual([]);
   });
 
+  it('makes: the match is exact apart from letter case, so a make without its diacritics does not match', () => {
+    expect(filtered({ makes: ['skoda'] })).toEqual([]);
+    expect(filtered({ makes: ['SKODA'] })).toEqual([]);
+    expect(filtered({ makes: ['citroen'] })).toEqual([]);
+    expect(filtered({ makes: ['škoda'] })).toEqual(['skoda-octavia', 'skoda-kodiaq']);
+    expect(filtered({ makes: ['skoda', 'bmw'] })).toEqual(['bmw-i4']);
+  });
+
   it('segments', () => {
     expect(filtered({ segments: ['B'] })).toEqual(['dacia-sandero', 'citroen-c3']);
     expect(filtered({ segments: ['C', 'B'] })).toEqual([
@@ -439,6 +447,22 @@ describe('rankCars - query', () => {
   it('a query that matches nothing gives an empty ranking', () => {
     expect(filtered({ query: 'lamborghini' })).toEqual([]);
   });
+
+  it('query searches the make, the model and the variant only, not the slug', () => {
+    // The slugs "volvo-xc60" and "skoda-kodiaq" exist, but no name contains these texts.
+    expect(filtered({ query: 'volvo-xc60' })).toEqual([]);
+    expect(filtered({ query: 'skoda-kodiaq' })).toEqual([]);
+    expect(filtered({ query: 'dacia-sandero' })).toEqual([]);
+    // The same words as separate words are found in the names.
+    expect(filtered({ query: 'volvo xc60' })).toEqual(['volvo-xc60']);
+  });
+
+  it('query does not search the body type, the fuel type or the segment', () => {
+    expect(filtered({ query: 'suv' })).toEqual([]);
+    expect(filtered({ query: 'phev' })).toEqual([]);
+    expect(filtered({ query: 'estate' })).toEqual([]);
+    expect(filtered({ query: 'automatic' })).toEqual([]);
+  });
 });
 
 describe('rankCars - combined filters', () => {
@@ -500,7 +524,7 @@ describe('rankCars - combined filters', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Behaviour 16: fuelConsumption
+// Fuel consumption ranking
 // ---------------------------------------------------------------------------
 
 describe('rankCars - fuelConsumption', () => {
@@ -582,7 +606,7 @@ describe('rankCars - fuelConsumption', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Behaviour 17: rankings react to the assumptions
+// Rankings react to the assumptions
 // ---------------------------------------------------------------------------
 
 describe('rankCars - reaction to assumptions', () => {
