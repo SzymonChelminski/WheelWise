@@ -44,6 +44,13 @@ export function CompareBarHost() {
   }, [pathname, dismissLimitNotice]);
 
   const count = cars.length;
+
+  // The bar publishes its height on <html> while it is shown and leaves the value there when it
+  // empties, which would keep the room under the footer. Without the value the page's own default applies.
+  useEffect(() => {
+    if (count === 0) document.documentElement.style.removeProperty("--bar-height");
+  }, [count]);
+
   const compareHref = buildCompareHref({
     pathname,
     query: pickAssumptionParams(new URLSearchParams(searchParams)).toString(),
