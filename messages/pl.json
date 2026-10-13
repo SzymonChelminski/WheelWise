@@ -7,6 +7,21 @@
     "rankings": {
       "title": "Rankingi nowych aut: ceny i koszty posiadania | WheelWise",
       "description": "Dziewięć rankingów nowych aut: cena zakupu, całkowity koszt, utrata wartości, utrzymanie, serwis, części, zużycie paliwa, koszt paliwa i ubezpieczenie. Filtruj po marce, nadwoziu i napędzie."
+    },
+    "compare": {
+      "title": "Porównanie aut: koszty obok siebie | WheelWise",
+      "description": "Porównaj 2 lub 3 nowe auta obok siebie: cena, utrata wartości, paliwo, ubezpieczenie, serwis, części i opłaty, miesięcznie albo rocznie."
+    },
+    "methodology": {
+      "title": "Jak liczymy: dane, model kosztów i źródła | WheelWise",
+      "description": "Skąd bierzemy ceny aut i dane, jak szacujemy każdy koszt, jak powstaje skala zarobków i gdzie kończy się dokładność wyników."
+    },
+    "car": {
+      "title": "{name}: koszt posiadania | WheelWise",
+      "description": "{name}: cena orientacyjna {price}. Miesięczny i roczny koszt posiadania, utrata wartości, paliwo, ubezpieczenie, serwis oraz zarobki, przy których auto mieści się w budżecie."
+    },
+    "notFound": {
+      "title": "Nie ma takiej strony | WheelWise"
     }
   },
   "common": {
@@ -92,7 +107,9 @@
     "horsepower": "KM",
     "kilowatt": "kW",
     "consumptionFuel": "l/100 km",
-    "consumptionElectric": "kWh/100 km"
+    "consumptionElectric": "kWh/100 km",
+    "engineSize": "{value} cm³",
+    "consumptionPhev": "{fuel} l + {electric} kWh /100 km"
   },
   "power": {
     "plain": {
@@ -101,11 +118,15 @@
     },
     "engine": {
       "label": "Moc silnika spalinowego",
-      "short": "silnik spalinowy {hp}"
+      "short": "silnik spalinowy {hp}",
+      "note": "Źródło podaje tylko silnik spalinowy, bez mocy całego układu hybrydowego.",
+      "rowNote": "silnik spalinowy"
     },
     "source": {
       "label": "Moc według danych źródłowych",
-      "short": "{hp} wg źródła"
+      "short": "{hp} wg źródła",
+      "note": "Zwykle moc znamionowa, niższa od szczytowej, którą podaje producent.",
+      "rowNote": "według danych źródłowych"
     },
     "listNote": "Moc aut elektrycznych podajemy według danych źródłowych (zwykle moc znamionowa), a moc hybryd to moc samego silnika spalinowego.",
     "methodologyLink": "Skąd bierzemy moc",
@@ -191,7 +212,8 @@
     "premium": "Roczna składka",
     "premiumUnit": "zł",
     "premiumHint": "Kwota z Twojej polisy lub oferty, za cały rok.",
-    "premiumError": "Wpisz składkę od 0 do 100 000 zł, samymi cyframi."
+    "premiumError": "Wpisz składkę od 0 do 100 000 zł, samymi cyframi.",
+    "yearsAfter": "{count, plural, one {# roku} other {# latach}}"
   },
   "filters": {
     "title": "Filtry",
@@ -263,5 +285,225 @@
     "emptyTitle": "Żadne auto nie pasuje do tych filtrów",
     "emptyText": "Poszerz zakres cen albo wyłącz część filtrów. W katalogu są tylko auta nowe.",
     "loading": "Wczytuję ranking…"
+  },
+  "listError": {
+    "title": "Nie udało się wczytać rankingu",
+    "text": "Sprawdź połączenie z internetem i spróbuj ponownie. Filtry i założenia zostały zachowane."
+  },
+  "costs": {
+    "depreciation": "Utrata wartości",
+    "fuel": "Paliwo i energia",
+    "insurance": "Ubezpieczenie",
+    "service": "Serwis",
+    "parts": "Części i eksploatacja",
+    "fees": "Opłaty",
+    "total": "Razem",
+    "category": "Kategoria",
+    "amount": "Kwota",
+    "share": "Udział",
+    "caption": "Koszty według kategorii, {period}"
+  },
+  "car": {
+    "breadcrumb": "Okruszki",
+    "priceExplain": "Francuska cena katalogowa najtańszej wersji, przeliczona na złote z polskim VAT. W polskim salonie cena może być inna.",
+    "priceDate": "Cennik z",
+    "source": "źródło: ADEME Car Labelling",
+    "versionsNote": "Nazwa i cena należą do najtańszej wersji tego auta. Wersje, które różnią się tylko napędem (2WD / 4WD), baterią, liczbą miejsc lub długością nadwozia, liczymy jako jedno auto; kosztują więcej.",
+    "attributes": "Dane auta",
+    "body": "Nadwozie",
+    "segment": "Segment",
+    "fuel": "Napęd",
+    "transmission": "Skrzynia biegów",
+    "engine": "Pojemność silnika",
+    "consumption": "Zużycie (WLTP)",
+    "costTitle": "Koszt posiadania",
+    "costLead": "{period}, licząc {years} posiadania",
+    "residual": "Po {years} auto będzie warte <value>{amount}</value> ({percent} ceny).",
+    "perKm": "Każdy kilometr kosztuje <value>{amount}</value>.",
+    "estimateNote": "oznacza szacunek dla Twoich założeń, nie ofertę.",
+    "earningsTitle": "Jakie zarobki na to auto",
+    "earningsIntroMonth": "Miesięczny dochód netto (na rękę), przy którym koszt <value>{amount}</value> miesięcznie zajmuje daną część budżetu.",
+    "earningsIntroYear": "Roczny dochód netto (na rękę), przy którym koszt <value>{amount}</value> rocznie zajmuje daną część budżetu.",
+    "levels": {
+      "comfortable": {
+        "label": "komfortowo",
+        "note": "auto zajmuje do 10% dochodu"
+      },
+      "reasonable": {
+        "label": "rozsądnie",
+        "note": "auto zajmuje 10–15% dochodu"
+      },
+      "stretch": {
+        "label": "na granicy",
+        "note": "auto zajmuje 15–20% dochodu"
+      },
+      "not_recommended": {
+        "label": "niezalecane",
+        "note": "auto zajmuje ponad 20% dochodu"
+      }
+    },
+    "rangeFrom": "od {min}",
+    "rangeBetween": "od {min} do {max}",
+    "rangeTo": "do {max}",
+    "costErrorTitle": "Nie udało się obliczyć kosztów tego auta",
+    "costErrorText": "Nie mamy teraz aktualnych cen paliw i prądu, które są potrzebne do obliczeń. Spróbuj ponownie za chwilę. Cena i dane auta powyżej są aktualne.",
+    "loading": "Wczytuję dane auta…"
+  },
+  "compare": {
+    "title": "Porównanie aut",
+    "caption": "Porównanie kosztów, {period}",
+    "rowHeader": "Pozycja",
+    "remove": "Usuń z porównania",
+    "removeShort": "Usuń",
+    "lowest": "najniżej",
+    "highest": "najwyżej",
+    "price": "Cena orientacyjna",
+    "priceDate": "Cennik z {date}",
+    "residual": "Wartość po {years}",
+    "consumption": "Zużycie (WLTP)",
+    "power": "Moc",
+    "cars": "Porównywane auta",
+    "addThirdTitle": "Dodaj trzecie auto",
+    "emptyTitle": "Dodaj co najmniej 2 auta",
+    "emptyOneTitle": "Dodaj jeszcze jedno auto",
+    "emptyText": "Porównanie mieści 2 lub 3 auta. Wyszukaj je tutaj albo dodaj przyciskiem „Porównaj” w rankingu.",
+    "toRankings": "Przejdź do rankingów",
+    "loading": "Wczytuję porównanie…"
+  },
+  "notFound": {
+    "title": "Nie ma takiej strony",
+    "text": "Adres może być błędny albo auto zniknęło z katalogu po aktualizacji danych. Wyszukaj je ponownie lub zacznij od rankingów.",
+    "toRankings": "Zobacz rankingi"
+  },
+  "errorPage": {
+    "title": "Coś się zepsuło po naszej stronie",
+    "text": "Nie udało się wczytać tej strony. Spróbuj ponownie za chwilę. Twoje założenia i wybrane auta są zapisane w tej przeglądarce."
+  },
+  "methodology": {
+    "title": "Jak liczymy",
+    "intro": "WheelWise nie zgaduje. Każda kwota na stronie powstaje z publicznych danych i jawnego modelu kosztów. Tu opisujemy, skąd bierzemy liczby i gdzie kończy się ich dokładność.",
+    "tocLabel": "Na tej stronie",
+    "sections": {
+      "prices": {
+        "id": "ceny",
+        "heading": "Ceny aut są orientacyjne",
+        "paragraphs": [
+          "WheelWise pokazuje, ile kosztuje posiadanie nowego auta: w złotych, dla kierowców w Polsce. Nie sprzedajemy aut i nie pośredniczymy w ich zakupie.",
+          "Katalog aut i ceny pochodzą z otwartego zbioru ADEME Car Labelling, prowadzonego przez francuską agencję rządową. To ceny katalogowe nowych aut we Francji.",
+          "Cenę przeliczamy na złote: francuską cenę w euro mnożymy przez średni kurs euro NBP, zamieniamy francuski VAT 20% na polski 23% i zaokrąglamy do 100 zł. Dlatego przy każdej cenie piszemy „cena orientacyjna” i podajemy datę cennika.",
+          "Cena w polskim salonie może się różnić od pokazanej o kilka procent lub więcej, bo producenci ustalają ceny osobno dla każdego kraju. Zakres modeli i wersji jest francuski, więc części aut sprzedawanych w Polsce w katalogu nie ma. Francuskiej premii ani kary ekologicznej (bonus / malus) do cen nie wliczamy.",
+          "Jedno auto to model w jednym nadwoziu, z jednym rodzajem napędu, jedną skrzynią biegów i jedną mocą. Z każdej takiej grupy pokazujemy najtańszą wersję.",
+          "Nazwy aut to opisy handlowe ze źródła, bez zmian. Wersje, które różnią się napędem (2WD / 4WD), pojemnością baterii, liczbą miejsc lub wyposażeniem, pokazujemy jako jedno auto w cenie najtańszej z nich; pozostałe kosztują więcej."
+        ]
+      },
+      "costs": {
+        "id": "koszty",
+        "heading": "Z czego składa się koszt",
+        "paragraphs": [
+          "Całkowity koszt to suma sześciu kategorii. Ceny zakupu nie doliczamy: jej miejsce zajmuje utrata wartości, czyli ta część ceny, której nie odzyskasz przy sprzedaży. Zakładamy zakup za gotówkę."
+        ],
+        "list": [
+          "Utrata wartości: różnica między ceną a szacowaną wartością auta po wybranym okresie. Wartość zależy od liczby lat, przebiegu, rodzaju napędu i marki.",
+          "Paliwo i energia: zużycie WLTP razy Twój przebieg i aktualna cena paliwa (benzyna, olej napędowy, LPG) albo prądu. Auta elektryczne ładujesz w domu, po cenie prądu dla gospodarstw domowych. Hybrydy jeżdżą na benzynie, a w hybrydach plug-in liczymy i paliwo, i prąd.",
+          "Ubezpieczenie: OC albo OC z AC, szacowane z wieku kierowcy, mocy i wartości auta, albo składka, którą sam podasz.",
+          "Serwis: przeglądy i obsługa okresowa. Zależą od marki i przebiegu, w autach elektrycznych są niższe.",
+          "Części i eksploatacja: opony, hamulce i inne części zużywalne. Zależą od przebiegu, wielkości auta i marki.",
+          "Opłaty: rejestracja nowego auta (160 zł) i okresowe badania techniczne (149 zł, w autach na LPG 245 zł), które przypadają przed końcem okresu posiadania."
+        ],
+        "after": [
+          "Nie liczymy kredytu, leasingu, parkingu, opłat drogowych, mandatów, mycia ani przechowywania opon."
+        ]
+      },
+      "estimates": {
+        "id": "szacunki",
+        "heading": "Co oznacza znak ≈",
+        "paragraphs": [
+          "Dla utraty wartości, ubezpieczenia, serwisu i części nie istnieją otwarte dane dla każdego modelu. Liczymy je modelem, którego parametry dobraliśmy na podstawie opublikowanych średnich rynkowych. Każdą taką kwotę poprzedza znak ≈.",
+          "Zużycie WLTP jest zwykle niższe niż w codziennej jeździe, szczególnie w hybrydach plug-in. Rzeczywisty koszt paliwa będzie więc raczej wyższy niż pokazany."
+        ]
+      },
+      "power": {
+        "id": "moc",
+        "otherId": "power",
+        "heading": "Moc aut elektrycznych i hybryd",
+        "paragraphs": [
+          "Dla aut benzynowych, diesli i aut na LPG źródło podaje moc maksymalną silnika i taką pokazujemy.",
+          "Dla hybryd i hybryd plug-in źródło podaje tylko moc silnika spalinowego. Moc całego układu, razem z silnikiem elektrycznym, jest wyższa, ale nie ma jej w danych. Dlatego przy tych autach piszemy „moc silnika spalinowego”.",
+          "Dla aut elektrycznych w danych nie ma mocy maksymalnej. Pokazujemy najwyższą wartość, jaką podaje źródło. Dla większości modeli jest to moc znamionowa (ciągła), wyraźnie niższa od mocy szczytowej z katalogu producenta: Tesla Model 3 ma w danych 88 kW. Dlatego przy autach elektrycznych piszemy „moc według danych źródłowych”. Ta wartość ma też niewielki wpływ na szacunek ubezpieczenia."
+        ]
+      },
+      "income": {
+        "id": "zarobki",
+        "heading": "Skala zarobków",
+        "paragraphs": [
+          "Skala pokazuje miesięczny dochód netto (na rękę), przy którym całkowity koszt auta, z utratą wartości, zajmuje określoną część budżetu. Opieramy się na regule 20/4/10 i na powszechnych zaleceniach doradców finansowych. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna."
+        ],
+        "list": [
+          "komfortowo: auto zajmuje do 10% dochodu",
+          "rozsądnie: od 10% do 15%",
+          "na granicy: od 15% do 20%",
+          "niezalecane: ponad 20%"
+        ]
+      },
+      "freshness": {
+        "id": "aktualnosc",
+        "heading": "Jak często odświeżamy dane",
+        "paragraphs": [
+          "Raz na dobę sprawdzamy wszystkie źródła. Każde z nich publikuje dane we własnym rytmie, dlatego przy cenach podajemy ich datę.",
+          "Data przy cenie aut („Cennik z”) to dzień, w którym źródło ostatnio zaktualizowało dane, a nie dzień, w którym je sprawdziliśmy. Datę ostatniego sprawdzenia znajdziesz w stopce strony."
+        ]
+      }
+    },
+    "sources": {
+      "caption": "Źródła danych",
+      "columns": [
+        "Źródło",
+        "Co z niego bierzemy",
+        "Aktualizacja",
+        "Licencja"
+      ],
+      "rows": [
+        {
+          "name": "ADEME Car Labelling",
+          "url": "https://data.ademe.fr/datasets/ademe-car-labelling",
+          "what": "Katalog nowych aut, ceny katalogowe we Francji, zużycie WLTP",
+          "updated": "co kwartał",
+          "licence": "Licence Ouverte / Open Licence 2.0 (Etalab)"
+        },
+        {
+          "name": "Komisja Europejska, Weekly Oil Bulletin",
+          "url": "https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en",
+          "what": "Ceny benzyny 95, oleju napędowego i LPG w Polsce",
+          "updated": "co tydzień",
+          "licence": "Ponowne wykorzystanie z podaniem źródła (zasady Komisji Europejskiej)"
+        },
+        {
+          "name": "Narodowy Bank Polski",
+          "url": "https://api.nbp.pl/",
+          "what": "Średni kurs euro (tabela A)",
+          "updated": "w dni robocze",
+          "licence": "Dane publiczne NBP"
+        },
+        {
+          "name": "Eurostat, nrg_pc_204",
+          "url": "https://ec.europa.eu/eurostat/databrowser/view/nrg_pc_204",
+          "what": "Cena prądu dla gospodarstw domowych w Polsce",
+          "updated": "co pół roku",
+          "licence": "Ponowne wykorzystanie z podaniem źródła (CC BY 4.0)"
+        },
+        {
+          "name": "Rankomat",
+          "url": "https://rankomat.pl/samochod/emeryt-za-polise-oc-placi-3-krotnie-mniej-niz-student",
+          "what": "Średnie składki OC według wieku kierowcy, na których opieramy szacunek ubezpieczenia",
+          "updated": "ręcznie, z nowych zestawień (obecnie pierwsze półrocze 2026)",
+          "licence": "Opublikowane zestawienie, przywołane ze wskazaniem źródła"
+        }
+      ]
+    },
+    "disclaimerTitle": "Zanim podejmiesz decyzję",
+    "disclaimers": [
+      "WheelWise nie jest ofertą handlową ani poradą finansową lub ubezpieczeniową. Wyniki to szacunki. Przed zakupem sprawdź cenę u dealera i poproś o wycenę ubezpieczenia.",
+      "Ceny u dealerów mogą się różnić od pokazanych."
+    ]
   }
 }

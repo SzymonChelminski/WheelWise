@@ -14,6 +14,7 @@ import { toSearchParams, type RawParams } from "@/lib/state/assumption-params";
 import { AssumptionsControls } from "../assumptions/AssumptionsControls";
 import { PeriodSwitch } from "../assumptions/PeriodSwitch";
 import { assumptionsSummary } from "../assumptions/summary";
+import { ListError } from "../ListError";
 import { LiveLink } from "../LiveLink";
 import { PowerNote } from "../car/PowerNote";
 import { ActiveFiltersControl } from "./ActiveFiltersControl";
@@ -52,6 +53,17 @@ function filterOptions(cars: Car[], locale: Locale): FilterOptions {
   };
 }
 
+/** What the filters offer while the catalogue cannot be read: every value, no counts, the makes already chosen. */
+function fallbackOptions(selected: RankingParams): FilterOptions {
+  const bare = (values: readonly string[]): FilterOptionData[] => values.map((value) => ({ value }));
+  return {
+    body: bare(BODY_TYPES),
+    fuel: bare(FUEL_TYPES),
+    segment: bare(SEGMENTS),
+    make: bare(selected.makes),
+  };
+}
+
 function isElectricOnly(params: RankingParams): boolean {
   return params.fuelTypes.length === 1 && params.fuelTypes[0] === "ev";
 }
@@ -59,21 +71,25 @@ function isElectricOnly(params: RankingParams): boolean {
 /** The ranking page below its heading: metric selector, filters, assumptions and the list. */
 export async function RankingsContent({ searchParams }: { searchParams: Promise<RawParams> }) {
   const raw = await searchParams;
-  const [{ cars, prices }, t, locale] = await Promise.all([
-    getCatalog(),
+  const [catalog, t, locale] = await Promise.all([
+    getCatalog().catch((): null => null),
     getTranslations(),
     getLocale() as Promise<Locale>,
   ]);
 
   const { assumptions, period } = parseAssumptions(raw);
-  const params = parseRankingParams(raw, [...new Set(cars.map((car) => car.make))]);
+  const params = parseRankingParams(
+    raw,
+    catalog ? [...new Set(catalog.cars.map((car) => car.make))] : undefined,
+  );
   const { metric, limit } = params;
 
-  const ranked = rankCars(cars, prices, assumptions, metric, toFilters(params));
+  // A failing catalogue costs the list only: the filters and assumptions stay usable.
+  const ranked = catalog ? rankCars(catalog.cars, catalog.prices, assumptions, metric, toFilters(params)) : [];
   const visible = ranked.slice(0, limit);
   const maxAmount = Math.max(0, ...visible.map((item) => metricAmount(item, metric, period)));
   const electricOnly = isElectricOnly(params);
-  const options = filterOptions(cars, locale);
+  const options = catalog ? filterOptions(catalog.cars, locale) : fallbackOptions(params);
   const activeCount = countActiveFilters(params);
 
   const periodText = period === "year" ? t("common.perYear") : t("common.perMonth");
@@ -129,7 +145,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 {title}
               </h2>
               <p className="mt-0.5 text-sm text-ink-muted" aria-live="polite">
-                {carsText(ranked.length)}
+                {catalog && carsText(ranked.length)}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -151,7 +167,9 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
           <ActiveFiltersControl className="mt-4" makes={options.make.map((make) => make.value)} />
 
           <div className="mt-4">
-            {ranked.length === 0 ? (
+            {!catalog ? (
+              <ListError />
+            ) : ranked.length === 0 ? (
               <EmptyState
                 title={t("rankings.emptyTitle")}
                 headingLevel="h3"

@@ -9,6 +9,7 @@ import { parseAssumptions } from "@/lib/domain/assumptions";
 import { formatInteger, type Locale } from "@/lib/format";
 import type { RawParams } from "@/lib/state/assumption-params";
 import { PowerNote } from "../car/PowerNote";
+import { ListError } from "../ListError";
 import { LiveLink } from "../LiveLink";
 import { RANKING_METRICS } from "../rankings/params";
 import { metricAmount, RankingRow } from "../rankings/RankingRow";
@@ -31,16 +32,17 @@ export async function HomeListsFallback() {
 /** The two top-five lists, the links to all rankings and the note on estimates. */
 export async function HomeLists({ searchParams }: { searchParams: Promise<RawParams> }) {
   const raw = await searchParams;
-  const [{ cars, prices }, t, locale] = await Promise.all([
-    getCatalog(),
+  const [catalog, t, locale] = await Promise.all([
+    getCatalog().catch((): null => null),
     getTranslations(),
     getLocale() as Promise<Locale>,
   ]);
 
   const { assumptions, period } = parseAssumptions(raw);
 
+  // A failing catalogue costs the two lists only: the rest of the page stays.
   const top = (metric: RankingMetric): RankedCar[] =>
-    rankCars(cars, prices, assumptions, metric, {}).slice(0, TOP_COUNT);
+    catalog ? rankCars(catalog.cars, catalog.prices, assumptions, metric, {}).slice(0, TOP_COUNT) : [];
   const byPrice = top("price");
   const byCost = top("totalCost");
   const largest = (items: RankedCar[], metric: RankingMetric) =>
@@ -68,6 +70,15 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
     />
   );
 
+  const list = (items: RankedCar[], metric: RankingMetric, label: string, maxAmount: number) =>
+    catalog ? (
+      <RankingList label={label} className="mt-4">
+        {items.map((item) => row(item, metric, maxAmount))}
+      </RankingList>
+    ) : (
+      <ListError className="mt-4" />
+    );
+
   return (
     <>
       <div className="grid gap-x-8 gap-y-12 lg:grid-cols-2">
@@ -76,9 +87,7 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
             {t("home.topPriceTitle")}
           </h2>
           <p className="mt-1 text-sm text-ink-muted">{t("metrics.price.description")}</p>
-          <RankingList label={t("home.topPriceTitle")} className="mt-4">
-            {byPrice.map((item) => row(item, "price", maxPrice))}
-          </RankingList>
+          {list(byPrice, "price", t("home.topPriceTitle"), maxPrice)}
           <p className="mt-3">
             <LiveLink to={{ kind: "carry", path: "/rankings", metric: "price" }} className={listLinkClass}>
               {t("home.topPriceLink")}
@@ -93,9 +102,7 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
           <p className="mt-1 text-sm text-ink-muted">
             {t(period === "year" ? "home.topCostNoteYear" : "home.topCostNoteMonth", noteValues)}
           </p>
-          <RankingList label={t("home.topCostTitle")} className="mt-4">
-            {byCost.map((item) => row(item, "totalCost", maxCost))}
-          </RankingList>
+          {list(byCost, "totalCost", t("home.topCostTitle"), maxCost)}
           <p className="mt-3">
             <LiveLink to={{ kind: "carry", path: "/rankings" }} className={listLinkClass}>
               {t("home.topCostLink")}

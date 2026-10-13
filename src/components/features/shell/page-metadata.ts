@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 /** Localised title, description and the links between the language versions of a page. */
 export async function pageMetadata(
   localeParam: string,
-  key: "home" | "rankings",
+  key: "home" | "rankings" | "compare" | "methodology",
   path: string,
 ): Promise<Metadata> {
   if (!hasLocale(routing.locales, localeParam)) notFound();

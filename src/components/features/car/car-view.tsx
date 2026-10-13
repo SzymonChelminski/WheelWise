@@ -21,7 +21,7 @@ export function carName(car: { make: string; variant: string }): string {
 // 1 kW = 1.35962 metric horsepower (KM / PS).
 const HORSEPOWER_PER_KW = 1.35962;
 
-function horsepower(powerKw: number, t: Translate): string {
+export function horsepower(powerKw: number, t: Translate): string {
   return `${Math.round(powerKw * HORSEPOWER_PER_KW)} ${t("attr.horsepower")}`;
 }
 
@@ -29,7 +29,7 @@ function horsepower(powerKw: number, t: Translate): string {
  * Which kind of power the source gives: engine power for petrol, diesel and LPG,
  * the combustion engine only for hybrids, usually the rated power for electric cars.
  */
-function powerKind(fuelType: FuelType): "plain" | "engine" | "source" {
+export function powerKind(fuelType: FuelType): "plain" | "engine" | "source" {
   if (fuelType === "ev") return "source";
   return fuelType === "hybrid" || fuelType === "phev" ? "engine" : "plain";
 }

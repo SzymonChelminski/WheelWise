@@ -18,7 +18,7 @@ import { SearchIndexProvider } from "@/components/features/shell/SearchIndexProv
 import { SiteFooter } from "@/components/features/shell/SiteFooter";
 import { SiteHeader } from "@/components/features/shell/SiteHeader";
 import { SITE_URL } from "@/config/site";
-import { getSearchIndex } from "@/lib/data/search-index";
+import { getSearchIndex, type SearchIndexEntry } from "@/lib/data/search-index";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -47,7 +47,8 @@ export default async function LocaleLayout({
   const [locale, t, searchIndex] = await Promise.all([
     getLocale() as Promise<"pl" | "en">,
     getTranslations(),
-    getSearchIndex(),
+    // Without the catalogue the search has nothing to suggest, and the page still renders.
+    getSearchIndex().catch((): SearchIndexEntry[] => []),
   ]);
 
   // The shell reserves room for the comparison bar below the footer. The bar publishes its

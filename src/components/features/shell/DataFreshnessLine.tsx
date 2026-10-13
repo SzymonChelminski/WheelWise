@@ -13,11 +13,14 @@ function latest(dates: string[]): string | undefined {
  * appears only when a refresh run has finished.
  */
 export async function DataFreshnessLine() {
-  const [{ cars, prices, lastRefresh }, t, locale] = await Promise.all([
-    getCatalog(),
+  const [catalog, t, locale] = await Promise.all([
+    getCatalog().catch((): null => null),
     getTranslations("footer"),
     getLocale() as Promise<Locale>,
   ]);
+  // The footer stays when the data cannot be read; it only has no freshness line then.
+  if (!catalog) return null;
+  const { cars, prices, lastRefresh } = catalog;
 
   // An empty catalogue has no price list date; the line then leaves that part out.
   const catalogueIso = latest(cars.map((car) => car.priceObservedAt));

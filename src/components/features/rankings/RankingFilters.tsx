@@ -9,8 +9,8 @@ import { listValues, parseRankingParams, setListValues } from "./params";
 
 export interface FilterOptionData {
   value: string;
-  /** Cars in the catalogue behind this option. */
-  count: number;
+  /** Cars in the catalogue behind this option; unknown while the catalogue cannot be read. */
+  count?: number;
 }
 
 /** The options that exist in the catalogue; built on the server. */
@@ -117,7 +117,7 @@ export function RankingFilters({ idPrefix, options }: { idPrefix: string; option
     data.map(({ value, count }) => ({
       value,
       label: label(value),
-      count: formatInteger(count, locale),
+      count: count === undefined ? undefined : formatInteger(count, locale),
       selected: isSelected(group, value),
     }));
 

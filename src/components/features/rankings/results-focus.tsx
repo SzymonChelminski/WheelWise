@@ -45,7 +45,7 @@ export function settleFocus(source: Source, signature: string): void {
  * After a client-side language switch the previous page stays in the document, hidden.
  * Every lookup is limited to the elements of the page that is rendered now.
  */
-function rendered(selector: string): HTMLElement[] {
+export function rendered(selector: string): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>(selector)).filter((element) =>
     element.checkVisibility(),
   );
