@@ -43,11 +43,12 @@ export function settleFocus(source: Source, signature: string): void {
 
 /*
  * After a client-side language switch the previous page stays in the document, hidden.
- * Every lookup is limited to the elements of the page that is rendered now.
+ * Every lookup is limited to the elements of the page that is rendered now: an element
+ * inside a `display: none` subtree has no boxes, in every browser.
  */
 export function rendered(selector: string): HTMLElement[] {
-  return Array.from(document.querySelectorAll<HTMLElement>(selector)).filter((element) =>
-    element.checkVisibility(),
+  return Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(
+    (element) => element.getClientRects().length > 0,
   );
 }
 
