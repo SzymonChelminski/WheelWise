@@ -49,7 +49,10 @@ export function resolveTarget(target: LinkTarget, query: string): string {
     case "carry": {
       const params = pickAssumptionParams(new URLSearchParams(query));
       if (target.metric) setMetric(params, target.metric);
-      return withQuery(target.path, params);
+      // The query goes before a "#" part.
+      const hashAt = target.path.indexOf("#");
+      if (hashAt < 0) return withQuery(target.path, params);
+      return withQuery(target.path.slice(0, hashAt), params) + target.path.slice(hashAt);
     }
     case "metric": {
       const params = rankingParams(query);
