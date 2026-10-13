@@ -41,7 +41,17 @@ export function settleFocus(source: Source, signature: string): void {
   target()?.focus();
 }
 
-const heading: Target = () => document.getElementById(RESULTS_HEADING_ID);
+/*
+ * After a client-side language switch the previous page stays in the document, hidden.
+ * Every lookup is limited to the elements of the page that is rendered now.
+ */
+function rendered(selector: string): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>(selector)).filter((element) =>
+    element.checkVisibility(),
+  );
+}
+
+const heading: Target = () => rendered(`#${RESULTS_HEADING_ID}`)[0] ?? null;
 
 export function focusHeadingAfterUpdate(): void {
   focusAfterUpdate("controls", heading);
@@ -50,15 +60,15 @@ export function focusHeadingAfterUpdate(): void {
 /** After the chip at `index` is removed: the chip that took its place, the last one, or the heading. */
 export function focusChipAfterUpdate(index: number): void {
   focusAfterUpdate("controls", () => {
-    const chips = document.querySelectorAll<HTMLElement>(CHIPS);
+    const chips = rendered(CHIPS);
     return chips.length > 0 ? chips[Math.min(index, chips.length - 1)] : heading();
   });
 }
 
 /** After more rows are added: the first of them. */
 function focusNewRowAfterUpdate(): void {
-  const before = document.querySelectorAll(ROWS).length;
-  focusAfterUpdate("list", () => document.querySelectorAll(ROWS)[before]?.querySelector<HTMLElement>("a[href]") ?? heading());
+  const before = rendered(ROWS).length;
+  focusAfterUpdate("list", () => rendered(ROWS)[before]?.querySelector<HTMLElement>("a[href]") ?? heading());
 }
 
 /** Renders nothing; `signature` changes with the list (the query string it was made for). */
