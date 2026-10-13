@@ -17,13 +17,14 @@ import {
 import { SearchIndexProvider } from "@/components/features/shell/SearchIndexProvider";
 import { SiteFooter } from "@/components/features/shell/SiteFooter";
 import { SiteHeader } from "@/components/features/shell/SiteHeader";
+import { SITE_URL } from "@/config/site";
 import { getSearchIndex } from "@/lib/data/search-index";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
 export const metadata: Metadata = {
   title: "WheelWise",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
 };
 
 export const viewport: Viewport = {

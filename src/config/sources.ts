@@ -1,8 +1,8 @@
 // Every external URL, validation range and request limit of the refresh job.
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:3000').replace(/\/+$/, '');
+import { SITE_URL } from '@/config/site';
 
-export const USER_AGENT = `WheelWise/1.0 (+${siteUrl}/en/methodology)`;
+export const USER_AGENT = `WheelWise/1.0 (+${SITE_URL}/en/methodology)`;
 
 /** The `source` of the rows loaded from `data/fixtures`. Real data always replaces them. */
 export const FIXTURE_SOURCE = 'fixture';
