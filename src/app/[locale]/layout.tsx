@@ -52,7 +52,7 @@ export default async function LocaleLayout({
   ]);
 
   // The shell reserves room for the comparison bar below the footer. The bar publishes its
-  // height as --bar-height only while it is shown; the class keeps the footer free of that room
+  // closed height as --bar-height while it is shown; the class keeps the footer free of that room
   // while nothing is selected (the inline value from the bar wins whenever it is present).
   return (
     <html lang={locale} className={`${fontVariables} [--bar-height:0px]`}>

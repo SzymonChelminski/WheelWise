@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 import { CompareBar, type CompareBarCar } from "@/components/ui/CompareBar";
 import { usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/lib/format";
@@ -11,9 +11,6 @@ import { useIntendedQuery } from "@/lib/state/intended-query";
 import { carMeta, carName } from "../car/car-view";
 import { compareHref as buildCompareHref } from "../shell/nav";
 import { useSearchIndex } from "../shell/SearchIndexProvider";
-
-// The room the design reserves before the bar has been measured.
-const CLOSED_HEIGHT_FALLBACK = "6.5rem";
 
 /*
  * The comparison bar wired to the stored selection. It is mounted on every page,
@@ -47,24 +44,6 @@ export function CompareBarHost() {
   }, [pathname, dismissLimitNotice]);
 
   const count = cars.length;
-
-  // The room under the footer is the height of the closed bar, also while the bar is open: the open
-  // bar closes as soon as a pointer goes down outside it, and room that shrank with it would move
-  // the page under that pointer. The bar publishes --bar-height only while it is closed and leaves
-  // the value behind when it empties. So this only drops the value when the bar is gone (the page's
-  // own default applies) and, when the bar comes back already open and has published nothing,
-  // brings back the closed height it had last (or the design's fallback).
-  const closedHeight = useRef<string>(CLOSED_HEIGHT_FALLBACK);
-  useEffect(() => {
-    const style = document.documentElement.style;
-    const published = style.getPropertyValue("--bar-height");
-    if (count === 0) {
-      if (published) closedHeight.current = published;
-      style.removeProperty("--bar-height");
-    } else if (!published) {
-      style.setProperty("--bar-height", closedHeight.current);
-    }
-  }, [count]);
 
   const compareHref = buildCompareHref({
     pathname,
