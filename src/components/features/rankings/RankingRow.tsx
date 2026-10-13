@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { COST_ORDER, type CostKey } from "@/components/ui/CostStrip";
-import { RankingItem, type RankingItemProps } from "@/components/ui/RankingItem";
+import type { RankingItemProps } from "@/components/ui/RankingItem";
 import type { CostMap, RankedCar, RankingMetric } from "@/lib/costs";
 import type { Period } from "@/lib/domain/types";
 import { formatDecimal, formatPln, type Locale } from "@/lib/format";
 import { carMeta, carName, type Translate } from "../car/car-view";
 import { CompareToggleButton } from "../compare/CompareToggleButton";
+import { LiveRankingItem } from "./LiveRankingItem";
 
 /** Metrics that do not depend on the cost period. */
 export function isPeriodIndependent(metric: RankingMetric): boolean {
@@ -58,7 +59,6 @@ export function RankingRow({
   electricOnly,
   locale,
   t,
-  carry,
   withToggle,
   detail = true,
 }: {
@@ -71,8 +71,6 @@ export function RankingRow({
   electricOnly: boolean;
   locale: Locale;
   t: Translate;
-  /** Query string with the assumption parameters, without "?". */
-  carry: string;
   withToggle: boolean;
   /** Price line under the name; the home page leaves it out. */
   detail?: boolean;
@@ -105,9 +103,9 @@ export function RankingRow({
   if (withToggle) action = <CompareToggleButton slug={car.slug} name={name} />;
 
   return (
-    <RankingItem
+    <LiveRankingItem
       rank={ranked.rank}
-      href={carry ? `/cars/${car.slug}?${carry}` : `/cars/${car.slug}`}
+      slug={car.slug}
       name={name}
       meta={carMeta(t, locale, car)}
       detail={metric !== "price" && detail ? indicativePrice : undefined}

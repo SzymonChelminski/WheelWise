@@ -5,32 +5,25 @@ import { EstimateNote, InfoNote } from "@/components/ui/Markers";
 import { RankingList } from "@/components/ui/RankingItem";
 import { SheetDisclosure } from "@/components/ui/Sheet";
 import { h2Class, linkClass, panelClass } from "@/components/ui/styles";
-import { Link } from "@/i18n/navigation";
 import { rankCars } from "@/lib/costs";
 import { getCatalog } from "@/lib/data/catalog";
 import { parseAssumptions } from "@/lib/domain/assumptions";
 import type { Car } from "@/lib/domain/types";
-import { formatInteger, formatPln, type Locale } from "@/lib/format";
-import {
-  pickAssumptionParams,
-  toSearchParams,
-  withQuery,
-  type RawParams,
-} from "@/lib/state/assumption-params";
+import { formatInteger, type Locale } from "@/lib/format";
+import { toSearchParams, type RawParams } from "@/lib/state/assumption-params";
 import { AssumptionsControls } from "../assumptions/AssumptionsControls";
 import { PeriodSwitch } from "../assumptions/PeriodSwitch";
 import { assumptionsSummary } from "../assumptions/summary";
+import { LiveLink } from "../LiveLink";
 import { PowerNote } from "../car/PowerNote";
-import { ActiveFiltersControl, type ActiveFilterItem } from "./ActiveFiltersControl";
+import { ActiveFiltersControl } from "./ActiveFiltersControl";
 import { MetricSelectorControl } from "./MetricSelectorControl";
 import {
   BODY_TYPES,
   countActiveFilters,
   FUEL_TYPES,
-  PAGE_SIZE,
   parseRankingParams,
   RANKING_METRICS,
-  rankingsHref,
   SEGMENTS,
   toFilters,
   type RankingParams,
@@ -75,8 +68,6 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
   const { assumptions, period } = parseAssumptions(raw);
   const params = parseRankingParams(raw, [...new Set(cars.map((car) => car.make))]);
   const { metric, limit } = params;
-  const carry = pickAssumptionParams(toSearchParams(raw));
-  const carryQuery = carry.toString();
 
   const ranked = rankCars(cars, prices, assumptions, metric, toFilters(params));
   const visible = ranked.slice(0, limit);
@@ -91,32 +82,11 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
     ? metricLabel
     : t("rankings.listTitle", { metric: metricLabel, period: periodText });
   const carsText = (count: number) => t("common.cars", { count });
-  const methodologyHref = withQuery("/methodology", carry);
-
-  const activeItems: ActiveFilterItem[] = [
-    ...params.makes.map((make) => ({ key: `make:${make}`, label: make })),
-    ...params.segments.map((value) => ({ key: `segment:${value}`, label: t(`attr.segment.${value}`) })),
-    ...params.bodyTypes.map((value) => ({ key: `body:${value}`, label: t(`attr.body.${value}`) })),
-    ...params.fuelTypes.map((value) => ({ key: `fuel:${value}`, label: t(`attr.fuel.${value}`) })),
-  ];
-  if (params.transmission) {
-    activeItems.push({
-      key: "gear",
-      label: t(params.transmission === "manual" ? "filters.transmissionManual" : "filters.transmissionAutomatic"),
-    });
-  }
-  if (params.priceMin !== undefined) {
-    activeItems.push({ key: "pmin", label: t("filters.activePriceMin", { price: formatPln(params.priceMin, locale) }) });
-  }
-  if (params.priceMax !== undefined) {
-    activeItems.push({ key: "pmax", label: t("filters.activePriceMax", { price: formatPln(params.priceMax, locale) }) });
-  }
-  if (params.query) activeItems.push({ key: "q", label: t("filters.activeQuery", { query: params.query }) });
 
   const methodologyLink = (
-    <Link href={methodologyHref} className={linkClass}>
+    <LiveLink to={{ kind: "carry", path: "/methodology" }} className={linkClass}>
       {t("common.howWeCount")}
-    </Link>
+    </LiveLink>
   );
 
   return (
@@ -124,13 +94,8 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
       <ResultsFocus signature={toSearchParams(raw).toString()} />
       <MetricSelectorControl
         className="mt-6"
-        current={metric}
         label={t("rankings.metricLabel")}
-        metrics={RANKING_METRICS.map((key) => ({
-          key,
-          label: t(`metrics.${key}.label`),
-          href: rankingsHref({ metric: key, selection: params, extra: carry }),
-        }))}
+        metrics={RANKING_METRICS.map((key) => ({ key, label: t(`metrics.${key}.label`) }))}
       />
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
@@ -183,7 +148,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
             </div>
           </div>
 
-          <ActiveFiltersControl className="mt-4" items={activeItems} />
+          <ActiveFiltersControl className="mt-4" makes={options.make.map((make) => make.value)} />
 
           <div className="mt-4">
             {ranked.length === 0 ? (
@@ -191,7 +156,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 title={t("rankings.emptyTitle")}
                 headingLevel="h3"
                 actions={
-                  <ResultsLink href={rankingsHref({ metric, extra: carry })} focus="heading">
+                  <ResultsLink to={{ kind: "clear" }} focus="heading">
                     {t("filters.clear")}
                   </ResultsLink>
                 }
@@ -211,7 +176,6 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                       electricOnly={electricOnly}
                       locale={locale}
                       t={t}
-                      carry={carryQuery}
                       withToggle
                     />
                   ))}
@@ -227,12 +191,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                     <ResultsLink
                       replace
                       focus="new-rows"
-                      href={rankingsHref({
-                        metric,
-                        limit: limit + PAGE_SIZE,
-                        selection: params,
-                        extra: carry,
-                      })}
+                      to={{ kind: "more" }}
                     >
                       {t("rankings.showMore")}
                     </ResultsLink>

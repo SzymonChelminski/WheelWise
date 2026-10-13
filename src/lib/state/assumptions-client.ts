@@ -1,23 +1,16 @@
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useOptimistic, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { z } from 'zod';
-import { usePathname, useRouter } from '@/i18n/navigation';
 import { DEFAULT_ASSUMPTIONS, parseAssumptions, serializeAssumptions } from '@/lib/domain/assumptions';
 import { assumptionsSchema } from '@/lib/domain/schemas';
 import type { Assumptions, Period } from '@/lib/domain/types';
-import {
-  ASSUMPTION_PARAM_KEYS,
-  hasAssumptionParams,
-  toRecord,
-  withQuery,
-} from './assumption-params';
-import { useUrlWriter } from './url-client';
+import { ASSUMPTION_PARAM_KEYS, hasAssumptionParams, toRecord } from './assumption-params';
+import { useIntendedQuery, useQueryWriter } from './intended-query';
 
 /*
- * Client side of the assumptions: the URL is the source of truth, every change
- * is also written to localStorage, and a page opened without any assumption
- * parameter takes the stored values once. Nothing read from storage reaches the
- * cost engine without passing assumptionsSchema.
+ * Client side of the assumptions: the intended query of the page is the source of
+ * truth, every change is also written to localStorage, and a page opened without any
+ * assumption parameter takes the stored values once. Nothing read from storage reaches
+ * the cost engine without passing assumptionsSchema.
  */
 export const ASSUMPTIONS_STORAGE_KEY = 'wheelwise.assumptions.v1';
 
@@ -63,72 +56,84 @@ function store(state: AssumptionState): void {
   }
 }
 
-/** Assumptions and period of the current URL, and the functions that change them. */
+function fromQuery(params: URLSearchParams): AssumptionState {
+  return parseAssumptions(toRecord(params));
+}
+
+/** Assumptions and period of the intended query, and the functions that change them. */
 export function useAssumptions() {
-  const searchParams = useSearchParams();
-  const { write } = useUrlWriter();
+  const intended = useIntendedQuery();
+  const write = useQueryWriter();
 
-  const fromUrl = useMemo(
-    () => parseAssumptions(toRecord(new URLSearchParams(searchParams))),
-    [searchParams],
-  );
-  // Shows the new value at once while the page for it is being fetched.
-  const [state, setOptimistic] = useOptimistic<AssumptionState, AssumptionState>(
-    fromUrl,
-    (_current, next) => next,
-  );
+  const state = useMemo(() => fromQuery(new URLSearchParams(intended)), [intended]);
+  useEffect(() => remember(state.assumptions), [state]);
 
-  useEffect(() => remember(fromUrl.assumptions), [fromUrl]);
-
-  const commit = useCallback(
-    (next: AssumptionState) => {
-      remember(next.assumptions);
-      store(next);
-      write(
-        (params) => {
-          for (const key of ASSUMPTION_PARAM_KEYS) params.delete(key);
-          serializeAssumptions(next.assumptions, next.period).forEach((value, key) =>
-            params.set(key, value),
-          );
-        },
-        () => setOptimistic(next),
-      );
+  /**
+   * Applies `change` to the assumptions of the intended query as they are when the change is made.
+   * Returning the argument as it is means there is nothing to change.
+   */
+  const update = useCallback(
+    (change: (current: AssumptionState) => AssumptionState) => {
+      const next = write((params) => {
+        const current = fromQuery(params);
+        const changed = change(current);
+        if (changed === current) return;
+        for (const key of ASSUMPTION_PARAM_KEYS) params.delete(key);
+        serializeAssumptions(changed.assumptions, changed.period).forEach((value, key) =>
+          params.set(key, value),
+        );
+      });
+      const saved = fromQuery(new URLSearchParams(next));
+      remember(saved.assumptions);
+      store(saved);
     },
-    [setOptimistic, write],
+    [write],
   );
 
   const setAssumptions = useCallback(
-    (assumptions: Assumptions) => commit({ assumptions, period: state.period }),
-    [commit, state.period],
+    (change: (current: Assumptions) => Assumptions) =>
+      update((current) => {
+        const assumptions = change(current.assumptions);
+        return assumptions === current.assumptions ? current : { ...current, assumptions };
+      }),
+    [update],
   );
   const setPeriod = useCallback(
-    (period: Period) => commit({ assumptions: state.assumptions, period }),
-    [commit, state.assumptions],
+    (period: Period) => update((current) => (current.period === period ? current : { ...current, period })),
+    [update],
   );
 
-  const { insurance } = state.assumptions;
-  const estimate: Estimate =
-    insurance.mode === 'estimate' ? insurance : (lastEstimate ?? (DEFAULT_ASSUMPTIONS.insurance as Estimate));
+  return {
+    assumptions: state.assumptions,
+    period: state.period,
+    estimate: estimateOf(state.assumptions.insurance),
+    setAssumptions,
+    setPeriod,
+  };
+}
 
-  return { assumptions: state.assumptions, period: state.period, estimate, setAssumptions, setPeriod };
+/** The estimate to show and to go back to: the current one, or the last one before the own premium. */
+export function estimateOf(insurance: Assumptions['insurance']): Estimate {
+  if (insurance.mode === 'estimate') return insurance;
+  return lastEstimate ?? (DEFAULT_ASSUMPTIONS.insurance as Estimate);
 }
 
 /** On a page opened without assumption parameters: puts the stored values into the URL, once. */
 export function useRestoreAssumptions(): void {
-  const router = useRouter();
-  const pathname = usePathname();
+  const write = useQueryWriter();
   const done = useRef(false);
 
   useEffect(() => {
     if (done.current) return;
     done.current = true;
 
-    const params = new URLSearchParams(window.location.search);
-    if (hasAssumptionParams(params)) return;
     const stored = loadStored();
     if (!stored) return;
     const restored = serializeAssumptions(stored.assumptions, stored.period);
     if (restored.size === 0) return;
-    router.replace(withQuery(pathname, params, restored), { scroll: false });
-  }, [pathname, router]);
+    write((params) => {
+      if (hasAssumptionParams(params)) return;
+      restored.forEach((value, key) => params.append(key, value));
+    });
+  }, [write]);
 }

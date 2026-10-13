@@ -14,8 +14,22 @@ export function useSyncedDraft(source: string) {
   return [draft, setDraft] as const;
 }
 
-/** Runs the latest action once the user has stopped typing for `delay` milliseconds. */
-export function useDebouncedRun(delay = 400) {
+/**
+ * Text being typed into a field that the URL does not know yet. It is shown until `epoch`
+ * (src/lib/state/intended-query.ts) moves on, and `source` (the intended value) after that.
+ */
+export function useEpochDraft(source: string, epoch: number) {
+  const [draft, setDraft] = useState<{ epoch: number; text: string } | null>(null);
+  const text = draft !== null && draft.epoch === epoch ? draft.text : source;
+  const setText = useCallback((next: string) => setDraft({ epoch, text: next }), [epoch]);
+  return [text, setText] as const;
+}
+
+/**
+ * Runs the latest action once the user has stopped typing for `delay` milliseconds.
+ * A pending action is dropped when `resetKey` changes.
+ */
+export function useDebouncedRun(delay = 400, resetKey?: unknown) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const cancel = useCallback(() => clearTimeout(timer.current), []);
@@ -26,7 +40,7 @@ export function useDebouncedRun(delay = 400) {
     },
     [delay],
   );
-  useEffect(() => cancel, [cancel]);
+  useEffect(() => cancel, [cancel, resetKey]);
 
   return { run, cancel };
 }

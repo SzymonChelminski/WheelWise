@@ -6,7 +6,7 @@ import { SearchCombobox } from "@/components/ui/SearchCombobox";
 import { useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/lib/format";
 import { pickAssumptionParams, withQuery } from "@/lib/state/assumption-params";
-import { forgetPendingWrites } from "@/lib/state/url-client";
+import { readIntendedQuery } from "@/lib/state/intended-query";
 import { carMeta, carName } from "../car/car-view";
 import { useSearchIndex } from "../shell/SearchIndexProvider";
 import { createCarSearch } from "./car-search";
@@ -38,7 +38,7 @@ export function SiteSearch({ size, className }: { size?: "md" | "lg"; className?
   );
 
   // Read when the user acts, so no component has to follow the query string.
-  const carried = () => pickAssumptionParams(new URLSearchParams(window.location.search));
+  const carried = () => pickAssumptionParams(new URLSearchParams(readIntendedQuery()));
 
   return (
     <form
@@ -50,7 +50,6 @@ export function SiteSearch({ size, className }: { size?: "md" | "lg"; className?
         event.preventDefault();
         const text = query.trim();
         if (!text) return;
-        forgetPendingWrites();
         router.push(withQuery("/rankings", new URLSearchParams({ q: text }), carried()));
       }}
     >
@@ -67,7 +66,6 @@ export function SiteSearch({ size, className }: { size?: "md" | "lg"; className?
         query={query}
         onQueryChange={setQuery}
         onSelect={(option) => {
-          forgetPendingWrites();
           router.push(withQuery(option.href, carried()));
         }}
         statusText={t("search.status", { count: options.length })}

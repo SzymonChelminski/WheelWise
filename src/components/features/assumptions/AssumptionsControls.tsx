@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { AssumptionsPanel, type AssumptionField } from "@/components/ui/AssumptionsPanel";
 import { ASSUMPTION_LIMITS, DRIVER_AGE_BANDS } from "@/lib/domain/assumptions";
 import type { DriverAgeBand } from "@/lib/domain/types";
-import { useAssumptions } from "@/lib/state/assumptions-client";
+import { estimateOf, useAssumptions } from "@/lib/state/assumptions-client";
 import { useDebouncedRun, useSyncedDraft } from "../use-draft";
 
 /** A whole number typed as digits within the limits, or null. Nothing else reaches the cost engine. */
@@ -30,11 +30,6 @@ export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
   const { assumptions, estimate, setAssumptions } = useAssumptions();
   const { run, cancel } = useDebouncedRun();
 
-  const latest = useRef(assumptions);
-  useEffect(() => {
-    latest.current = assumptions;
-  }, [assumptions]);
-
   const urlMode = assumptions.insurance.mode;
   const premium = assumptions.insurance.mode === "custom" ? assumptions.insurance.annualPremiumPln : null;
 
@@ -48,18 +43,21 @@ export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
   function applyMileage(raw: string) {
     const value = parseDigits(raw, ASSUMPTION_LIMITS.annualMileageKm);
     setKmError(value === null);
-    if (value !== null && value !== latest.current.annualMileageKm) {
-      setAssumptions({ ...latest.current, annualMileageKm: value });
-    }
+    if (value === null) return;
+    setAssumptions((current) =>
+      current.annualMileageKm === value ? current : { ...current, annualMileageKm: value },
+    );
   }
 
   function applyPremium(raw: string) {
     const value = parseDigits(raw, ASSUMPTION_LIMITS.annualPremiumPln);
     setPremiumError(value === null);
     if (value === null) return;
-    const current = latest.current.insurance;
-    if (current.mode === "custom" && current.annualPremiumPln === value) return;
-    setAssumptions({ ...latest.current, insurance: { mode: "custom", annualPremiumPln: value } });
+    setAssumptions((current) =>
+      current.insurance.mode === "custom" && current.insurance.annualPremiumPln === value
+        ? current
+        : { ...current, insurance: { mode: "custom", annualPremiumPln: value } },
+    );
   }
 
   function onChange(field: AssumptionField, value: string) {
@@ -71,7 +69,7 @@ export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
         break;
       case "ownershipYears": {
         const years = parseDigits(value, ASSUMPTION_LIMITS.ownershipYears);
-        if (years !== null) setAssumptions({ ...assumptions, ownershipYears: years });
+        if (years !== null) setAssumptions((current) => ({ ...current, ownershipYears: years }));
         break;
       }
       case "insuranceMode":
@@ -81,17 +79,25 @@ export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
         } else if (value === "estimate") {
           setMode("estimate");
           setPremiumError(false);
-          if (urlMode === "custom") setAssumptions({ ...assumptions, insurance: estimate });
+          setAssumptions((current) =>
+            current.insurance.mode === "custom" ? { ...current, insurance: estimateOf(current.insurance) } : current,
+          );
         }
         break;
       case "driverAgeBand":
         if (isAgeBand(value)) {
-          setAssumptions({ ...assumptions, insurance: { ...estimate, driverAgeBand: value } });
+          setAssumptions((current) => ({
+            ...current,
+            insurance: { ...estimateOf(current.insurance), driverAgeBand: value },
+          }));
         }
         break;
       case "coverage":
         if (value === "oc" || value === "oc_ac") {
-          setAssumptions({ ...assumptions, insurance: { ...estimate, coverage: value } });
+          setAssumptions((current) => ({
+            ...current,
+            insurance: { ...estimateOf(current.insurance), coverage: value },
+          }));
         }
         break;
       case "annualPremiumPln":

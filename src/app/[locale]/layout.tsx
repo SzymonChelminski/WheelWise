@@ -6,6 +6,7 @@ import { Footer, Header, SiteShell } from "@/components/layout/SiteShell";
 import { fontVariables } from "@/components/ui/fonts";
 import { CompareBarHost } from "@/components/features/compare/CompareBarHost";
 import { DataFreshnessLine } from "@/components/features/shell/DataFreshnessLine";
+import { IntendedQueryHost } from "@/components/features/shell/IntendedQueryHost";
 import {
   footerLabels,
   footerNav,
@@ -55,6 +56,9 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${fontVariables} [--bar-height:0px]`}>
       <body className="bg-ground font-sans text-base text-ink antialiased">
         <NextIntlClientProvider>
+          <Suspense fallback={null}>
+            <IntendedQueryHost />
+          </Suspense>
           <SearchIndexProvider index={searchIndex}>
             <SiteShell
               skipLabel={t("common.skip")}

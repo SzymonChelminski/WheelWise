@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { CompareBar, type CompareBarCar } from "@/components/ui/CompareBar";
@@ -8,6 +7,7 @@ import { usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/lib/format";
 import { pickAssumptionParams } from "@/lib/state/assumption-params";
 import { useCompare } from "@/lib/state/compare-client";
+import { useIntendedQuery } from "@/lib/state/intended-query";
 import { carMeta, carName } from "../car/car-view";
 import { compareHref as buildCompareHref } from "../shell/nav";
 import { useSearchIndex } from "../shell/SearchIndexProvider";
@@ -21,7 +21,7 @@ export function CompareBarHost() {
   const t = useTranslations();
   const locale = useLocale() as Locale;
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const intended = useIntendedQuery();
   const index = useSearchIndex();
   const { slugs, remove, clear, limitReached, dismissLimitNotice } = useCompare();
 
@@ -45,15 +45,27 @@ export function CompareBarHost() {
 
   const count = cars.length;
 
-  // The bar publishes its height on <html> while it is shown and leaves the value there when it
-  // empties, which would keep the room under the footer. Without the value the page's own default applies.
+  // The room under the footer is the height of the bar while it is shown. The bar publishes its
+  // height as --bar-height only while it is closed and leaves the value behind when it empties.
+  // This keeps the value in step with the bar however it is opened, and drops it when the bar
+  // is gone, so the page's own default applies.
   useEffect(() => {
-    if (count === 0) document.documentElement.style.removeProperty("--bar-height");
+    const root = document.documentElement;
+    const bar = document.querySelector<HTMLElement>('[data-compare-bar="fixed"]');
+    if (count === 0 || !bar) {
+      root.style.removeProperty("--bar-height");
+      return;
+    }
+    const publish = () => root.style.setProperty("--bar-height", `${bar.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(bar);
+    return () => observer.disconnect();
   }, [count]);
 
   const compareHref = buildCompareHref({
     pathname,
-    query: pickAssumptionParams(new URLSearchParams(searchParams)).toString(),
+    query: pickAssumptionParams(new URLSearchParams(intended)).toString(),
     compareSlugs: cars.map((car) => car.slug),
   });
 

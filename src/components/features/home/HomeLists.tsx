@@ -1,23 +1,18 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { RankingListSkeleton } from "@/components/ui/Feedback";
 import { EstimateNote } from "@/components/ui/Markers";
-import { LinkList } from "@/components/ui/MetricSelector";
 import { RankingList } from "@/components/ui/RankingItem";
 import { h2Class, linkClass } from "@/components/ui/styles";
-import { Link } from "@/i18n/navigation";
 import { rankCars, type RankedCar, type RankingMetric } from "@/lib/costs";
 import { getCatalog } from "@/lib/data/catalog";
 import { parseAssumptions } from "@/lib/domain/assumptions";
 import { formatInteger, type Locale } from "@/lib/format";
-import {
-  pickAssumptionParams,
-  toSearchParams,
-  withQuery,
-  type RawParams,
-} from "@/lib/state/assumption-params";
+import type { RawParams } from "@/lib/state/assumption-params";
 import { PowerNote } from "../car/PowerNote";
-import { RANKING_METRICS, rankingsHref } from "../rankings/params";
+import { LiveLink } from "../LiveLink";
+import { RANKING_METRICS } from "../rankings/params";
 import { metricAmount, RankingRow } from "../rankings/RankingRow";
+import { RankingLinks } from "./RankingLinks";
 
 const TOP_COUNT = 5;
 const listLinkClass = `${linkClass} inline-flex min-h-11 items-center font-semibold`;
@@ -43,8 +38,6 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
   ]);
 
   const { assumptions, period } = parseAssumptions(raw);
-  const carry = pickAssumptionParams(toSearchParams(raw));
-  const carryQuery = carry.toString();
 
   const top = (metric: RankingMetric): RankedCar[] =>
     rankCars(cars, prices, assumptions, metric, {}).slice(0, TOP_COUNT);
@@ -70,7 +63,6 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
       electricOnly={false}
       locale={locale}
       t={t}
-      carry={carryQuery}
       withToggle={false}
       detail={false}
     />
@@ -88,12 +80,9 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
             {byPrice.map((item) => row(item, "price", maxPrice))}
           </RankingList>
           <p className="mt-3">
-            <Link
-              href={rankingsHref({ metric: "price", extra: carry })}
-              className={listLinkClass}
-            >
+            <LiveLink to={{ kind: "carry", path: "/rankings", metric: "price" }} className={listLinkClass}>
               {t("home.topPriceLink")}
-            </Link>
+            </LiveLink>
           </p>
         </section>
 
@@ -108,9 +97,9 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
             {byCost.map((item) => row(item, "totalCost", maxCost))}
           </RankingList>
           <p className="mt-3">
-            <Link href={rankingsHref({ extra: carry })} className={listLinkClass}>
+            <LiveLink to={{ kind: "carry", path: "/rankings" }} className={listLinkClass}>
               {t("home.topCostLink")}
-            </Link>
+            </LiveLink>
           </p>
         </section>
       </div>
@@ -119,11 +108,11 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
         <h2 id="all-rankings" className={h2Class}>
           {t("home.allRankingsTitle")}
         </h2>
-        <LinkList
+        <RankingLinks
           label={t("home.allRankingsTitle")}
           className="mt-4"
           items={RANKING_METRICS.map((metric) => ({
-            href: rankingsHref({ metric, extra: carry }),
+            metric,
             title: t(`metrics.${metric}.label`),
             description: t(`metrics.${metric}.description`),
           }))}
@@ -136,9 +125,9 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
       />
       <EstimateNote className="mt-8">
         {t("home.estimateNote")}{" "}
-        <Link href={withQuery("/methodology", carry)} className={linkClass}>
+        <LiveLink to={{ kind: "carry", path: "/methodology" }} className={linkClass}>
           {t("common.howWeCount")}
-        </Link>
+        </LiveLink>
       </EstimateNote>
     </>
   );

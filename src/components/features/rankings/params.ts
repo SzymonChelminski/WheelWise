@@ -142,34 +142,3 @@ export function countActiveFilters(selection: RankingSelection): number {
     (selection.query ? 1 : 0)
   );
 }
-
-/** `/rankings` with the given parameters. Empty values are left out. */
-export function rankingsHref(parts: {
-  metric?: RankingMetric;
-  limit?: number;
-  selection?: Partial<RankingSelection>;
-  extra?: URLSearchParams;
-}): string {
-  const params = new URLSearchParams();
-  if (parts.metric && parts.metric !== DEFAULT_METRIC) params.set("metric", parts.metric);
-
-  const selection = parts.selection ?? {};
-  setIfAny(params, "make", selection.makes);
-  setIfAny(params, "segment", selection.segments);
-  setIfAny(params, "body", selection.bodyTypes);
-  setIfAny(params, "fuel", selection.fuelTypes);
-  if (selection.transmission) params.set("gear", selection.transmission);
-  if (selection.priceMin !== undefined) params.set("pmin", String(selection.priceMin));
-  if (selection.priceMax !== undefined) params.set("pmax", String(selection.priceMax));
-  if (selection.query) params.set("q", selection.query);
-
-  if (parts.limit && parts.limit > PAGE_SIZE) params.set("limit", String(parts.limit));
-  parts.extra?.forEach((value, name) => params.set(name, value));
-
-  const query = params.toString();
-  return query ? `/rankings?${query}` : "/rankings";
-}
-
-function setIfAny(params: URLSearchParams, name: string, values: readonly string[] | undefined) {
-  if (values && values.length > 0) setListValues(params, name, values);
-}
