@@ -2,6 +2,7 @@ import { hasLocale } from "next-intl";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  ACTIVE_SLUGS_READ_TIMEOUT_MS,
   ACTIVE_SLUGS_REFRESH_MS,
   ACTIVE_SLUGS_RETRY_MS,
   CAR_SLUG_PATTERN,
@@ -17,9 +18,18 @@ let activeSlugs: ReadonlySet<string> | null = null;
 let nextReadAt = 0;
 let pendingRead: Promise<void> | null = null;
 
+/** Rejects when `read` takes longer than the time limit; a read that never answers must not hold a request. */
+function withTimeLimit<T>(read: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limit = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("Reading the car list timed out")), ACTIVE_SLUGS_READ_TIMEOUT_MS);
+  });
+  return Promise.race([read, limit]).finally(() => clearTimeout(timer));
+}
+
 async function readActiveSlugs(): Promise<void> {
   try {
-    activeSlugs = new Set((await getActiveCars()).map((car) => car.slug));
+    activeSlugs = new Set((await withTimeLimit(getActiveCars())).map((car) => car.slug));
     nextReadAt = Date.now() + ACTIVE_SLUGS_REFRESH_MS;
   } catch {
     // The previous list (if any) stays in use; the page reports its own error for a failing source.
@@ -32,7 +42,8 @@ async function currentActiveSlugs(): Promise<ReadonlySet<string> | null> {
     pendingRead ??= readActiveSlugs().finally(() => {
       pendingRead = null;
     });
-    await pendingRead;
+    // An older list answers at once while the refresh runs; without one the request waits for the read.
+    if (activeSlugs === null) await pendingRead;
   }
   return activeSlugs;
 }
