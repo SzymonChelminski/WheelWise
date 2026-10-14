@@ -213,7 +213,7 @@
     "premiumUnit": "zł",
     "premiumHint": "Kwota z Twojej polisy lub oferty, za cały rok.",
     "premiumError": "Wpisz składkę od 0 do 100 000 zł, samymi cyframi.",
-    "yearsAfter": "{count, plural, one {# roku} other {# latach}}"
+    "yearsAfter": "{count, plural, one {roku} other {# latach}}"
   },
   "filters": {
     "title": "Filtry",
