@@ -143,13 +143,19 @@ export function watchNavigation(): () => void {
   };
 }
 
+// The query of the address the document was loaded from, read before the router changes
+// anything. A part of the page can hydrate after the router has already replaced the address
+// (the restored assumptions); the router's search parameters are newer than that HTML then,
+// and hydration does not repair an attribute that differs.
+const documentQuery: string | null = typeof window === 'undefined' ? null : browserQuery();
+
 /**
  * The intended query. On the server and while hydrating it is the query of the request,
  * so the HTML and the first render of the browser agree.
  */
 export function useIntendedQuery(): string {
   const requestQuery = useSearchParams().toString();
-  return useSyncExternalStore(subscribe, readIntendedQuery, () => requestQuery);
+  return useSyncExternalStore(subscribe, readIntendedQuery, () => documentQuery ?? requestQuery);
 }
 
 const getEpoch = (): number => epoch;
