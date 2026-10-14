@@ -9,12 +9,24 @@ import { useRouter } from "@/i18n/navigation";
 /** Where focus goes after a retry: the heading of the section that held the error, or of the page. */
 type RetryScope = { container: Element; headings: string[] };
 
-function focusHeading({ container, headings }: RetryScope): void {
+/**
+ * The container that held the error, or its replacement: a section that is swapped for another
+ * element (the cost panel of the car page) is found again by its label.
+ */
+function currentContainer({ container }: RetryScope): Element | null {
+  if (container.isConnected) return container;
+  const label = container.getAttribute("aria-label");
+  return label ? document.querySelector(`main section[aria-label="${CSS.escape(label)}"]`) : null;
+}
+
+function focusHeading(scope: RetryScope): void {
   const active = document.activeElement;
   if (active && active !== document.body) return;
+  const container = currentContainer(scope);
+  if (!container) return;
   // A section on a page that is kept hidden after a navigation has no boxes.
   if (container.getClientRects().length === 0) return;
-  const heading = headings.map((selector) => container.querySelector<HTMLElement>(selector)).find(Boolean);
+  const heading = scope.headings.map((selector) => container.querySelector<HTMLElement>(selector)).find(Boolean);
   if (!heading) return;
   heading.tabIndex = -1;
   heading.focus();
