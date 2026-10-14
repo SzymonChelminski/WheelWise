@@ -60,6 +60,8 @@ export function EstimateNote({
  * static text, so it has no live-region role.
  * Uses: under the fuel-consumption ranking (which cars it leaves out), on the
  * car page (the entry stands for several versions).
+ * The default measure (max-w-prose) has no specificity, so a max-width class
+ * passed in className always replaces it, whatever the order of the two rules.
  */
 export function InfoNote({
   children,
@@ -69,7 +71,12 @@ export function InfoNote({
   className?: string;
 }) {
   return (
-    <p className={cn("flex max-w-prose items-start gap-2 text-sm text-ink-muted", className)}>
+    <p
+      className={cn(
+        "flex items-start gap-2 text-sm text-ink-muted [:where(&)]:max-w-prose",
+        className,
+      )}
+    >
       <Icon name="info" size={16} className="mt-0.5 shrink-0 text-ink" />
       <span className="min-w-0">{children}</span>
     </p>

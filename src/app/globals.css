@@ -182,6 +182,16 @@
     scroll-padding-bottom: calc(var(--bar-height, 6.5rem) + 1rem);
   }
 
+  /*
+   * Browsers without :has() (Firefox before 121) get the same room from the
+   * property alone: the bar sets --bar-height on <html> while it is shown.
+   */
+  @supports not selector(:has(*)) {
+    html {
+      scroll-padding-bottom: calc(var(--bar-height, 0px) + 1rem);
+    }
+  }
+
   body {
     background-color: var(--color-ground);
     color: var(--color-ink);
