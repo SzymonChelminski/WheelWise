@@ -76,7 +76,7 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
         {items.map((item) => row(item, metric, maxAmount))}
       </RankingList>
     ) : (
-      <ListError className="mt-4" />
+      <ListError variant="home" className="mt-4" />
     );
 
   return (

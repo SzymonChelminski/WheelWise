@@ -22,6 +22,9 @@
     },
     "notFound": {
       "title": "This page does not exist | WheelWise"
+    },
+    "error": {
+      "title": "This page could not be loaded | WheelWise"
     }
   },
   "common": {
@@ -288,7 +291,8 @@
   },
   "listError": {
     "title": "The ranking could not be loaded",
-    "text": "Check your internet connection and try again. Your filters and assumptions are kept."
+    "text": "Check your internet connection and try again. Your filters and assumptions are kept.",
+    "homeText": "Check your internet connection and try again."
   },
   "costs": {
     "depreciation": "Depreciation",
@@ -346,7 +350,7 @@
     "rangeBetween": "from {min} to {max}",
     "rangeTo": "up to {max}",
     "costErrorTitle": "The costs of this car could not be calculated",
-    "costErrorText": "The current fuel and electricity prices needed for the calculation are not available. Try again in a moment. The price and details of the car above are up to date.",
+    "costErrorText": "The data needed for the calculation, such as fuel and electricity prices, is not available right now. Try again in a moment. Your assumptions are kept.",
     "loading": "Loading the car…"
   },
   "compare": {
@@ -368,7 +372,9 @@
     "emptyOneTitle": "Add one more car",
     "emptyText": "A comparison holds 2 or 3 cars. Search for them here or add them with the “Compare” button in a ranking.",
     "toRankings": "Go to rankings",
-    "loading": "Loading the comparison…"
+    "loading": "Loading the comparison…",
+    "errorTitle": "The comparison could not be loaded",
+    "errorText": "Check your internet connection and try again. Your selected cars and assumptions are kept."
   },
   "notFound": {
     "title": "This page does not exist",

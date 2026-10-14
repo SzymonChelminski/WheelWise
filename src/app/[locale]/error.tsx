@@ -12,6 +12,7 @@ export default function ErrorPage({ retry }: { error: Error & { digest?: string 
 
   return (
     <Container className="py-12 md:py-20">
+      <title>{t("meta.error.title")}</title>
       <div className="max-w-xl">
         <Icon name="alert" size={24} className="text-danger" />
         <h1 className={`${h1Class} mt-2`}>{t("errorPage.title")}</h1>

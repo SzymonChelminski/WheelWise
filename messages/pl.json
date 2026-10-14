@@ -22,6 +22,9 @@
     },
     "notFound": {
       "title": "Nie ma takiej strony | WheelWise"
+    },
+    "error": {
+      "title": "Nie udało się wczytać strony | WheelWise"
     }
   },
   "common": {
@@ -288,7 +291,8 @@
   },
   "listError": {
     "title": "Nie udało się wczytać rankingu",
-    "text": "Sprawdź połączenie z internetem i spróbuj ponownie. Filtry i założenia zostały zachowane."
+    "text": "Sprawdź połączenie z internetem i spróbuj ponownie. Filtry i założenia zostały zachowane.",
+    "homeText": "Sprawdź połączenie z internetem i spróbuj ponownie."
   },
   "costs": {
     "depreciation": "Utrata wartości",
@@ -346,7 +350,7 @@
     "rangeBetween": "od {min} do {max}",
     "rangeTo": "do {max}",
     "costErrorTitle": "Nie udało się obliczyć kosztów tego auta",
-    "costErrorText": "Nie mamy teraz aktualnych cen paliw i prądu, które są potrzebne do obliczeń. Spróbuj ponownie za chwilę. Cena i dane auta powyżej są aktualne.",
+    "costErrorText": "Nie mamy teraz danych potrzebnych do obliczeń, na przykład cen paliw i prądu. Spróbuj ponownie za chwilę. Założenia zostały zachowane.",
     "loading": "Wczytuję dane auta…"
   },
   "compare": {
@@ -368,7 +372,9 @@
     "emptyOneTitle": "Dodaj jeszcze jedno auto",
     "emptyText": "Porównanie mieści 2 lub 3 auta. Wyszukaj je tutaj albo dodaj przyciskiem „Porównaj” w rankingu.",
     "toRankings": "Przejdź do rankingów",
-    "loading": "Wczytuję porównanie…"
+    "loading": "Wczytuję porównanie…",
+    "errorTitle": "Nie udało się wczytać porównania",
+    "errorText": "Sprawdź połączenie z internetem i spróbuj ponownie. Wybrane auta i założenia zostały zachowane."
   },
   "notFound": {
     "title": "Nie ma takiej strony",
