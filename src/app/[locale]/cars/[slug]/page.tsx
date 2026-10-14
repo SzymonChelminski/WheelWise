@@ -2,18 +2,16 @@ import type { Metadata } from "next";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { CarDetails } from "@/components/features/car/CarDetails";
+import { CarContent, CarFrame } from "@/components/features/car/CarDetails";
 import { carName } from "@/components/features/car/car-view";
+import { CAR_SLUG_PATTERN, MAX_CAR_SLUG_LENGTH } from "@/config/car-lookup";
 import { getCar, getCatalog } from "@/lib/data/catalog";
 import { formatPln } from "@/lib/format";
 import { routing } from "@/i18n/routing";
 
-// The shape of every catalogue slug; anything else cannot be a car, so it never reaches the cache.
-const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-const MAX_SLUG_LENGTH = 200;
-
 async function findCar(slug: string) {
-  if (slug.length > MAX_SLUG_LENGTH || !SLUG_PATTERN.test(slug)) return null;
+  // Anything but a catalogue-shaped slug cannot be a car, so it never reaches the data cache.
+  if (slug.length > MAX_CAR_SLUG_LENGTH || !CAR_SLUG_PATTERN.test(slug)) return null;
   return getCar(slug);
 }
 
@@ -45,9 +43,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function CarPage({ params }: { params: Promise<{ slug: string }> }) {
+async function CarLoader({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  // Before anything streams, so an unknown car answers with a 404 status.
   const car = await findCar(slug);
   if (!car) notFound();
 
@@ -56,5 +53,15 @@ export default async function CarPage({ params }: { params: Promise<{ slug: stri
     (catalog) => catalog.prices,
     (): null => null,
   );
-  return <CarDetails car={car} prices={prices} />;
+  return <CarContent car={car} prices={prices} />;
+}
+
+// The slug is read behind the boundary of the frame (the proxy has already answered 404 for an
+// address that is not a car), so the shell of the page does not wait for it.
+export default function CarPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <CarFrame>
+      <CarLoader params={params} />
+    </CarFrame>
+  );
 }

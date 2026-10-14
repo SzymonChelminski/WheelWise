@@ -13,9 +13,10 @@ import { resolveTarget, type LinkTarget } from "../link-target";
  * the controls (they follow the intended query at once) or the list (it follows the
  * address the router has applied).
  */
-export const RESULTS_HEADING_ID = "ranking-title";
-
-const ROWS = `section[aria-labelledby="${RESULTS_HEADING_ID}"] ol > li`;
+// The list section and its heading carry these attributes (RankingsContent), not an id: after a
+// client-side navigation another page of the same kind stays in the document, hidden.
+const HEADING = "[data-results-heading]";
+const ROWS = "section[data-results] ol > li";
 const CHIPS = "[data-active-filters] ul button";
 
 type Target = () => HTMLElement | null;
@@ -52,7 +53,7 @@ export function rendered(selector: string): HTMLElement[] {
   );
 }
 
-const heading: Target = () => rendered(`#${RESULTS_HEADING_ID}`)[0] ?? null;
+const heading: Target = () => rendered(HEADING)[0] ?? null;
 
 export function focusHeadingAfterUpdate(): void {
   focusAfterUpdate("controls", heading);

@@ -12,6 +12,7 @@ import { h1Class, h2Class, linkClass, panelClass } from "@/components/ui/styles"
 import type { Car, MarketPrices } from "@/lib/domain/types";
 import { formatDate, formatPln, type Locale } from "@/lib/format";
 import { AssumptionsControls } from "../assumptions/AssumptionsControls";
+import { AssumptionsRestore } from "../assumptions/AssumptionsRestore";
 import { CompareToggleButton } from "../compare/CompareToggleButton";
 import { LoadError } from "../ListError";
 import { PageLink } from "../PageLink";
@@ -35,15 +36,15 @@ function usable(prices: MarketPrices): boolean {
 }
 
 /**
- * The car page: identity and price, attributes, the cost of ownership and the earnings
- * scale, with the assumptions in an aside from 1024 px. `prices` is null when the market
- * prices could not be read; the cost panel is then replaced by an error and nothing else changes.
+ * The frame of the car page: back link and the room for the car. What goes inside is rendered
+ * behind a boundary, so the page is sent before the car it shows is known.
  */
-export async function CarDetails({ car, prices }: { car: Car; prices: MarketPrices | null }) {
+export async function CarFrame({ children }: { children: ReactNode }) {
   const t = await getTranslations();
 
   return (
     <Container className="py-6 md:py-10">
+      <AssumptionsRestore />
       <nav aria-label={t("car.breadcrumb")}>
         <PageLink
           to={{ kind: "carry", path: "/rankings" }}
@@ -54,18 +55,17 @@ export async function CarDetails({ car, prices }: { car: Car; prices: MarketPric
         </PageLink>
       </nav>
 
-      <Suspense fallback={<CarPageSkeleton label={t("car.loading")} />}>
-        <CarContent car={car} prices={prices} />
-      </Suspense>
+      <Suspense fallback={<CarPageSkeleton label={t("car.loading")} />}>{children}</Suspense>
     </Container>
   );
 }
 
 /*
  * Rendered for each request, so that the client components below (they read the query of the
- * page) are rendered on the server for the address that was asked for.
+ * page) are rendered on the server for the address that was asked for. `prices` is null when the
+ * market prices could not be read; the cost panel is then replaced by an error and nothing else changes.
  */
-async function CarContent({ car, prices }: { car: Car; prices: MarketPrices | null }) {
+export async function CarContent({ car, prices }: { car: Car; prices: MarketPrices | null }) {
   await connection();
   const [t, locale] = await Promise.all([getTranslations(), getLocale() as Promise<Locale>]);
   const name = carName(car);
@@ -139,8 +139,8 @@ async function CarContent({ car, prices }: { car: Car; prices: MarketPrices | nu
           <CompareToggleButton standalone className="mt-5" slug={car.slug} name={name} />
         </div>
 
-        <section aria-labelledby="car-attributes" className="mt-8">
-          <h2 id="car-attributes" className="sr-only">
+        <section aria-label={t("car.attributes")} className="mt-8">
+          <h2 className="sr-only">
             {t("car.attributes")}
           </h2>
           <dl className="grid grid-cols-2 border-y border-line sm:grid-cols-3 xl:grid-cols-4">
@@ -163,8 +163,8 @@ async function CarContent({ car, prices }: { car: Car; prices: MarketPrices | nu
         {prices && usable(prices) ? (
           <CarCostSection car={car} prices={prices} />
         ) : (
-          <section aria-labelledby="car-cost" className="mt-12">
-            <h2 id="car-cost" className={h2Class}>
+          <section aria-label={t("car.costTitle")} className="mt-12">
+            <h2 className={h2Class}>
               {t("car.costTitle")}
             </h2>
             <LoadError title={t("car.costErrorTitle")} className="mt-4">
@@ -174,12 +174,12 @@ async function CarContent({ car, prices }: { car: Car; prices: MarketPrices | nu
         )}
       </div>
 
-      <aside aria-labelledby="car-assumptions" className="hidden lg:block">
+      <aside aria-label={t("assumptions.title")} className="hidden lg:block">
         <div className={`${panelClass} sticky top-6 p-5`}>
-          <h2 id="car-assumptions" className="mb-4 font-display text-xl font-semibold text-ink">
+          <h2 className="mb-4 font-display text-xl font-semibold text-ink">
             {t("assumptions.title")}
           </h2>
-          <AssumptionsControls idPrefix="side-a" />
+          <AssumptionsControls />
         </div>
       </aside>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { MetricSelector } from "@/components/ui/MetricSelector";
 import type { RankingMetric } from "@/lib/costs";
 import { useIntendedQuery, useQueryWriter } from "@/lib/state/intended-query";
@@ -19,6 +20,7 @@ export function MetricSelectorControl({
   label: string;
   className?: string;
 }) {
+  const id = useId();
   const intended = useIntendedQuery();
   const write = useQueryWriter();
   const { metric: current } = parseRankingParams(new URLSearchParams(intended));
@@ -32,6 +34,7 @@ export function MetricSelectorControl({
       }))}
       current={current}
       labels={{ label }}
+      id={id}
       className={className}
       onSelectChange={(key) => {
         const metric = RANKING_METRICS.find((item) => item === key);

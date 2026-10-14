@@ -171,7 +171,7 @@ export function CompareView({ cars, prices }: { cars: Car[]; prices: MarketPrice
     return (
       <>
         {heading}
-        <AssumptionsSummaryControl className="mt-6" idPrefix="sheet-a" />
+        <AssumptionsSummaryControl className="mt-6" />
         <div className="mt-4">
           <ComparisonSkeleton columns={selected.length === 3 ? 3 : 2} label={t("compare.loading")} />
         </div>
@@ -244,7 +244,7 @@ export function CompareView({ cars, prices }: { cars: Car[]; prices: MarketPrice
   return (
     <>
       {heading}
-      <AssumptionsSummaryControl className="mt-6" idPrefix="sheet-a" />
+      <AssumptionsSummaryControl className="mt-6" />
 
       <ComparisonTable
         className="mt-4"
@@ -289,8 +289,8 @@ export function CompareView({ cars, prices }: { cars: Car[]; prices: MarketPrice
       </EstimateNote>
 
       {selected.length === 2 && (
-        <section aria-labelledby="add-third" className="mt-10 max-w-md">
-          <h2 id="add-third" className={h3Class}>
+        <section aria-label={t("compare.addThirdTitle")} className="mt-10 max-w-md">
+          <h2 className={h3Class}>
             {t("compare.addThirdTitle")}
           </h2>
           <ComparePicker className="mt-3" selected={selected} onAdd={addCar} />

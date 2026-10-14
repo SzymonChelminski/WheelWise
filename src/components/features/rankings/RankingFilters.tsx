@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { useId } from "react";
 import { FiltersPanel, type FilterGroupKey, type FilterOption } from "@/components/ui/FiltersPanel";
 import { formatInteger, type Locale } from "@/lib/format";
 import { useIntendedEpoch, useIntendedQuery, useQueryWriter } from "@/lib/state/intended-query";
@@ -29,8 +30,9 @@ type TextField = keyof typeof TEXT_PARAM;
  * function of the query at that moment, so it keeps what other controls and links changed
  * before. Text fields wait until the user stops typing, or leaves the field.
  */
-export function RankingFilters({ idPrefix, options }: { idPrefix: string; options: FilterOptions }) {
+export function RankingFilters({ options }: { options: FilterOptions }) {
   const t = useTranslations();
+  const idPrefix = useId();
   const locale = useLocale() as Locale;
   const intended = useIntendedQuery();
   const epoch = useIntendedEpoch();

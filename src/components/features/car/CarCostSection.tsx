@@ -40,15 +40,15 @@ export function CarCostSection({ car, prices }: { car: Car; prices: MarketPrices
 
   return (
     <>
-      <section aria-labelledby="car-cost" className="mt-12">
+      <section aria-label={t("car.costTitle")} className="mt-12">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <h2 id="car-cost" className={h2Class}>
+          <h2 className={h2Class}>
             {t("car.costTitle")}
           </h2>
           <PeriodSwitch />
         </div>
 
-        <AssumptionsSummaryControl className="mt-4 lg:hidden" idPrefix="sheet-a" />
+        <AssumptionsSummaryControl className="mt-4 lg:hidden" />
 
         <div className={`${panelClass} mt-4 p-4 md:p-6`}>
           <p className="font-display text-4xl font-semibold text-ink tabular-nums">
@@ -99,8 +99,8 @@ export function CarCostSection({ car, prices }: { car: Car; prices: MarketPrices
         </EstimateNote>
       </section>
 
-      <section aria-labelledby="car-earnings" className="mt-12">
-        <h2 id="car-earnings" className={h2Class}>
+      <section aria-label={t("car.earningsTitle")} className="mt-12">
+        <h2 className={h2Class}>
           {t("car.earningsTitle")}
         </h2>
         <p className="mt-2 max-w-prose text-base text-ink-muted">

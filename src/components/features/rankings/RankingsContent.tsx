@@ -30,7 +30,7 @@ import {
   type RankingParams,
 } from "./params";
 import { RankingFilters, type FilterOptionData, type FilterOptions } from "./RankingFilters";
-import { RESULTS_HEADING_ID, ResultsFocus, ResultsLink } from "./results-focus";
+import { ResultsFocus, ResultsLink } from "./results-focus";
 import { isPeriodIndependent, metricAmount, RankingRow } from "./RankingRow";
 
 function countBy(values: string[], order?: readonly string[]): FilterOptionData[] {
@@ -118,11 +118,11 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
         <aside aria-label={t("filters.title")} className="hidden lg:block">
           <div className={`${panelClass} p-5`}>
             <h2 className="mb-4 font-display text-xl font-semibold text-ink">{t("filters.title")}</h2>
-            <RankingFilters idPrefix="side" options={options} />
+            <RankingFilters options={options} />
           </div>
         </aside>
 
-        <section aria-labelledby="ranking-title" className="min-w-0">
+        <section data-results aria-label={title} className="min-w-0">
           <AssumptionsSummary
             label={t("assumptions.title")}
             summary={assumptionsSummary(t, locale, assumptions)}
@@ -134,14 +134,14 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 closeLabel={t("common.close")}
                 applyLabel={t("assumptions.done")}
               >
-                <AssumptionsControls idPrefix="sheet-a" />
+                <AssumptionsControls />
               </SheetDisclosure>
             }
           />
 
           <div className="mt-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
             <div>
-              <h2 id={RESULTS_HEADING_ID} tabIndex={-1} className={h2Class}>
+              <h2 data-results-heading tabIndex={-1} className={h2Class}>
                 {title}
               </h2>
               <p className="mt-0.5 text-sm text-ink-muted" aria-live="polite">
@@ -158,7 +158,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 closeLabel={t("common.close")}
                 applyLabel={t("filters.apply", { count: ranked.length })}
               >
-                <RankingFilters idPrefix="sheet-f" options={options} />
+                <RankingFilters options={options} />
               </SheetDisclosure>
               {!isPeriodIndependent(metric) && <PeriodSwitch />}
             </div>

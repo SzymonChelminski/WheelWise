@@ -82,8 +82,8 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
   return (
     <>
       <div className="grid gap-x-8 gap-y-12 lg:grid-cols-2">
-        <section aria-labelledby="top-price">
-          <h2 id="top-price" className={h2Class}>
+        <section aria-label={t("home.topPriceTitle")}>
+          <h2 className={h2Class}>
             {t("home.topPriceTitle")}
           </h2>
           <p className="mt-1 text-sm text-ink-muted">{t("metrics.price.description")}</p>
@@ -95,8 +95,8 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
           </p>
         </section>
 
-        <section aria-labelledby="top-cost">
-          <h2 id="top-cost" className={h2Class}>
+        <section aria-label={t("home.topCostTitle")}>
+          <h2 className={h2Class}>
             {t("home.topCostTitle")}
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
@@ -111,8 +111,8 @@ export async function HomeLists({ searchParams }: { searchParams: Promise<RawPar
         </section>
       </div>
 
-      <section aria-labelledby="all-rankings" className="mt-14">
-        <h2 id="all-rankings" className={h2Class}>
+      <section aria-label={t("home.allRankingsTitle")} className="mt-14">
+        <h2 className={h2Class}>
           {t("home.allRankingsTitle")}
         </h2>
         <RankingLinks

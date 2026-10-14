@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { AssumptionsPanel, type AssumptionField } from "@/components/ui/AssumptionsPanel";
 import { ASSUMPTION_LIMITS, DRIVER_AGE_BANDS } from "@/lib/domain/assumptions";
 import type { DriverAgeBand } from "@/lib/domain/types";
@@ -25,8 +25,11 @@ function isAgeBand(value: string): value is DriverAgeBand {
  * change goes to the URL (and the browser's storage) at once; text fields wait
  * until the user stops typing and show an error instead of applying a bad value.
  */
-export function AssumptionsControls({ idPrefix }: { idPrefix: string }) {
+export function AssumptionsControls() {
   const t = useTranslations();
+  // Every field and radio group of this form is named from it: two forms on a page, or the form of a
+  // page that is kept hidden after a navigation, must not share a name or an id.
+  const idPrefix = useId();
   const { assumptions, estimate, setAssumptions } = useAssumptions();
   const { run, cancel } = useDebouncedRun();
 
