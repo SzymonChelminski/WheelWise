@@ -19,6 +19,6 @@ export function assumptionsSummary(t: Translate, locale: Locale, assumptions: As
     km,
     years,
     coverage: t(`assumptions.coverageShort.${insurance.coverage}`),
-    age: t(`assumptions.ageBands.${insurance.driverAgeBand}`),
+    age: t(`assumptions.ageBandsInSummary.${insurance.driverAgeBand}`),
   });
 }
