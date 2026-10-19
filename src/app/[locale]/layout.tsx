@@ -14,6 +14,7 @@ import {
   mainNav,
   type NavContext,
 } from "@/components/features/shell/nav";
+import { RouteFocus } from "@/components/features/shell/RouteFocus";
 import { SearchIndexProvider } from "@/components/features/shell/SearchIndexProvider";
 import { SiteFooter } from "@/components/features/shell/SiteFooter";
 import { SiteHeader } from "@/components/features/shell/SiteHeader";
@@ -60,6 +61,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Suspense fallback={null}>
             <IntendedQueryHost />
+            <RouteFocus />
           </Suspense>
           <SearchIndexProvider index={searchIndex}>
             <SiteShell
