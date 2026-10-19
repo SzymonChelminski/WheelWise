@@ -1,12 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Port of the production server the tests run against; E2E_PORT overrides the default.
+const port = Number(process.env.E2E_PORT ?? 3000);
+
 export default defineConfig({
   testDir: "tests/e2e",
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${port}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -20,8 +23,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run start",
-    port: 3000,
+    command: `npm run build && npm run start -- --port ${port}`,
+    port,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
   },
