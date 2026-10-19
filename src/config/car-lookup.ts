@@ -8,5 +8,5 @@ export const ACTIVE_SLUGS_REFRESH_MS = 5 * 60_000;
 /** How long it waits after a failed read before trying again. */
 export const ACTIVE_SLUGS_RETRY_MS = 30_000;
 
-/** How long one read of the list may take; a slower read counts as failed. */
+/** How long a request waits for the first read of the list before it passes through unchecked. */
 export const ACTIVE_SLUGS_READ_TIMEOUT_MS = 5_000;

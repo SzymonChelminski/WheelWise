@@ -18,18 +18,19 @@ let activeSlugs: ReadonlySet<string> | null = null;
 let nextReadAt = 0;
 let pendingRead: Promise<void> | null = null;
 
-/** Rejects when `read` takes longer than the time limit; a read that never answers must not hold a request. */
-function withTimeLimit<T>(read: Promise<T>): Promise<T> {
+/** Resolves when `read` settles or the time limit passes, whichever comes first; `read` itself keeps running. */
+async function waitAtMost(read: Promise<void>): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
-  const limit = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("Reading the car list timed out")), ACTIVE_SLUGS_READ_TIMEOUT_MS);
+  const limit = new Promise<void>((resolve) => {
+    timer = setTimeout(resolve, ACTIVE_SLUGS_READ_TIMEOUT_MS);
   });
-  return Promise.race([read, limit]).finally(() => clearTimeout(timer));
+  await Promise.race([read, limit]);
+  clearTimeout(timer);
 }
 
 async function readActiveSlugs(): Promise<void> {
   try {
-    activeSlugs = new Set((await withTimeLimit(getActiveCars())).map((car) => car.slug));
+    activeSlugs = new Set((await getActiveCars()).map((car) => car.slug));
     nextReadAt = Date.now() + ACTIVE_SLUGS_REFRESH_MS;
   } catch {
     // The previous list (if any) stays in use; the page reports its own error for a failing source.
@@ -42,8 +43,9 @@ async function currentActiveSlugs(): Promise<ReadonlySet<string> | null> {
     pendingRead ??= readActiveSlugs().finally(() => {
       pendingRead = null;
     });
-    // An older list answers at once while the refresh runs; without one the request waits for the read.
-    if (activeSlugs === null) await pendingRead;
+    // An older list answers at once while the refresh runs. Without one, a request waits for the
+    // read at most the time limit; a slower read is not abandoned, its list serves later requests.
+    if (activeSlugs === null) await waitAtMost(pendingRead);
   }
   return activeSlugs;
 }
