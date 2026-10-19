@@ -163,6 +163,8 @@ test.describe("keyboard", () => {
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL("/pl/rankings?q=sandero");
     await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toHaveText(msg("pl", "rankings.title"));
+    // The results stream in after the heading; Tab is pressed once the first result row is shown.
+    await expect(rankingList(page, listTitle("pl", "totalCost")).getByRole("link").first()).toBeVisible();
     await firstStopAfter("the search opened the rankings");
 
     // A ranking row opens a car page.
