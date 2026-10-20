@@ -277,10 +277,19 @@ function replaceFrenchWords(text: string): string {
   );
 }
 
-/** Cuts the French equipment text that follows the model name and the trailing separators it leaves. */
+/** An opening bracket at the end of a name: its group was cut off by the source's length limit. */
+const UNBALANCED_OPENING_BRACKET_PATTERN = /\s*[([]$/;
+
+/**
+ * Cuts the French equipment text that follows the model name, the trailing separators it leaves and
+ * a trailing opening bracket (and the separators before it).
+ */
 function withoutFrenchTail(text: string): string {
   const cutAt = text.search(NAME_TAIL_START_PATTERN);
-  return (cutAt < 0 ? text : text.slice(0, cutAt)).replace(NAME_TRAILING_SEPARATORS_PATTERN, '');
+  return (cutAt < 0 ? text : text.slice(0, cutAt))
+    .replace(NAME_TRAILING_SEPARATORS_PATTERN, '')
+    .replace(UNBALANCED_OPENING_BRACKET_PATTERN, '')
+    .replace(NAME_TRAILING_SEPARATORS_PATTERN, '');
 }
 
 function titleCaseWord(word: string): string {
