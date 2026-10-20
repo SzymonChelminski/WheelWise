@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Container, SkipLink } from "@/components/layout/SiteShell";
 import { Button, type ButtonVariant } from "@/components/ui/Button";
 import { PowerDetail } from "@/components/ui/CarMeta";
+import { CarPhoto } from "@/components/ui/CarPhoto";
 import { CheckboxRow, FilterChip, SegmentedSwitch } from "@/components/ui/Choice";
 import { COMPARE_BAR_HINT_ID } from "@/components/ui/CompareBar";
 import { CompareToggle } from "@/components/ui/CompareToggle";
@@ -37,6 +38,7 @@ import {
   mockRankingByTotalCost,
 } from "@/mocks/cars";
 import { copy } from "@/mocks/copy";
+import { mockPhotoCeed, mockPhotoSandero } from "@/mocks/photos";
 import { CostRow, PreviewAssumptions, PreviewSearch } from "../_components/parts";
 import { Freshness, PreviewCompareBar, PreviewShell } from "../_components/PreviewShell";
 import {
@@ -420,6 +422,33 @@ export default async function ComponentsPreview({
             dateText={formatDate(mockCar.priceObservedAt, locale)}
           />
           <Freshness locale={locale} />
+        </Block>
+
+        <Block title="Car photo (22rem, as in the right column of the car page)">
+          <div className="grid gap-6 md:grid-cols-2 md:items-start">
+            <div>
+              <p className="mb-2 text-xs text-ink-muted">3 : 2 original, shown whole</p>
+              <CarPhoto
+                className="max-w-[22rem]"
+                photo={mockPhotoSandero}
+                carName={carName(mockCar)}
+                labels={t.car.photo}
+              />
+            </div>
+            <div>
+              <p className="mb-2 text-xs text-ink-muted">2.1 : 1 original, shown whole (frame follows the photo from 4 : 3 to 2.4 : 1)</p>
+              <CarPhoto
+                className="max-w-[22rem]"
+                photo={mockPhotoCeed}
+                carName="Kia Ceed SW 1.6 GDi ISG / Electric (60.5ch) DCT6 Système Hybrid rechargeable"
+                labels={t.car.photo}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-ink-muted">
+            No photo, or a photo that fails to load: the component renders nothing (previews car-no-photo and
+            car-photo-error).
+          </p>
         </Block>
 
         <Block title="Comparison bar, closed: 0, 1, 2 and 3 cars (3 = full)">

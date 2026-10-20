@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Container } from "@/components/layout/SiteShell";
 import { AssumptionsSummary } from "@/components/ui/AssumptionsPanel";
+import { CarPhoto, type CarPhotoData } from "@/components/ui/CarPhoto";
 import { PowerDetail } from "@/components/ui/CarMeta";
 import { CarName, nameWrapClass } from "@/components/ui/CarName";
 import { SegmentedSwitch } from "@/components/ui/Choice";
@@ -48,11 +49,14 @@ export function CarScreen({
   locale,
   path,
   car,
+  photo,
   compareSlugs,
 }: {
   locale: Locale;
   path: string;
   car: Car;
+  /** Photo of the car's model; null when the model has none. */
+  photo: CarPhotoData | null;
   /** Cars in the comparison bar. */
   compareSlugs: string[];
 }) {
@@ -110,8 +114,13 @@ export function CarScreen({
           </Link>
         </nav>
 
-        <div className="mt-2 grid gap-x-10 gap-y-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="min-w-0">
+        {/*
+          From 1024 px: two columns. The photo takes the top of the right column beside the
+          name and price; the assumptions aside starts under it. Without a photo (none, or it
+          failed to load) dense placement moves the aside up to the top, as on a page without photos.
+        */}
+        <div className="mt-2 lg:grid lg:grid-flow-row-dense lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-x-10">
+          <div className="min-w-0 lg:col-start-1">
             <h1 className={`${h1Class} ${nameWrapClass}`}>
               <CarName>{name}</CarName>
             </h1>
@@ -154,7 +163,16 @@ export function CarScreen({
                 labels={t.compareToggle}
               />
             </div>
+          </div>
 
+          <CarPhoto
+            className="mt-8 max-w-md lg:col-start-2 lg:mt-0 lg:max-w-none lg:self-start"
+            photo={photo}
+            carName={name}
+            labels={t.car.photo}
+          />
+
+          <div className="min-w-0 lg:col-start-1">
             <section aria-labelledby="car-attributes" className="mt-8">
               <h2 id="car-attributes" className="sr-only">
                 {t.car.attributes}
@@ -275,7 +293,10 @@ export function CarScreen({
             </section>
           </div>
 
-          <aside aria-labelledby="car-assumptions" className="hidden lg:block">
+          <aside
+            aria-labelledby="car-assumptions"
+            className="hidden lg:col-start-2 lg:row-span-2 lg:block lg:[[data-car-photo]~&]:mt-8"
+          >
             <div className={`${panelClass} sticky top-6 p-5`}>
               <h2 id="car-assumptions" className="mb-4 font-display text-xl font-semibold text-ink">
                 {t.assumptions.title}

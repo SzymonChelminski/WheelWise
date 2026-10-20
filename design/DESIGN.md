@@ -6,7 +6,7 @@ All class names below are Tailwind CSS 4 utilities generated from the tokens in 
 
 ## 1. Design rationale
 
-**Concept: a cost ledger, not a car showroom.** Every car is drawn as one horizontal *cost strip* split into six cost categories that always keep the same order and colour; around it the interface is typographic and numeric, with no photographs and no decoration.
+**Concept: a cost ledger, not a car showroom.** Every car is drawn as one horizontal *cost strip* split into six cost categories that always keep the same order and colour; around it the interface is typographic and numeric, with no decoration. The one photograph is the illustrative model photo on the car page: a reference plate that confirms which car this is, printed with its author, licence and source like every other figure on the site, never a showroom picture.
 
 - **Speed, simplicity (szybkość, prostota):** the answer (a monthly amount) is the largest thing on every row and page; one search field on the home page; rankings are plain lists, not card grids; the mobile metric selector is a native select.
 - **Minimalism:** two colours do the work (petrol for structure and actions, amber only for the one call to action on dark surfaces and for the current navigation item); cost colours appear only inside the strip and its legend.
@@ -16,9 +16,9 @@ Audience: ordinary people checking whether they can afford a new car, on phones 
 
 What a user should remember: the coloured strip that shows where the money goes.
 
-Avoid: car photographs, manufacturer logos, card grids with icons, gradients, glow, glass effects, shadows on static content, colour as the only carrier of meaning, all-caps labels, eyebrow labels above headings.
+Avoid: car photographs anywhere except that one model photo (no galleries, hero images or photos in lists), photos without their source, manufacturer logos, card grids with icons, gradients, glow, glass effects, shadows on static content, colour as the only carrier of meaning, all-caps labels, eyebrow labels above headings.
 
-Typeface rationale: Barlow was drawn from Californian road signs and licence plates, so it belongs to the subject; its semi-condensed cut keeps long car names (the catalogue has names of up to 103 characters, such as "Jeep COMPASS 1.5 Turbo T4 (130ch) BVR7 Longitude/Longitude Business/Night Eagle/Limited/High Altitude/S") and amounts compact.
+Typeface rationale: Barlow was drawn from Californian road signs and licence plates, so it belongs to the subject; its semi-condensed cut keeps long car names (cleaned catalogue names reach 95 characters, such as "Jeep Compass 1.5 Turbo T4 BVR7 Longitude/Longitude Business/Night Eagle/Limited/High Altitude/S"; layouts are checked with 103) and amounts compact.
 
 ## 2. Theme decision
 
@@ -125,7 +125,7 @@ z-index (plain utilities, no theme variables): `10` comparison toggle above the 
 |---|---|---|
 | `--breakpoint-sm` | 40rem (640 px) | Link list 2 columns; car attributes 3 columns; comparison bar action (active and idle) gains its icon and its full side padding |
 | `--breakpoint-md` | 48rem (768 px) | Header on one line; metric selector becomes links; comparison becomes a classic table; sheet becomes a right drawer; h1 48 px |
-| `--breakpoint-lg` | 64rem (1024 px) | Filters sidebar; assumptions aside on the car page; home lists side by side; link list 3 columns; the closed comparison bar shows the selected cars in one row |
+| `--breakpoint-lg` | 64rem (1024 px) | Filters sidebar; assumptions aside on the car page; car photo moves to the top of the right column; home lists side by side; link list 3 columns; the closed comparison bar shows the selected cars in one row |
 | `--breakpoint-xl` | 80rem (1280 px) | Car attributes 4 columns |
 
 ### 3.6 Motion
@@ -180,6 +180,8 @@ Ratios computed with the WCAG 2.x relative-luminance formula from the token valu
 | danger | ground | 5.91 | Field error text of a field placed on the page |
 
 Measured on 25 preview pages in both languages at 375 and 1280 px (computed colour of every text node against its nearest opaque background): 34 distinct pairs are rendered, all listed above, lowest 5.59.
+
+Car photo (section 5.3, `CarPhoto`), no new pair: caption `ink-muted` on `ground` 6.56; caption links `brand` on `ground` 7.25 (focus ring `brand` on `ground` 7.25); the tag on the photo is `ink` on an opaque `sunken` box 14.19, so its contrast does not depend on the photo behind it. The frame border is `line` (decorative: the photo edge needs no boundary).
 
 ### 4.2 Component boundaries, graphics and focus
 
@@ -251,6 +253,7 @@ All components are presentational: texts arrive as props already translated and 
 | `FiltersPanel`, `ActiveFilters` (`FiltersPanel.tsx`) | Panel: `idPrefix`, `labels: FiltersLabels`, `query?`, `priceMin?`, `priceMax?`, `priceError?`, `transmission?`, `bodyTypes`, `fuelTypes`, `segments`, `makes` (`FilterOption[]`: `value`, `label`, `count?`, `selected?`, `disabled?`), `onTextChange?`, `onTransmissionChange?`, `onToggle?(group, value, checked)`. Active: `items: { key, label }[]`, `labels: { list, remove, clear }`, `onRemove?`, `onClear?` | Panel order: text query, price from / to (two fields side by side, shared error line), body type chips, powertrain chips, gearbox switch (any / manual / automatic), segment chips, makes (scrolling list of `CheckboxRow`, max height 16rem). An option with no cars is disabled, not hidden. `ActiveFilters`: row of removable `brand-tint` chips (36 px, 44 on touch) and a "Wyczyść filtry" text button; renders nothing when no filter is on. Preview: rankings (sidebar, chips row), rankings-filters-open. |
 | `Prose`, `Notice`, `DataTable` (`Prose.tsx`) | `Prose { children }`; `Notice { title, children }`; `DataTable { caption, columns, rows }` | **Prose**: measure 65ch (`max-w-prose`, 588 px), 16 px / 26 px, h2 28 px with 3rem above and 0.75rem below, h3 22 px, lists, links in `brand` underlined. **Notice** (disclaimers): bordered box (`line-strong`), title display 18 px, text 14 px. **DataTable**: bordered table with a visible caption, header band on `ground`; below its 40rem minimum width it scrolls sideways inside its own focusable region, the page does not. Preview: methodology. |
 | `CarName`, `nameWrapClass` (`CarName.tsx`) | `CarName { children: string }` | Prints a car name in full and adds a line-break opportunity (`<wbr>`) after every "/", so names such as "Longitude/Limited/High Altitude/S" break between trim levels. The element around it carries `nameWrapClass` (`overflow-wrap: anywhere`), which lets any other long token break and keeps the name from widening a table column or flex item. Used by every component that prints a name (section 7.1). |
+| `CarPhoto` (`CarPhoto.tsx`, client); also the types `CarPhotoData`, `CarPhotoLabels` | `photo: CarPhotoData \| null` (`sources` at the standard Wikimedia widths 500 / 960 / 1280, `width`, `height` of the original, `author` plain text up to 120 characters, `license`, `licenseUrl \| null`, `sourceUrl` = Commons file page), `carName` (make + variant, as in the h1), `labels: { alt, marker, credit, creditPublicDomain, publicDomain, source, unknownAuthor }` (templates, section 9.5), `className?` (placement only) | Illustrative model photo on the car page. `<figure data-car-photo>`: frame + `<figcaption>`. **Frame:** full width of its slot, radius lg, 1 px `line` border, `sunken` fill, `overflow: hidden`; its `aspect-ratio` is the photo's own (`width / height`) clamped to 4:3 … 2.4:1, and the `<img>` fills it with `object-fit: cover` (centred), so a photo inside that range is shown whole and only a taller or a wider one is cropped; no letterbox. **Image:** plain `<img>` (never `next/image`), `srcset` of the given sources with `w` descriptors, `sizes="(min-width: 64rem) 22rem, (min-width: 30rem) 28rem, calc(100vw - 2rem)"`, `src` = the 960 source (else the largest), `width` / `height` = original size, `alt` = `labels.alt` with `{name}` = `carName`, `loading="eager"`, `fetchpriority="high"`, `decoding="async"`. **Tag:** `IndicativeTag` with `labels.marker` ("Zdjęcie poglądowe"), absolute, 0.5rem from the top and left edges of the frame, `aria-hidden` (the alt text says the same). **Caption:** 0.5rem below the frame, 13 px `ink-muted`, `overflow-wrap: anywhere`; one sentence from `labels.credit` with `{author}`, `{license}`, `{source}`; `{license}` is a link to `licenseUrl` when it is set, plain text otherwise; `{source}` is always a link to `sourceUrl` with the text `labels.source`; both links `linkClass`, `target="_blank"`, `rel="noreferrer"`, 16 px external icon, at least 24 px high (the same pattern as the price source link). A licence whose short name starts with "Public domain" or "PD" uses `labels.creditPublicDomain` and prints `labels.publicDomain` instead of the short name; an empty author prints `labels.unknownAuthor`. **States:** photo; loading (the frame already has its final size, the `sunken` fill and the tag; nothing moves when the image arrives; no fade, no skeleton pulse); no photo (`photo === null` or no source): renders nothing; load failure (`onError`, and after mount an image that is `complete` with `naturalWidth === 0`, which covers a failure before hydration): renders nothing, exactly like no photo, never a broken-image icon. Preview: car, car-electric, car-long-name, car-no-photo, car-photo-error, components. |
 | `CarMeta`, `PowerLabel`, `PowerDetail` (`CarMeta.tsx`) | `CarMeta { attributes: string[], power: { short, full } }`; `PowerLabel { short, full }`; `PowerDetail { value, note? }` | **CarMeta**: the attribute phrase that accompanies a name everywhere: body type, powertrain, gearbox, then the power label, joined by commas; wraps between attributes, never truncated. **PowerLabel** (short form): the short text is shown (`aria-hidden`), the full text is read instead (visually hidden); it never breaks inside. **PowerDetail** (full form, value of the power attribute): figure 16 px / 500 and under it a 13 px `ink-muted` explanation with a link to the methodology. Texts and rules: section 9.9. Preview: components (power labels), car, car-electric, car-long-name, compare. |
 | `Icon` (`Icon.tsx`) | `name: IconName`, `size?: 16 \| 20 \| 24` | One set drawn for WheelWise: 24 px grid, 1.75 px stroke, round caps, no fills. Names: `search`, `chevron-down`, `chevron-right`, `arrow-left`, `check`, `plus`, `close`, `sliders`, `gauge`, `external`, `info`, `alert`, `compare`, `refresh`. Always `aria-hidden`. |
 | `Logo`, `LogoMark` (`Logo.tsx`), `src/app/icon.svg` | `Logo { tone?: "on-brand" \| "brand" }`, `LogoMark { size? = 28 }` | Mark: a wheel rim drawn as a cost ring, five sixths in the text colour, one sixth amber, with a hub dot. Wordmark "WheelWise" in Barlow Semi Condensed 600, 22 px, `-0.01em`, `translate="no"`. Site icon: the mark in white and amber on a `brand-strong` rounded square. |
@@ -287,15 +290,32 @@ Bars: metrics `totalCost` and `maintenance` use the full `CostStrip`; `depreciat
 
 States: empty (`EmptyState`, h3, action "Wyczyść filtry"; count reads "0 aut"); error (`InlineError` with retry; filters and assumptions stay); loading (`RankingListSkeleton`).
 
-### 6.3 Car details (`/cars/[slug]`; preview `car` petrol, `car-electric`, `car-long-name` hybrid with the comparison full)
+### 6.3 Car details (`/cars/[slug]`; preview `car` petrol, `car-electric`, `car-long-name` hybrid with the comparison full, `car-no-photo`, `car-photo-error`)
 
 Grid from 1024 px: content column + 22rem aside, gap 2.5rem. Below 1024 px one column and no aside.
+
+**Structure and photo placement.** Under the back link the page has four blocks, in this DOM order: **head** (h1, price block, several-versions notice, compare toggle), **photo** (`CarPhoto`), **body** (attributes, cost section, earnings section), **aside** (assumptions). The DOM order is also the reading and focus order at every width.
+
+| Width | Rule |
+|---|---|
+| base (below 640 px) | One column, normal flow. Photo 2rem (`mt-8`) below the compare toggle (below its hint when the comparison is full), full content width; attributes 2rem below the photo caption. At 375 px: frame 343 x 229 px for a 3:2 photo, caption 2 lines. |
+| 640 px | Same flow. The photo is at most 28rem wide (`max-w-md`), left-aligned: the same left edge and the same maximum width as the price explanation and the notice, so head and photo form one text column. |
+| 1024 px | The wrapper of the four blocks becomes `lg:grid lg:grid-flow-row-dense lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-x-10`, no row gap. Head `lg:col-start-1` (row 1); photo `lg:col-start-2 lg:mt-0 lg:max-w-none lg:self-start` (row 1: top of the right column, its top edge level with the top of the h1, 22rem = 352 px wide); body `lg:col-start-1` (row 2, attributes 2rem under the head, as before); aside `lg:col-start-2 lg:row-span-2 lg:[[data-car-photo]~&]:mt-8`. With a photo the aside takes rows 2–3 and its panel starts 2rem under row 1, level with the attributes; without a photo, dense placement puts the aside in rows 1–2, exactly as on a page without photos. Row 1 is as tall as the taller of head and photo. The head is normally the taller (334 px with a one-line name against 283 px for the 3:2 Sandero photo at 1280 px), so the content column is laid out identically with and without a photo; only a 4:3 photo with a three-line caption next to a one-line name (about 338 px against 334 px) would start the body a few pixels lower, under the photo. |
+| 1280 px | Same as 1024 px; the content column is 744 px wide (568 px at 1024 px), the photo stays 352 px. |
+
+Classes: `src/app/[locale]/design-preview/_components/CarScreen.tsx`; copy them as they are.
+
+**No photo: the slot is omitted, no placeholder.** A grey box saying "no photo" tells nothing about the car, would cost about 300 px above the attributes on a phone, and would appear on every model without a free photo and on every new model until the photo list is refreshed. The page was complete before photos existed; the photo is an addition that may be absent.
+
+**Layout-jump rule.** Loading never moves anything (the frame has its final size before the image arrives). Content above the photo slot never moves. When the photo fails to load, the slot is removed once: below 1024 px everything under it moves up by the slot height + 2rem (frame + 0.5rem + caption + 2rem: 317 px at 375 px with the Sandero photo) and by no more; from 1024 px the content column does not move (0 px) and only the assumptions aside moves up into the freed top of the right column. Measured in `car-photo-error` (every thumbnail answers 404): attributes at 981 → 664 px from the top of the document at 375 px (317 px, the slot), 586 → 586 px at 1280 px; afterwards the page is identical to `car-no-photo` (same positions at 375 and 1280 px).
+
+**Loading priority.** The photo is the largest element of the first viewport from 1024 px (352 x 235 px, larger than the h1) and starts about 660 px down at 375 x 812, so it is a likely Largest Contentful Paint: `loading="eager"`, `fetchpriority="high"`, `decoding="async"`, `src` and `srcset` in the server HTML. `sizes` makes 1x screens load the 500 px file and 2x and 3x phones the 960 or 1280 px file; no other width is ever requested.
 
 Content column: back link to rankings (44 px high); h1 = make + variant, printed in full (`CarName`, `nameWrapClass`); price block 1.5rem below: price (display 36 px) + `IndicativeTag`, a 14 px explanation (max 28rem), `PriceDate` with the source link (opens in a new tab, external icon), then 1rem below the several-versions notice (`InfoNote className="max-w-md"`: max 28rem = 448 px, the same width and left edge as the price explanation above it, so the price block is one text column; on every car page); `CompareToggle size="md" showHint` 1.25rem below (when the comparison is full and this car is not in it, the reason is printed under the button); attributes as a `<dl>` grid (2 / 3 / 4 columns at base / 640 / 1280 px; term 13 px `ink-muted`, value 16 px / 500; hairlines), in the order body type, segment, powertrain, gearbox, power, engine size, consumption. The power attribute uses the full power label (section 9.9): its term is the full label, its value is `PowerDetail`; when it has an explanation (hybrid, plug-in hybrid, electric) the cell spans 2 columns; section "Koszt posiadania": h2 with the month / year switch on the right, `AssumptionsSummary` (below 1024 px only), panel with the total (display 48 px with "≈"), the line "{period}, licząc {n} lat posiadania" and `CostBreakdown animate`; `EstimateNote`; section "Jakie zarobki na to auto": h2, one sentence, `EarningsScale`.
 
 Aside (from 1024 px): sticky panel (top 1.5rem) with h2 "Założenia" and `AssumptionsPanel`.
 
-States: loading `CarPageSkeleton`; unknown slug: the 404 page; cost calculation impossible (the market prices or other data the calculation needs cannot be read): the section keeps its h2 "Koszt posiadania" and shows, 1rem below it, an `InlineError` with retry in place of the cost panel (texts: section 9.5). In this state the month / year switch, the `AssumptionsSummary`, the `EstimateNote` and the whole earnings section are not rendered. Everything above the section stays: name, price block, notice, compare toggle, attributes. The assumptions aside (from 1024 px) also stays, so the column widths do not change and a retry uses the values shown there.
+States: loading `CarPageSkeleton`; unknown slug: the 404 page; cost calculation impossible (the market prices or other data the calculation needs cannot be read): the section keeps its h2 "Koszt posiadania" and shows, 1rem below it, an `InlineError` with retry in place of the cost panel (texts: section 9.5). In this state the month / year switch, the `AssumptionsSummary`, the `EstimateNote` and the whole earnings section are not rendered. Everything above the section stays: name, price block, notice, compare toggle, photo, attributes. The assumptions aside (from 1024 px) also stays, so the column widths do not change and a retry uses the values shown there.
 
 ### 6.4 Comparison (`/compare`; preview `compare`, `compare-2-cars`, `compare-long-names`, `compare-1-car`, `compare-empty`, `compare-loading`)
 
@@ -324,7 +344,8 @@ Both pages set their own document title (section 9.11); the error page does not 
 
 ## 7. Responsive rules
 
-- Mobile first; the layout is fluid between breakpoints (section 3.5). Verified at 320, 375, 768 and 1280 px; no page scrolls sideways at any of them (`scrollWidth <= clientWidth` on all 25 preview pages, Polish and English, including the pages filled with 100-character names).
+- Mobile first; the layout is fluid between breakpoints (section 3.5). Verified at 320, 375, 768 and 1280 px; no page scrolls sideways at any of them (`scrollWidth <= clientWidth` on all 25 preview pages, Polish and English, including the pages filled with 100-character names). The five car pages (`car`, `car-electric`, `car-long-name` with a 103-character name, `car-no-photo`, `car-photo-error`) were measured again with the photo at 320, 375, 768 and 1280 px in both languages: no sideways scrolling.
+- Car photo: below 1024 px in the flow under the compare toggle, at most 28rem wide; from 1024 px at the top of the right column (section 6.3).
 - `RankingItem` and `EarningsScale` respond to the width of their container, not of the viewport, so the same row works in a half-width column on the home page and in the full-width list.
 - Car names: section 7.1.
 - The only element allowed to scroll sideways is `DataTable`, inside its own focusable region.
@@ -333,7 +354,7 @@ Both pages set their own document title (section 9.11); the error page does not 
 
 ### 7.1 Long car names
 
-Names come from the source unchanged: median 28 characters, 30% over 40, longest 103, some with "/"-joined parts and no spaces. One rule: **a name is printed in full and wraps**; it is cut only where a fixed strip must stay one line high, and there the whole name is one visible control away. Every name goes through `CarName` inside an element with `nameWrapClass`.
+Names are cleaned from the source descriptions: the power marker (such as "(101ch)") and French words are removed and model names are in normal case ("Renault Clio"), so several cars may share a name and their attributes tell them apart. Names are still long: some reach 95 characters, some have "/"-joined parts and no spaces; layouts are checked with a 103-character stress name. One rule: **a name is printed in full and wraps**; it is cut only where a fixed strip must stay one line high, and there the whole name is one visible control away. Every name goes through `CarName` inside an element with `nameWrapClass`.
 
 | Component | Rule | Where the whole name is read |
 |---|---|---|
@@ -361,6 +382,7 @@ No component relies on `title` or `aria-label` to give the whole name. Where a n
 - **Forms:** every control has a visible label (or `aria-label` for search); hints and errors are linked with `aria-describedby`; errors say what to enter. Groups use `fieldset` / `legend`.
 - **Live regions:** search result count, ranking car count and comparison-bar count are polite live regions; the comparison bar's hint line is a status region (it announces the limit message); inline errors use `role="alert"`; skeleton wrappers use `role="status"`.
 - **Language:** `<html lang>` follows the locale; language links carry `lang` and `hrefLang`; the brand name has `translate="no"`.
+- **Car photo:** `<figure>` with the attribution in `<figcaption>`; non-empty alt built from the car name ("Dacia Sandero: zdjęcie poglądowe modelu"); the visible tag on the photo is `aria-hidden` because the alt says the same; the two caption links have their visible text as accessible name ("CC BY-SA 4.0", "Wikimedia Commons"), open a new tab with the external icon like every external link, and show the standard ring. A failed image is removed, so no broken-image icon or stray alt text appears. axe (wcag2a, wcag2aa, wcag21aa, wcag22aa): 0 violations on `car`, `car-no-photo`, `car-photo-error`, `car-electric`, `car-long-name`, `components`, both languages, 375 and 1280 px.
 - **Tables:** real `<table>` elements with captions, `scope` on headers; the comparison renders one of two tables per width, the other is `display: none`; below 768 px the cars are an ordered list before the table and the column headers repeat each car's number and whole name (cut only visually).
 
 ## 9. Microcopy
@@ -388,7 +410,7 @@ Source of truth for every string: `src/mocks/copy.ts` and `src/mocks/methodology
 | Data freshness | Dane sprawdzone {date}. Ceny paliw z {date}, cennik aut z {date}. | Data checked on {date}. Fuel prices from {date}, car price list from {date}. |
 | Cost categories | Utrata wartości; Paliwo i energia; Ubezpieczenie; Serwis; Części i eksploatacja; Opłaty; Razem | Depreciation; Fuel and energy; Insurance; Servicing; Parts and wear; Fees; Total |
 | Breakdown table | Kategoria / Kwota / Udział; caption: Koszty według kategorii, {okres} | Category / Amount / Share; caption: Costs by category, {period} |
-| Body types | sedan / hatchback, kombi, SUV, coupé, kabriolet, minivan, van | saloon / hatchback, estate, SUV, coupé, convertible, MPV, van |
+| Body types | hatchback lub sedan, kombi, SUV, coupé, kabriolet, minivan, van | hatchback or saloon, estate, SUV, coupé, convertible, MPV, van |
 | Powertrains | benzyna, diesel, LPG, hybryda, hybryda plug-in, elektryczny | petrol, diesel, LPG, hybrid, plug-in hybrid, electric |
 | Gearbox (attribute) | skrzynia manualna, automat | manual gearbox, automatic |
 | Segments | A mini, B miejskie, C kompaktowe, D średnie, E wyższe, F luksusowe | A mini, B small, C compact, D mid-size, E executive, F luxury |
@@ -491,15 +513,24 @@ Metric names and descriptions (home link list, metric selector):
 | Earnings: title | Jakie zarobki na to auto | The income this car calls for |
 | Earnings: intro, monthly view | Miesięczny dochód netto (na rękę), przy którym koszt ≈ {kwota} miesięcznie zajmuje daną część budżetu. | Net monthly income (take-home pay) at which a cost of ≈ {amount} per month takes the given share of the budget. |
 | Earnings: intro, yearly view ({kwota} is the yearly total; the ranges are 12 x the monthly ones; labels and notes of the four levels do not change) | Roczny dochód netto (na rękę), przy którym koszt ≈ {kwota} rocznie zajmuje daną część budżetu. | Net yearly income (take-home pay) at which a cost of ≈ {amount} per year takes the given share of the budget. |
-| Level 1 | komfortowo; auto zajmuje do 10% dochodu | comfortable; the car takes up to 10% of income |
-| Level 2 | rozsądnie; auto zajmuje 10–15% dochodu | reasonable; the car takes 10–15% of income |
-| Level 3 | na granicy; auto zajmuje 15–20% dochodu | stretching it; the car takes 15–20% of income |
-| Level 4 | niezalecane; auto zajmuje ponad 20% dochodu | not recommended; the car takes over 20% of income |
+| Level 1 | komfortowo; auto zajmuje do 15% dochodu | comfortable; the car takes up to 15% of income |
+| Level 2 | rozsądnie; auto zajmuje 15–20% dochodu | reasonable; the car takes 15–20% of income |
+| Level 3 | na granicy; auto zajmuje 20–25% dochodu | stretching it; the car takes 20–25% of income |
+| Level 4 | niezalecane; auto zajmuje ponad 25% dochodu | not recommended; the car takes over 25% of income |
 | Ranges | od {min}; od {min} do {max}; do {max} | from {min}; from {min} to {max}; up to {max} |
 | Costs cannot be calculated: title | Nie udało się obliczyć kosztów tego auta | The costs of this car could not be calculated |
 | Costs cannot be calculated: text | Nie mamy teraz danych potrzebnych do obliczeń, na przykład cen paliw i prądu. Spróbuj ponownie za chwilę. Założenia zostały zachowane. | The data needed for the calculation, such as fuel and electricity prices, is not available right now. Try again in a moment. Your assumptions are kept. |
 | Costs cannot be calculated: action | Spróbuj ponownie | Try again |
 | Loading | Wczytuję dane auta… | Loading the car… |
+| Photo: alt text (`car.photo.alt`; {name} = make + variant) | {name}: zdjęcie poglądowe modelu | {name}: illustrative photo of the model |
+| Photo: tag on the photo (`car.photo.marker`) | Zdjęcie poglądowe | Illustrative photo |
+| Photo: caption (`car.photo.credit`; {license} = short name, a link when the licence URL exists; {source} = link to the file page) | Zdjęcie: {author}, licencja {license}, źródło: {source} | Photo: {author}, licence {license}, source: {source} |
+| Photo: caption, public domain (`car.photo.creditPublicDomain`) | Zdjęcie: {author}, {license}, źródło: {source} | Photo: {author}, {license}, source: {source} |
+| Photo: public domain (`car.photo.publicDomain`, printed as {license}) | domena publiczna | public domain |
+| Photo: link to the file page (`car.photo.source`) | Wikimedia Commons | Wikimedia Commons |
+| Photo: missing author (`car.photo.unknownAuthor`) | autor nieznany | unknown author |
+
+Example captions: "Zdjęcie: Alexander-93, licencja CC BY-SA 4.0, źródło: Wikimedia Commons" / "Photo: Alexander-93, licence CC BY-SA 4.0, source: Wikimedia Commons". No photo: no text (the slot is omitted, section 6.3). The licence short name and the author are printed as Commons gives them (`CC BY-SA 4.0`, `CC BY-SA 3.0 de`, `© M 93`), never translated, except "Public domain".
 
 ### 9.6 Comparison
 
@@ -533,6 +564,8 @@ Full text: `src/mocks/methodology.ts` (a design proposal; every figure must be c
 | Contents label | Na tej stronie | On this page |
 | Section headings | Ceny aut są orientacyjne; Z czego składa się koszt; Co oznacza znak ≈; Moc aut elektrycznych i hybryd; Skala zarobków; Jak często odświeżamy dane | Car prices are indicative; What the cost is made of; What the ≈ sign means; Power of electric and hybrid cars; The income scale; How often the data is refreshed |
 | Sources table | Źródła danych; columns: Źródło, Co z niego bierzemy, Aktualizacja, Licencja | Data sources; columns: Source, What we take from it, Updated, Licence |
+| Sources table, row Wikimedia Commons (`methodology.sources.rows`, appended as the last row; `url`: https://commons.wikimedia.org/) | Wikimedia Commons; Zdjęcia modeli aut; ręcznie, gdy w katalogu pojawiają się nowe modele; CC BY-SA / CC BY / CC0 / domena publiczna, osobno dla każdego zdjęcia | Wikimedia Commons; Photos of car models; by hand, when new models enter the catalogue; CC BY-SA / CC BY / CC0 / public domain, per photo |
+| Photos sentence (`methodology.sections.prices.paragraphs`, appended as the last paragraph) | Zdjęcia aut są poglądowe: pokazują model, niekoniecznie tę samą wersję lub generację, i pochodzą z Wikimedia Commons. Autora i licencję każdego zdjęcia podajemy pod nim. | Car photos are illustrative: they show the model, not necessarily the same version or generation, and come from Wikimedia Commons. The author and licence of each photo are given under it. |
 | Disclaimer title | Zanim podejmiesz decyzję | Before you decide |
 
 ### 9.8 Not found and error
@@ -622,7 +655,7 @@ Functions in `src/components/ui/format.ts` (`Intl` with `pl-PL` and `en-GB`).
 ## 11. Interaction and motion
 
 - Colour transitions on hover, focus, press and selection: `--duration-fast`. Hover styles apply only on devices that hover (`@media (hover: hover)`, custom `hover` variant in `globals.css`).
-- One authored moment: on the car page the large cost strip grows from the left once (`--animate-strip-grow`). Nothing else animates on load; there are no scroll-triggered effects.
+- One authored moment: on the car page the large cost strip grows from the left once (`--animate-strip-grow`). Nothing else animates on load; there are no scroll-triggered effects. The car photo appears as it decodes, without a fade.
 - Sheets slide in from the bottom (below 768 px) or from the right (`--duration-slow`, `--ease-out-expo`) with a fading backdrop, and slide out the same way (`@starting-style` and `transition-behavior: allow-discrete`, no JavaScript). A browser without these two features opens and closes the sheet at once, with no transition (section 8, older browsers).
 - Loading: skeletons that keep the final layout's sizes, so nothing shifts when data arrives; buttons show a spinner and `aria-busy`.
 - Changing an assumption, filter, metric or period updates results in place; the count lines announce the change.
@@ -637,11 +670,12 @@ Functions in `src/components/ui/format.ts` (`Intl` with `pl-PL` and `en-GB`).
 - Use the components as they are; pass translated, formatted strings. Do not restyle: token values, the focus ring, the order and colours of cost categories (`COST_ORDER`, `COST_FILL`), the "≈" marker, the wording "cena orientacyjna" and "niezalecane", control heights.
 - Colours, sizes, radii and shadows come only from the tokens in `globals.css`; no hex values in components. `src/app/icon.svg` repeats three token values as literals because an SVG file cannot read CSS variables: `#0e4553` (brand-strong), `#ffffff`, `#ffb81c` (signal).
 - Fonts: put `fontVariables` from `src/components/ui/fonts.ts` on `<html>` (done in `src/app/[locale]/layout.tsx`).
-- Mock data: `src/mocks/cars.ts` (cars, costs, income ranges, counts), `src/mocks/copy.ts` and `src/mocks/methodology.ts` (texts), `src/mocks/types.ts` (local copies of the domain types; replace with imports from `@/lib/domain/types` and `@/lib/costs`, the shapes and units are the same). The mock cars are real catalogue rows with real slugs; two rows are invented for the long-name comparison and are marked `mockStressSlugs`. Move the texts to `messages/pl.json` and `messages/en.json`; the functions in `copy.ts` become ICU plurals and placeholders.
+- Mock data: `src/mocks/cars.ts` (cars, costs, income ranges, counts), `src/mocks/copy.ts` and `src/mocks/methodology.ts` (texts), `src/mocks/types.ts` (local copies of the domain types; replace with imports from `@/lib/domain/types` and `@/lib/costs`, the shapes and units are the same). The mock cars are real catalogue rows, with names and slugs written by the catalogue rules (cleaned names; slug make-model[-body]-fuel-gearbox-<KM>km); two rows are invented with a 103-character name for the long-name previews and are marked `mockStressSlugs`. Move the texts to `messages/pl.json` and `messages/en.json`; the functions in `copy.ts` become ICU plurals and placeholders.
 - `src/app/[locale]/design-preview/_lib/view.ts` shows how domain objects map to component props (formatting and picking only): reuse the mapping, replace the mock imports with real data. `powerKind(car)` picks the power label from `fuelType`; `carMeta(car, locale)` builds the attribute line that must accompany every name.
 - `CostBreakdown.residualValuePct` is a percentage from 0 to 100, in the mocks as in the cost engine. `formatPercent` takes a share from 0 to 1, so the car page calls `formatPercent(costs.residualValuePct / 100, locale)`; cost shares are already fractions and are passed as they are.
 - Residual value: it belongs to one ownership period. The real pages take it from the cost breakdown calculated for the period the user chose (`residualValuePln`, `residualValuePct`) and print that same period in the label ("Wartość po 5 latach"), with `ownershipText(years, locale, "after")` or its equivalent in the messages; the two forms of the period and every text that uses them are in section 9.10. The previews pass `MOCK_OWNERSHIP_YEARS` (5), the only period the mock costs exist for; do not copy that constant.
 - `InfoNote`: to change its width pass one max-width class in `className` (`max-w-md` on the car page); do not wrap it and do not add a second max-width.
+- `CarPhoto`: pass `getModelImage(car)` as `photo` (null when the model has none), `carName` = make + variant, and the seven `car.photo.*` texts as `labels`. The templates keep their placeholders: read them with `t.raw("car.photo.credit")` and so on (the component fills `{name}`, `{author}`, `{license}`, `{source}`; it is a client component, so the labels are strings, not functions). `CarPhotoData` is exported from `CarPhoto.tsx`; the data module may import it or declare the same shape. Place it with the classes of section 6.3 (copy `CarScreen.tsx`); never give the frame a fixed height, another crop rule or a placeholder. Sample photos: `src/mocks/photos.ts` (real Commons files with their real authors and licences; `mockPhotoFor(car)` is keyed like `data/model-images.json`; `mockPhotoBroken` points at a missing file for the failure preview).
 - Car names: always `<CarName>` inside an element with `nameWrapClass`; never `truncate` a name outside the closed comparison bar and the key header of the narrow comparison.
 - Compare toggles in lists get `describedBy={COMPARE_BAR_HINT_ID}`; a lone toggle gets `showHint`. The fixed bar carries that id by default; a page has one fixed bar. Give a static bar a `hintId` only when something has to point to it. On an attempt to add a fourth car set `notice` on `CompareBar` and keep it until the selection changes.
 - `CompareBar` handles focus after `onRemove` and `onClear` itself, also when the selection changes a moment later (for example after it has been saved); `onRemove` and `onClear` only have to change the selection. Keep `id="main"` and `tabIndex={-1}` on `<main>` (`SiteShell`): the bar sends focus there when it empties.
@@ -655,7 +689,7 @@ Functions in `src/components/ui/format.ts` (`Intl` with `pl-PL` and `en-GB`).
 
 ## 13. Screenshots (`design/screens/`)
 
-File name: `<screen>-<width>-<locale>.png`. Captured from a production build with Playwright (Chromium, headless), device scale factor 1, so every file is exactly 375 or 1280 px wide; reduced motion on. Viewport 375 x 812 and 1280 x 900.
+File name: `<screen>-<width>-<locale>.png`. Captured from a production build with Playwright (Chromium, headless), device scale factor 1, so every file is exactly as wide as its name says; reduced motion on. Viewport 375 x 812 and 1280 x 900 (320 x 900 and 768 x 900 for the car pages). The car pages and `components-*` were captured after the car photo was added and show the cleaned names; the other files predate the cleaned names. The photos are the real 500 px Commons thumbnails.
 
 - **Full-page captures** (whole document height): every file not listed as a viewport capture. The viewport is grown to the height of the document before the capture, so the fixed comparison bar sits at the bottom edge of the image, over the room the footer keeps free for it, as it does on a real screen scrolled to the end.
 - **Viewport captures** (exactly 375 x 812 or 1280 x 900), used where a layer covers the page: `rankings-filters-open-*`, `rankings-assumptions-open-*`, `rankings-full-*`, `compare-bar-open-*`.
@@ -671,9 +705,11 @@ File name: `<screen>-<width>-<locale>.png`. Captured from a production build wit
 | Rankings, fuel consumption with its note | `rankings-consumption-375-pl`, `rankings-consumption-1280-pl` |
 | Rankings, comparison full with the limit message (viewport) | `rankings-full-375-pl`, `rankings-full-1280-pl` |
 | Rankings, long names | `rankings-long-names-375-pl`, `rankings-long-names-1280-pl` |
-| Car details, petrol | `car-375-pl`, `car-1280-pl`, `car-375-en` |
+| Car details, petrol, with the model photo | `car-320-pl`, `car-375-pl`, `car-768-pl`, `car-1280-pl`, `car-375-en`, `car-1280-en` |
+| Car details, no photo of the model | `car-no-photo-320-pl`, `car-no-photo-768-pl`, `car-no-photo-1280-pl`, `car-no-photo-1280-en` |
+| Car details, photo fails to load (identical to no photo) | `car-photo-error-375-pl`, `car-photo-error-1280-pl` |
 | Car details, electric | `car-electric-375-pl`, `car-electric-1280-pl` |
-| Car details, hybrid, 103-character name, comparison full | `car-long-name-375-pl`, `car-long-name-1280-pl` |
+| Car details, hybrid, 103-character name, comparison full | `car-long-name-320-pl`, `car-long-name-375-pl`, `car-long-name-1280-pl` |
 | Comparison, 3 cars | `compare-375-pl`, `compare-1280-pl`, `compare-375-en` |
 | Comparison, 3 cars with the 103-character name | `compare-long-names-375-pl`, `compare-long-names-1280-pl` |
 | Comparison, 2 cars sharing a name | `compare-2-cars-375-pl`, `compare-2-cars-1280-pl` |

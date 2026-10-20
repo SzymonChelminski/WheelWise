@@ -1,4 +1,5 @@
 import { mockCarLongName, mockCompareFullOthers } from "@/mocks/cars";
+import { mockPhotoFor } from "@/mocks/photos";
 import { CarScreen } from "../_components/CarScreen";
 import { assertDesignPreview, P, toLocale } from "../_lib/view";
 
@@ -15,6 +16,7 @@ export default async function CarLongNamePreview({
       locale={locale}
       path={`${P}/car-long-name`}
       car={mockCarLongName}
+      photo={mockPhotoFor(mockCarLongName)}
       compareSlugs={mockCompareFullOthers}
     />
   );

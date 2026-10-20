@@ -1,4 +1,5 @@
 import { mockCarElectric, mockCompareTwo } from "@/mocks/cars";
+import { mockPhotoFor } from "@/mocks/photos";
 import { CarScreen } from "../_components/CarScreen";
 import { assertDesignPreview, P, toLocale } from "../_lib/view";
 
@@ -15,6 +16,7 @@ export default async function CarElectricPreview({
       locale={locale}
       path={`${P}/car-electric`}
       car={mockCarElectric}
+      photo={mockPhotoFor(mockCarElectric)}
       compareSlugs={mockCompareTwo}
     />
   );
