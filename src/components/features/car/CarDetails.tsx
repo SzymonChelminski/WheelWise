@@ -19,7 +19,7 @@ import { CompareToggleButton } from "../compare/CompareToggleButton";
 import { LoadError } from "../ListError";
 import { PageLink } from "../PageLink";
 import { CarCostSection } from "./CarCostSection";
-import { carName } from "./car-view";
+import { carName, carNameWithAttributes } from "./car-view";
 import { consumptionText, engineSizeText, powerLabel, powerNotes, powerValue } from "./car-format";
 
 /** The address of the price source, or null when it is not a web address. */
@@ -152,7 +152,12 @@ export async function CarContent({ car, prices }: { car: Car; prices: MarketPric
             )}
           </PriceDate>
           <InfoNote className="mt-4 max-w-md">{t("car.versionsNote")}</InfoNote>
-          <CompareToggleButton standalone className="mt-5" slug={car.slug} name={name} />
+          <CompareToggleButton
+            standalone
+            className="mt-5"
+            slug={car.slug}
+            name={carNameWithAttributes(t, locale, car)}
+          />
         </div>
       </div>
 

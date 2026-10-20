@@ -58,6 +58,27 @@ export function carMeta(t: Translate, locale: Locale, car: CarFacts): ReactNode 
   );
 }
 
+/**
+ * Name plus the attributes that tell cars of the same name apart, for the accessible name of a
+ * control ("Dacia Sandero, benzyna, manualna, 91 KM"). The body type is left out for the
+ * common hatchback or sedan.
+ */
+export function carNameWithAttributes(
+  t: Translate,
+  locale: Locale,
+  car: CarFacts & { make: string; variant: string },
+): string {
+  return [
+    carName(car),
+    car.bodyType === "sedan_hatchback" ? "" : t(`attr.body.${car.bodyType}`),
+    t(`attr.fuel.${car.fuelType}`),
+    t(`attr.transmission.${car.transmission}`),
+    powerText(t, locale, car).short,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
 /** True when a list shows cars whose power is not plain engine power. */
 export function hasSpecialPower(fuelTypes: readonly FuelType[]): boolean {
   return fuelTypes.some((fuelType) => powerKind(fuelType) !== "plain");

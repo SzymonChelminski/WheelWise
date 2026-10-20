@@ -4,7 +4,7 @@ import type { RankingItemProps } from "@/components/ui/RankingItem";
 import type { CostMap, RankedCar, RankingMetric } from "@/lib/costs";
 import type { Period } from "@/lib/domain/types";
 import { formatDecimal, formatPln, type Locale } from "@/lib/format";
-import { carMeta, carName, type Translate } from "../car/car-view";
+import { carMeta, carName, carNameWithAttributes, type Translate } from "../car/car-view";
 import { CompareToggleButton } from "../compare/CompareToggleButton";
 import { LiveRankingItem } from "./LiveRankingItem";
 
@@ -100,7 +100,11 @@ export function RankingRow({
   }
 
   let action: ReactNode;
-  if (withToggle) action = <CompareToggleButton slug={car.slug} name={name} />;
+  if (withToggle) {
+    action = (
+      <CompareToggleButton slug={car.slug} name={carNameWithAttributes(t, locale, car)} />
+    );
+  }
 
   return (
     <LiveRankingItem
