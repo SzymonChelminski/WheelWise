@@ -21,7 +21,7 @@ import { allSourceRoutes, URLS } from '../helpers/sources';
 
 const database = setupTestDatabase();
 
-const GIULIA = 'alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw';
+const GIULIA = 'alfa-romeo-giulia-diesel-automatic-160km';
 const STEP_NAMES = ['exchange-rate', 'oil-bulletin', 'electricity', 'catalogue'];
 
 const result = (source: string, overrides: Partial<SourceResult> = {}): SourceResult => ({

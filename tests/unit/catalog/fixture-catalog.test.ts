@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ademeRowSchema, brandsSchema, buildCatalog, type AdemeRow } from '@/lib/catalog';
+import { ademeRowSchema, brandsSchema, buildCatalog, toSlug, type AdemeRow } from '@/lib/catalog';
 import { calculateCosts } from '@/lib/costs';
 import { carInputSchema, marketPriceSchema } from '@/lib/domain/schemas';
 import type { CarInput, MarketPrice, MarketPrices } from '@/lib/domain/types';
@@ -140,20 +140,23 @@ describe('committed catalogue', () => {
   });
 
   it('the power of electric cars is resolved from the description and the rated power', () => {
-    expect(car('tesla-model-3-sedan-hatchback-ev-automatic-88kw')).toMatchObject({
-      variant: 'MODEL 3 (88Kw)',
+    // Dataset descriptions "MODEL 3 (88Kw)", "EV6 Moteur électrique 239kW (325ch)", "SPRING (19Kw)".
+    expect(car('tesla-model-3-ev-automatic-120km')).toMatchObject({
+      variant: 'Model 3',
       powerKw: 88,
     });
-    expect(car('kia-ev6-suv-ev-automatic-239kw')).toMatchObject({
-      variant: 'EV6 Moteur électrique 239kW (325ch)',
+    expect(car('kia-ev6-suv-ev-automatic-325km')).toMatchObject({
+      variant: 'EV6',
       powerKw: 239,
     });
-    expect(car('dacia-spring-sedan-hatchback-ev-automatic-19kw')).toMatchObject({
-      variant: 'SPRING (19Kw)',
+    expect(car('dacia-spring-ev-automatic-26km')).toMatchObject({
+      variant: 'Spring',
       powerKw: 19,
     });
-    expect(car('nissan-leaf-sedan-hatchback-ev-automatic-90kw').powerKw).toBe(90);
-    const eSoul = cars.filter((entry) => entry.make === 'Kia' && /\(204ch\)/.test(entry.variant) && /e-soul/i.test(entry.variant));
+    expect(car('nissan-leaf-ev-automatic-122km').powerKw).toBe(90);
+    // "e-Soul Moteur électrique (204ch)": 204 * 0.7355 = 150.04 kW
+    expect(rows.some((row) => /e-Soul.*\(204ch\)/i.test(row.Description_Commerciale))).toBe(true);
+    const eSoul = cars.filter((entry) => entry.make === 'Kia' && entry.variant === 'e-Soul');
     expect(eSoul.length).toBeGreaterThanOrEqual(1);
     for (const entry of eSoul) expect(entry.powerKw).toBe(150);
   });
@@ -186,7 +189,7 @@ describe('committed catalogue', () => {
     );
     expect(wrong.map((entry) => entry.slug)).toEqual([]);
     // One car by hand: 45 600 EUR -> 200 982 PLN -> 201 000 PLN.
-    expect(car('alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw')).toMatchObject({
+    expect(car('alfa-romeo-giulia-diesel-automatic-160km')).toMatchObject({
       priceEur: 45600,
       listPricePln: 201000,
     });
@@ -202,7 +205,7 @@ describe('committed catalogue', () => {
   });
 
   it('the stored consumption rounds half up: the Porsche Macan with 280 kW uses 11.2 l/100 km', () => {
-    expect(car('porsche-macan-suv-petrol-automatic-280kw').fuelL100).toBe(11.2);
+    expect(car('porsche-macan-suv-petrol-automatic-381km')).toMatchObject({ powerKw: 280, fuelL100: 11.2 });
   });
 });
 
@@ -217,13 +220,13 @@ describe('committed catalogue - Dacia Sandero against the dataset rows', () => {
       Math.min(...manualPetrol.filter((row) => row.Puissance_maximale === power).map((row) => row.Prix_véhicule ?? Infinity));
     expect(cheapest(49)).toBe(10990);
     expect(cheapest(67)).toBe(14400);
-    expect(car('dacia-sandero-sedan-hatchback-petrol-manual-49kw')).toMatchObject({
-      variant: 'SANDERO (67ch)',
+    expect(car('dacia-sandero-petrol-manual-67km')).toMatchObject({
+      variant: 'Sandero',
       powerKw: 49,
       priceEur: 10990,
     });
-    expect(car('dacia-sandero-sedan-hatchback-petrol-manual-67kw')).toMatchObject({
-      variant: 'SANDERO (91ch)',
+    expect(car('dacia-sandero-petrol-manual-91km')).toMatchObject({
+      variant: 'Sandero',
       powerKw: 67,
       priceEur: 14400,
     });
@@ -238,8 +241,8 @@ describe('committed catalogue - Dacia Sandero against the dataset rows', () => {
     const lpgCars = cars.filter((entry) => entry.make === 'Dacia' && entry.model === 'SANDERO' && entry.fuelType === 'lpg');
     expect(lpgCars).toHaveLength(1);
     expect(lpgCars[0]).toMatchObject({
-      slug: 'dacia-sandero-sedan-hatchback-lpg-manual-74kw',
-      variant: 'SANDERO (101ch)',
+      slug: 'dacia-sandero-lpg-manual-101km',
+      variant: 'Sandero',
       powerKw: 74,
       fuelL100: 7.2,
       priceEur: 15350,
@@ -247,11 +250,102 @@ describe('committed catalogue - Dacia Sandero against the dataset rows', () => {
   });
 
   it('the Dacia Jogger LPG car is named after its cheapest version and takes power and consumption from that version only', () => {
-    expect(car('dacia-jogger-estate-lpg-manual-74kw')).toMatchObject({
-      variant: 'JOGGER (101ch)',
+    expect(car('dacia-jogger-estate-lpg-manual-101km')).toMatchObject({
+      variant: 'Jogger',
       powerKw: 74,
       priceEur: 19148,
     });
+  });
+});
+
+describe('committed catalogue - readable names and addresses', () => {
+  const FRENCH_WORDS = [
+    'Essence',
+    'Gazole',
+    'facelift',
+    'Hybride',
+    'Électrique',
+    'Electrique',
+    'de',
+    'à',
+    'avec',
+    'et',
+    'pour',
+    'sans',
+    'norme',
+    'freins',
+    'système',
+    'moteur',
+    'nouvelle',
+    'rechargeable',
+    'famille',
+    'jantes',
+    'châssis',
+    'berline',
+    'classique',
+    'créative',
+    'pn',
+    'alt',
+    'opt',
+  ];
+  const wholeWord = (word: string) => new RegExp(`(?<![\\p{L}\\p{N}])${word}(?![\\p{L}\\p{N}])`, 'iu');
+
+  it('still holds 489 cars', () => {
+    expect(cars).toHaveLength(489);
+  });
+
+  it('no car name carries a power marker such as (101ch), (94ch+24Kw) or (19Kw)', () => {
+    const wrong = cars.filter((entry) => /\(\s*\d+\s*(ch|cv|kw)/i.test(entry.variant));
+    expect(wrong.map((entry) => entry.variant)).toEqual([]);
+  });
+
+  it.each(FRENCH_WORDS)('no car name contains the French word "%s"', (word) => {
+    const pattern = wholeWord(word);
+    const wrong = cars.filter((entry) => pattern.test(entry.variant));
+    expect(wrong.map((entry) => entry.variant)).toEqual([]);
+  });
+
+  it('no car name contains a gearbox code such as BVM6 or BVA', () => {
+    const wrong = cars.filter((entry) => wholeWord('bv[am]\\d*').test(entry.variant));
+    expect(wrong.map((entry) => entry.variant)).toEqual([]);
+  });
+
+  it('no car name ends with an opening bracket or a separator', () => {
+    const wrong = cars.filter((entry) => /[([\s/\-.,+]$/.test(entry.variant));
+    expect(wrong.map((entry) => entry.variant)).toEqual([]);
+  });
+
+  it('the Renault Clio diesel of 74 kW is "Renault Clio" at renault-clio-diesel-manual-101km', () => {
+    expect(car('renault-clio-diesel-manual-101km')).toMatchObject({
+      make: 'Renault',
+      model: 'CLIO',
+      variant: 'Clio',
+      bodyType: 'sedan_hatchback',
+      fuelType: 'diesel',
+      transmission: 'manual',
+      powerKw: 74,
+    });
+  });
+
+  it('no slug carries the body part sedan-hatchback or a power in kW', () => {
+    expect(cars.filter((entry) => entry.slug.includes('sedan-hatchback')).map((entry) => entry.slug)).toEqual([]);
+    expect(cars.filter((entry) => /-\d+kw/.test(entry.slug)).map((entry) => entry.slug)).toEqual([]);
+  });
+
+  it('every slug is make-model[-body]-fuel-gearbox-<KM>km with KM = kW * 1.35962 rounded, plus an optional -n', () => {
+    const wrong = cars.filter((entry) => {
+      const body = entry.bodyType === 'sedan_hatchback' ? '' : `-${entry.bodyType.replace('_', '-')}`;
+      const km = Math.round(entry.powerKw * 1.35962);
+      const base = `${toSlug(entry.make)}-${toSlug(entry.model)}${body}-${entry.fuelType}-${entry.transmission}-${km}km`;
+      return !(entry.slug === base || new RegExp(`^${base}-\\d+$`).test(entry.slug));
+    });
+    expect(wrong.map((entry) => entry.slug)).toEqual([]);
+  });
+
+  it('slugs are unique over the whole catalogue', () => {
+    const slugs = cars.map((entry) => entry.slug);
+    const duplicates = slugs.filter((slug, index) => slugs.indexOf(slug) !== index);
+    expect(duplicates).toEqual([]);
   });
 });
 

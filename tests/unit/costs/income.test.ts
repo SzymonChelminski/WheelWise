@@ -1,17 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import { requiredIncome } from '@/lib/costs';
 
-// Required income rule of the cost model. Shares 0.10, 0.15, 0.20; bounds rounded to the nearest 100 PLN.
+// Required income rule of the cost model. Shares 0.15, 0.20, 0.25 (Polish guidance); bounds rounded to the
+// nearest 100 PLN.
 
 describe('requiredIncome - reference case', () => {
   it('requiredIncome(1713.40) gives the income ranges of the cost model reference case', () => {
-    // 17134 -> 17100; 11422.67 -> 11400; 8567 -> 8600
+    // 1713.40 / 0.15 = 11422.67 -> 11400; / 0.20 = 8567 -> 8600; / 0.25 = 6853.6 -> 6900
     expect(requiredIncome(1713.4)).toEqual([
-      { level: 'comfortable', minIncomePln: 17100, maxIncomePln: null },
-      { level: 'reasonable', minIncomePln: 11400, maxIncomePln: 17100 },
-      { level: 'stretch', minIncomePln: 8600, maxIncomePln: 11400 },
-      { level: 'not_recommended', minIncomePln: null, maxIncomePln: 8600 },
+      { level: 'comfortable', minIncomePln: 11400, maxIncomePln: null },
+      { level: 'reasonable', minIncomePln: 8600, maxIncomePln: 11400 },
+      { level: 'stretch', minIncomePln: 6900, maxIncomePln: 8600 },
+      { level: 'not_recommended', minIncomePln: null, maxIncomePln: 6900 },
     ]);
+  });
+
+  it('a monthly cost of 2000 PLN needs 13 300 PLN for comfortable, 10 000 for reasonable and 8000 for stretch', () => {
+    // 2000 / 0.15 = 13333.33 -> 13300; / 0.20 = 10000; / 0.25 = 8000
+    expect(requiredIncome(2000)).toEqual([
+      { level: 'comfortable', minIncomePln: 13300, maxIncomePln: null },
+      { level: 'reasonable', minIncomePln: 10000, maxIncomePln: 13300 },
+      { level: 'stretch', minIncomePln: 8000, maxIncomePln: 10000 },
+      { level: 'not_recommended', minIncomePln: null, maxIncomePln: 8000 },
+    ]);
+  });
+
+  it('the shares are 15 %, 20 % and 25 %: a cost of 3000 PLN gives exactly 20 000, 15 000 and 12 000 PLN', () => {
+    // Values that need no rounding, so each bound is exactly cost / share.
+    const [comfortable, reasonable, stretch] = requiredIncome(3000);
+    expect(comfortable.minIncomePln).toBe(20000);
+    expect(reasonable.minIncomePln).toBe(15000);
+    expect(stretch.minIncomePln).toBe(12000);
   });
 });
 
@@ -31,14 +50,14 @@ describe('requiredIncome - structure', () => {
     expect(ranges).toHaveLength(4);
     expect(last.level).toBe('not_recommended');
     expect(last.minIncomePln).toBeNull();
-    expect(last.maxIncomePln).toBe(12500);
+    expect(last.maxIncomePln).toBe(10000);
   });
 
   it('the first level is comfortable with no upper bound', () => {
     const [first] = requiredIncome(2499);
     expect(first.level).toBe('comfortable');
     expect(first.maxIncomePln).toBeNull();
-    expect(first.minIncomePln).toBe(25000);
+    expect(first.minIncomePln).toBe(16700);
   });
 
   it.each([1, 49, 333.33, 1000, 1713.4, 2499, 9876.54, 250000])(
@@ -56,24 +75,29 @@ describe('requiredIncome - structure', () => {
 
 describe('requiredIncome - rounding to 100 PLN', () => {
   it('rounds down below the half step and up above it', () => {
-    // 2499 / 0.10 = 24990 -> 25000; / 0.15 = 16660 -> 16700; / 0.20 = 12495 -> 12500
-    const ranges = requiredIncome(2499);
-    expect(ranges[0].minIncomePln).toBe(25000);
-    expect(ranges[1].minIncomePln).toBe(16700);
-    expect(ranges[2].minIncomePln).toBe(12500);
+    // 1713.40 / 0.15 = 11422.67 -> 11400 (down); / 0.20 = 8567 -> 8600 (up); / 0.25 = 6853.6 -> 6900 (up)
+    const ranges = requiredIncome(1713.4);
+    expect(ranges[0].minIncomePln).toBe(11400);
+    expect(ranges[1].minIncomePln).toBe(8600);
+    expect(ranges[2].minIncomePln).toBe(6900);
+    // 2499 / 0.15 = 16660 -> 16700; / 0.20 = 12495 -> 12500; / 0.25 = 9996 -> 10000
+    const higher = requiredIncome(2499);
+    expect(higher[0].minIncomePln).toBe(16700);
+    expect(higher[1].minIncomePln).toBe(12500);
+    expect(higher[2].minIncomePln).toBe(10000);
   });
 
   it('exact multiples stay unchanged and 6666.67 rounds to 6700', () => {
-    // 1000 / 0.10 = 10000; / 0.15 = 6666.67 -> 6700; / 0.20 = 5000
+    // 1000 / 0.15 = 6666.67 -> 6700; / 0.20 = 5000; / 0.25 = 4000
     const ranges = requiredIncome(1000);
-    expect(ranges[0].minIncomePln).toBe(10000);
-    expect(ranges[1].minIncomePln).toBe(6700);
-    expect(ranges[2].minIncomePln).toBe(5000);
+    expect(ranges[0].minIncomePln).toBe(6700);
+    expect(ranges[1].minIncomePln).toBe(5000);
+    expect(ranges[2].minIncomePln).toBe(4000);
   });
 
-  it('values below 50 PLN round to 0 (monthly cost 7.4)', () => {
-    // 74 -> 100; 49.33 -> 0; 37 -> 0
-    const ranges = requiredIncome(7.4);
+  it('values below 50 PLN round to 0 (monthly cost 8)', () => {
+    // 8 / 0.15 = 53.33 -> 100; / 0.20 = 40 -> 0; / 0.25 = 32 -> 0
+    const ranges = requiredIncome(8);
     expect(ranges[0].minIncomePln).toBe(100);
     expect(ranges[1].minIncomePln).toBe(0);
     expect(ranges[2].minIncomePln).toBe(0);

@@ -130,7 +130,7 @@ describe('GET /api/cron/daily - running the job', () => {
 
     expect(await storedPrice(database.db, 'eur_pln')).toMatchObject({ pricePln: 4.3775, observedAt: '2026-10-09' });
     expect(await storedPrice(database.db, 'petrol')).toMatchObject({ pricePln: 6.6642, observedAt: '2026-10-05' });
-    expect((await getCarBySlug('alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw'))?.listPricePln).toBe(204600);
+    expect((await getCarBySlug('alfa-romeo-giulia-diesel-automatic-160km'))?.listPricePln).toBe(204600);
     expect((await allRefreshRuns(database.db)).map((run) => [run.job, run.status])).toEqual([['daily', 'ok']]);
   });
 

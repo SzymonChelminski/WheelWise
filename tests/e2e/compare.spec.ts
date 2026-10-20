@@ -29,11 +29,13 @@ test.describe("comparison", () => {
     const list = rankingList(page, listTitle(pl, "totalCost"));
     const bar = compareBar(page);
 
-    for (const car of [first, second]) {
-      const toggle = compareToggle(list, pl, nameOf(car));
+    // Several cars can share a name, so each toggle is found in the row of its car.
+    for (const [index, car] of [first, second].entries()) {
+      const row = list.getByRole("listitem").nth(index);
+      const toggle = compareToggle(row, pl, nameOf(car));
       await interactive(toggle);
       await toggle.click();
-      await expect(compareToggle(list, pl, nameOf(car), true)).toHaveAttribute("aria-pressed", "true");
+      await expect(compareToggle(row, pl, nameOf(car), true)).toHaveAttribute("aria-pressed", "true");
     }
     await expect(bar.disclosure(2)).toBeVisible();
     await bar.compareLink(2).click();
@@ -60,7 +62,11 @@ test.describe("comparison", () => {
 
     // Back on the rankings every other toggle is full; trying one shows the limit message.
     await visit(page, "/pl/rankings");
-    const full = compareToggle(rankingList(page, listTitle(pl, "totalCost")), pl, nameOf(fourth));
+    const full = compareToggle(
+      rankingList(page, listTitle(pl, "totalCost")).getByRole("listitem").nth(3),
+      pl,
+      nameOf(fourth),
+    );
     await expect(full).toHaveAttribute("aria-disabled", "true");
     await interactive(full);
     // The toggle keeps its focus and its action while it looks disabled.
@@ -128,6 +134,38 @@ test.describe("comparison", () => {
     await expect(page.getByRole("heading", { name: msg(pl, "compare.emptyOneTitle") })).toBeVisible();
   });
 
+  test("a former car address kept in the stored comparison is dropped without an error or an empty place", async ({
+    page,
+  }) => {
+    const oldSlug = "renault-clio-sedan-hatchback-diesel-manual-74kw";
+    await visit(page, "/pl/methodology");
+    await page.evaluate(
+      ([key, slugs]) => window.localStorage.setItem(key, JSON.stringify(slugs)),
+      ["wheelwise.compare.v1", [oldSlug, petrol.slug]] as const,
+    );
+
+    await visit(page, "/pl/rankings");
+    const bar = compareBar(page);
+    await expect(bar.disclosure(1)).toBeVisible();
+    await expect(bar.disclosure(2)).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => window.localStorage.getItem("wheelwise.compare.v1")))
+      .toBe(JSON.stringify([petrol.slug]));
+    await interactive(bar.disclosure(1));
+    await bar.disclosure(1).click();
+    await expect(bar.removeButton(nameOf(petrol))).toBeVisible();
+    await expect(bar.region.getByRole("listitem")).toHaveCount(1);
+
+    // The comparison page restores the stored cars without the former address.
+    await page.evaluate(
+      ([key, slugs]) => window.localStorage.setItem(key, JSON.stringify(slugs)),
+      ["wheelwise.compare.v1", [oldSlug, petrol.slug, electric.slug]] as const,
+    );
+    await visit(page, "/pl/compare");
+    await expectQuery(page, [`cars=${petrol.slug},${electric.slug}`]);
+    await expectComparison(page, pl, [petrol, electric], defaults, "month");
+  });
+
   test("the yearly view shows the yearly amounts", async ({ page }) => {
     const cars = [petrol, electric];
     await visit(page, `/pl/compare?cars=${cars.map((car) => car.slug).join(",")}`);
@@ -139,7 +177,7 @@ test.describe("comparison", () => {
   test("the comparison bar keeps the same room under the footer open or closed", async ({ page, isMobile }) => {
     await visit(page, "/pl/rankings");
     const car = ranking("totalCost")[0].car;
-    const toggle = compareToggle(rankingList(page, listTitle(pl, "totalCost")), pl, nameOf(car));
+    const toggle = compareToggle(rankingList(page, listTitle(pl, "totalCost")).getByRole("listitem").first(), pl, nameOf(car));
     await interactive(toggle);
     await toggle.click();
 

@@ -31,7 +31,7 @@ import {
 
 const database = setupTestDatabase();
 
-const GIULIA = 'alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw';
+const GIULIA = 'alfa-romeo-giulia-diesel-automatic-160km';
 const NBP = 'Narodowy Bank Polski, tabela A';
 const TODAY_RANGE = URLS.nbpRange('2026-10-05', '2026-10-11');
 
@@ -145,7 +145,7 @@ describe('catalogue step - download and write', () => {
     );
     expect(await getCarBySlug(GIULIA)).toMatchObject({
       make: 'Alfa Romeo',
-      variant: 'GIULIA 2.2 Diesel (160ch) AT8',
+      variant: 'Giulia 2.2 Diesel AT8',
       brandTier: 'premium',
       valueRetention: 'low',
       priceEur: 45600,
@@ -745,7 +745,7 @@ describe('catalogue step - makes missing from the brand data', () => {
 
     expect(result).toMatchObject({ ok: true, updated: 491, skipped: 70 });
     expect(result.errors).toEqual([{ item: 'ZEEKR', message: expect.stringMatching(/brands\.json/) }]);
-    expect(await getCarBySlug('zeekr-7x-sedan-hatchback-petrol-manual-67kw')).toMatchObject({
+    expect(await getCarBySlug('zeekr-7x-petrol-manual-91km')).toMatchObject({
       make: 'Zeekr',
       brandTier: 'mainstream',
       valueRetention: 'average',

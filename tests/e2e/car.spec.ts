@@ -95,6 +95,32 @@ test.describe("car page", () => {
     });
   }
 
+  for (const locale of LOCALES) {
+    test(`the earnings notes name the shares 15, 20 and 25% (${locale})`, async ({ page }) => {
+      await visit(page, `/${locale}/cars/${petrol.slug}`);
+      const levels = page
+        .getByRole("region", { name: msg(locale, "car.earningsTitle"), exact: true })
+        .getByRole("listitem");
+      await expect(levels).toHaveCount(4);
+      const notes =
+        locale === "pl"
+          ? [
+              "auto zajmuje do 15% dochodu",
+              "auto zajmuje 15–20% dochodu",
+              "auto zajmuje 20–25% dochodu",
+              "auto zajmuje ponad 25% dochodu",
+            ]
+          : [
+              "the car takes up to 15% of income",
+              "the car takes 15–20% of income",
+              "the car takes 20–25% of income",
+              "the car takes over 25% of income",
+            ];
+      for (const [index, note] of notes.entries()) await expect(levels.nth(index)).toContainText(note);
+      await expect(levels.filter({ hasText: "10%" })).toHaveCount(0);
+    });
+  }
+
   test("the price carries the indicative marker, its date and a link to its source", async ({ page }) => {
     await visit(page, `/pl/cars/${petrol.slug}`);
     const main = page.getByRole("main");

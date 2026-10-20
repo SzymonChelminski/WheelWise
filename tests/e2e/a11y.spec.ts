@@ -1,8 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
-import { cars, cheapest, nameOf } from "./helpers/catalogue";
+import { carBySlug, cars, cheapest, nameOf } from "./helpers/catalogue";
 import { comparisonTable } from "./helpers/comparison";
-import { expect, NOT_FOUND_LINE, test } from "./helpers/fixtures";
+import { expect, NOT_FOUND_LINE, PHOTO_FAILED_LINE, photoRoute, test } from "./helpers/fixtures";
 import { LOCALES, msg, type Locale } from "./helpers/text";
 import {
   compareBar,
@@ -17,6 +17,7 @@ import {
 const petrol = cheapest((car) => car.fuelType === "petrol");
 const electric = cheapest((car) => car.fuelType === "ev");
 const hybrid = cheapest((car) => car.fuelType === "hybrid");
+const clio = carBySlug("renault-clio-diesel-manual-101km");
 /** The cars with the longest names in the catalogue. */
 const longest = [...cars].sort((a, b) => nameOf(b).length - nameOf(a).length).slice(0, 3);
 
@@ -24,6 +25,8 @@ interface Screen {
   name: string;
   open: (page: Page, locale: Locale) => Promise<void>;
   notFound?: boolean;
+  /** The photo request is refused, so the browser logs the failed load. */
+  photoFails?: boolean;
 }
 
 async function addToComparison(page: Page, locale: Locale, count: number) {
@@ -94,6 +97,26 @@ const screens: Screen[] = [
     },
   },
   {
+    name: "car page with the model photo (Renault Clio)",
+    open: async (page, locale) => {
+      await visit(page, `/${locale}/cars/${clio.slug}`);
+      const image = page.getByRole("main").locator("figure[data-car-photo] img");
+      await expect
+        .poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0))
+        .toBe(true);
+    },
+  },
+  {
+    name: "car page whose model photo cannot be loaded",
+    photoFails: true,
+    open: async (page, locale) => {
+      await photoRoute(page, (route) => route.abort("failed"));
+      await visit(page, `/${locale}/cars/${clio.slug}`);
+      await expect(page.getByRole("main").locator("figure[data-car-photo]")).toHaveCount(0);
+      await expect(page.getByRole("region", { name: msg(locale, "car.earningsTitle"), exact: true })).toBeVisible();
+    },
+  },
+  {
     name: "comparison without cars",
     open: async (page, locale) => {
       await visit(page, `/${locale}/compare`);
@@ -136,6 +159,7 @@ test.describe("accessibility checks", () => {
     for (const screen of screens) {
       test(`${screen.name} has no WCAG 2.2 AA violations (${locale})`, async ({ page, watch }) => {
         if (screen.notFound) watch.allowConsole(NOT_FOUND_LINE);
+        if (screen.photoFails) watch.allowConsole(PHOTO_FAILED_LINE);
         await screen.open(page, locale);
         const results = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])

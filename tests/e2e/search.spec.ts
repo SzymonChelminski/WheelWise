@@ -43,6 +43,33 @@ test.describe("search", () => {
     await expect(field).toHaveValue("");
   });
 
+  for (const [locale, body] of [
+    ["pl", "hatchback lub sedan"],
+    ["en", "hatchback or saloon"],
+  ] as const) {
+    test(`"clio" suggests cars named Renault Clio, described as ${body} (${locale})`, async ({ page }) => {
+      await visit(page, `/${locale}`);
+      const field = await searchField(page, locale);
+      await field.fill("clio");
+
+      const expected = matching("clio");
+      expect(expected.length).toBeGreaterThan(1);
+      expect(expected.every((car) => nameOf(car) === "Renault Clio")).toBe(true);
+      const options = page.getByRole("listbox").getByRole("option");
+      await expect(options).toHaveCount(expected.length);
+      const texts = (await options.allTextContents()).map(squash);
+      for (const text of texts) {
+        expect(text.startsWith("Renault Clio"), text).toBe(true);
+        expect(text, text).not.toMatch(/\(\s*\d+\s*(ch|cv|kw)/i);
+        expect(text, text).not.toMatch(/CLIO/);
+      }
+      const hatchbacks = expected.filter((car) => car.bodyType === "sedan_hatchback").length;
+      expect(hatchbacks).toBeGreaterThan(0);
+      expect(texts.filter((text) => text.includes(body))).toHaveLength(hatchbacks);
+      expect(texts.filter((text) => /sedan \/ hatchback|sedan\/hatchback/i.test(text))).toEqual([]);
+    });
+  }
+
   test("choosing a suggestion with the keyboard opens that car", async ({ page }) => {
     await visit(page, "/pl");
     const field = await searchField(page, "pl");
@@ -56,8 +83,16 @@ test.describe("search", () => {
     await expect(second).toHaveAttribute("aria-selected", "true");
     await expect(field).toHaveAttribute("aria-activedescendant", (await second.getAttribute("id")) ?? "");
     const text = squash(await second.textContent());
-    const car = matching("sander").find((item) => text.startsWith(nameOf(item)) && text.length > 0);
-    expect(car, "the active suggestion is a matching car").toBeDefined();
+    // Several cars can share a name; the attributes printed with it tell them apart.
+    const candidates = matching("sander").filter(
+      (item) =>
+        text.startsWith(nameOf(item)) &&
+        text.includes(msg("pl", `attr.fuel.${item.fuelType}`)) &&
+        text.includes(msg("pl", `attr.transmission.${item.transmission}`)) &&
+        text.includes(`${Math.round(item.powerKw * 1.35962)} KM`),
+    );
+    expect(candidates, `the active suggestion "${text}" is one matching car`).toHaveLength(1);
+    const car = candidates[0];
 
     await field.press("Enter");
     await expect(page).toHaveURL(`/pl/cars/${car!.slug}`);

@@ -5,7 +5,7 @@ const port = Number(process.env.E2E_PORT ?? 3000);
 
 // A car page from the fixture catalogue. The server counts as ready only once it has answered this
 // address, so its first read of the car slug list happens before the test workers load the machine.
-const warmUpCarPath = "/pl/cars/alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw";
+const warmUpCarPath = "/pl/cars/alfa-romeo-giulia-diesel-automatic-160km";
 
 export default defineConfig({
   testDir: "tests/e2e",

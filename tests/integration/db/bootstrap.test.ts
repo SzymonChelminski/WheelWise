@@ -39,10 +39,10 @@ describe('bootstrapFromFixtures', () => {
 
     const cars = await getActiveCars();
     expect(cars).toHaveLength(489);
-    expect(await getCarBySlug('alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw')).toMatchObject({
+    expect(await getCarBySlug('alfa-romeo-giulia-diesel-automatic-160km')).toMatchObject({
       make: 'Alfa Romeo',
       model: 'GIULIA',
-      variant: 'GIULIA 2.2 Diesel (160ch) AT8',
+      variant: 'Giulia 2.2 Diesel AT8',
       priceEur: 45600,
       listPricePln: 201000,
       priceObservedAt: '2026-09-14',

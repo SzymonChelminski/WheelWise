@@ -20,8 +20,11 @@ async function expectNotFoundPage(page: Page, locale: Locale) {
 
 test.describe("missing pages", () => {
   for (const [locale, path] of [
-    ["pl", "/pl/cars/no-such-car-99kw"],
-    ["en", "/en/cars/no-such-car-99kw"],
+    ["pl", "/pl/cars/no-such-car-99km"],
+    ["en", "/en/cars/no-such-car-99km"],
+    // The former address of the Renault Clio diesel: old addresses are not redirected.
+    ["pl", "/pl/cars/renault-clio-sedan-hatchback-diesel-manual-74kw"],
+    ["en", "/en/cars/renault-clio-sedan-hatchback-diesel-manual-74kw"],
     ["pl", "/pl/no/such/page"],
     ["en", "/en/no-such-page"],
   ] as const) {
@@ -71,7 +74,7 @@ test.describe("response headers", () => {
     { path: "/pl", status: 200 },
     { path: "/en/rankings?fuel=ev", status: 200 },
     { path: "/pl/does-not-exist", status: 404 },
-    { path: "/pl/cars/no-such-car-99kw", status: 404 },
+    { path: "/pl/cars/no-such-car-99km", status: 404 },
     { path: "/api/cron/daily", status: 401 },
   ]) {
     test(`${path} carries the security headers`, async ({ request }) => {

@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   ademeRowSchema,
   buildCatalog,
   displayVariant,
+  normalizeNameCase,
+  toSlug,
   type AdemeRow,
   type BrandInfo,
   type BuildResult,
@@ -117,10 +121,11 @@ function expectSkipped(input: AdemeRow, reason: string): void {
 describe('buildCatalog - a complete car', () => {
   it('turns one valid row into one car with every field filled', () => {
     expect(only(row())).toEqual({
-      slug: 'dacia-sandero-sedan-hatchback-petrol-manual-67kw',
+      // 67 kW * 1.35962 = 91.09 -> 91 KM; the body part is left out for sedan_hatchback
+      slug: 'dacia-sandero-petrol-manual-91km',
       make: 'Dacia',
       model: 'SANDERO',
-      variant: 'SANDERO (91ch)',
+      variant: 'Sandero',
       bodyType: 'sedan_hatchback',
       segment: 'B',
       fuelType: 'petrol',
@@ -463,7 +468,7 @@ describe('buildCatalog - grouping into cars', () => {
       }),
     ]).cars[0];
     expect(car).toMatchObject({
-      variant: 'SANDERO Essential',
+      variant: 'Sandero Essential',
       priceEur: 12500,
       engineCc: 999,
       segment: 'B',
@@ -487,7 +492,7 @@ describe('buildCatalog - grouping into cars', () => {
       row({ Description_Commerciale: 'SANDERO Z', Conso_vitesse_mixte_Min: 5.0, Conso_vitesse_mixte_Max: 5.0 }),
     ];
     for (const input of [versions, [...versions].reverse()]) {
-      expect(build(input).cars[0]).toMatchObject({ variant: 'SANDERO Z', fuelL100: 5 });
+      expect(build(input).cars[0]).toMatchObject({ variant: 'Sandero Z', fuelL100: 5 });
     }
   });
 
@@ -497,7 +502,7 @@ describe('buildCatalog - grouping into cars', () => {
       plugInRow({ Description_Commerciale: 'SANDERO Z', Conso_elec_Min: 150, Conso_elec_Max: 150 }),
     ];
     for (const input of [versions, [...versions].reverse()]) {
-      expect(build(input).cars[0]).toMatchObject({ variant: 'SANDERO Z', electricKwh100: 15 });
+      expect(build(input).cars[0]).toMatchObject({ variant: 'Sandero Z', electricKwh100: 15 });
     }
   });
 
@@ -508,7 +513,7 @@ describe('buildCatalog - grouping into cars', () => {
       row({ Description_Commerciale: 'SANDERO Expression' }),
     ];
     for (const input of [versions, [...versions].reverse()]) {
-      expect(build(input).cars[0].variant).toBe('SANDERO Essential');
+      expect(build(input).cars[0].variant).toBe('Sandero Essential');
     }
   });
 
@@ -540,9 +545,10 @@ describe('buildCatalog - bi-fuel LPG cars', () => {
       const result = build(input);
       expect(result.cars).toHaveLength(1);
       expect(result.cars[0]).toMatchObject({
-        slug: 'dacia-sandero-sedan-hatchback-lpg-manual-74kw',
+        // 74 kW * 1.35962 = 100.61 -> 101 KM
+        slug: 'dacia-sandero-lpg-manual-101km',
         fuelType: 'lpg',
-        variant: 'SANDERO ECO-G (101ch)',
+        variant: 'Sandero ECO-G',
         powerKw: 74,
         // LPG mode: mean of 6.8 and 7.6; petrol mode would give 5.3
         fuelL100: 7.2,
@@ -563,8 +569,8 @@ describe('buildCatalog - bi-fuel LPG cars', () => {
     const result = build([dearerVersion, petrolMode, lpgMode]);
     expect(result.cars).toHaveLength(1);
     expect(result.cars[0]).toMatchObject({
-      slug: 'dacia-sandero-sedan-hatchback-lpg-manual-74kw',
-      variant: 'SANDERO ECO-G (101ch)',
+      slug: 'dacia-sandero-lpg-manual-101km',
+      variant: 'Sandero ECO-G',
       powerKw: 74,
       fuelL100: 7.2,
       priceEur: 13000,
@@ -581,7 +587,7 @@ describe('buildCatalog - bi-fuel LPG cars', () => {
     });
     const car = build([petrolMode, lpgMode, cheapWeak]).cars[0];
     expect(car).toMatchObject({
-      variant: 'SANDERO ECO-G Essential',
+      variant: 'Sandero ECO-G Essential',
       priceEur: 12000,
       powerKw: 60,
       fuelL100: 7,
@@ -685,8 +691,8 @@ describe('buildCatalog - price in PLN', () => {
 });
 
 describe('buildCatalog - slugs and order', () => {
-  it('the slug is make-model-body-fuel-transmission-power in lower-case ASCII with hyphens', () => {
-    expect(only(row()).slug).toBe('dacia-sandero-sedan-hatchback-petrol-manual-67kw');
+  it('the slug is make-model-body-fuel-transmission-power in KM in lower-case ASCII with hyphens', () => {
+    expect(only(row()).slug).toBe('dacia-sandero-petrol-manual-91km');
     expect(
       only(
         row({
@@ -698,19 +704,20 @@ describe('buildCatalog - slugs and order', () => {
           Puissance_maximale: 100,
         }),
       ).slug,
-    ).toBe('bmw-218-mpv-petrol-automatic-100kw');
+    // 100 kW * 1.35962 = 135.96 -> 136 KM
+    ).toBe('bmw-218-mpv-petrol-automatic-136km');
   });
 
   it('diacritics are removed and every run of other characters becomes one hyphen', () => {
     expect(
       only(row({ Marque: 'SKODA', Modèle: 'ENYAQ  iV / 80', Description_Commerciale: 'ENYAQ iV 80' })).slug,
-    ).toBe('skoda-enyaq-iv-80-sedan-hatchback-petrol-manual-67kw');
+    ).toBe('skoda-enyaq-iv-80-petrol-manual-91km');
     expect(
       only(row({ Marque: 'CITROEN', Modèle: 'Ë-C4 X', Description_Commerciale: 'ë-C4 X' })).slug,
-    ).toBe('citroen-e-c4-x-sedan-hatchback-petrol-manual-67kw');
+    ).toBe('citroen-e-c4-x-petrol-manual-91km');
     expect(
       only(row({ Marque: 'MERCEDES', Modèle: 'CLASSE_A (W177)', Description_Commerciale: 'A 180' })).slug,
-    ).toBe('mercedes-benz-classe-a-w177-sedan-hatchback-petrol-manual-67kw');
+    ).toBe('mercedes-benz-classe-a-w177-petrol-manual-91km');
   });
 
   it('every slug is lower-case ASCII kebab-case', () => {
@@ -732,9 +739,9 @@ describe('buildCatalog - slugs and order', () => {
       row({ Modèle: 'C4_X', Description_Commerciale: 'C4_X Max', Prix_véhicule: 18000 }),
     ];
     const expected = [
-      ['dacia-c4-x-sedan-hatchback-petrol-manual-67kw', 18000, 'C4_X'],
-      ['dacia-c4-x-sedan-hatchback-petrol-manual-67kw-2', 20000, 'C4 X'],
-      ['dacia-c4-x-sedan-hatchback-petrol-manual-67kw-3', 22000, 'C4-X'],
+      ['dacia-c4-x-petrol-manual-91km', 18000, 'C4_X'],
+      ['dacia-c4-x-petrol-manual-91km-2', 20000, 'C4 X'],
+      ['dacia-c4-x-petrol-manual-91km-3', 22000, 'C4-X'],
     ];
     const orders = [
       sameSlug,
@@ -768,11 +775,12 @@ describe('buildCatalog - slugs and order', () => {
       row({ Marque: 'KIA', Modèle: 'CEED', Description_Commerciale: 'CEED' }),
     ]);
     expect(result.cars.map((car) => car.slug)).toEqual([
-      'bmw-218-sedan-hatchback-petrol-manual-67kw',
-      'dacia-sandero-sedan-hatchback-petrol-manual-67kw',
-      'dacia-sandero-sedan-hatchback-petrol-manual-81kw',
-      'kia-ceed-sedan-hatchback-petrol-manual-67kw',
-      'toyota-yaris-sedan-hatchback-petrol-manual-67kw',
+      'bmw-218-petrol-manual-91km',
+      // 81 kW * 1.35962 = 110.13 -> 110 KM
+      'dacia-sandero-petrol-manual-110km',
+      'dacia-sandero-petrol-manual-91km',
+      'kia-ceed-petrol-manual-91km',
+      'toyota-yaris-petrol-manual-91km',
     ]);
   });
 
@@ -808,37 +816,38 @@ describe('buildCatalog - slugs and order', () => {
 
 describe('buildCatalog - text clean-up', () => {
   it('repairs text whose encoding was broken: CoupÃ© becomes Coupé', () => {
-    expect(only(row({ Description_Commerciale: 'SANDERO CoupÃ©' })).variant).toBe('SANDERO Coupé');
+    expect(only(row({ Description_Commerciale: 'SANDERO CoupÃ©' })).variant).toBe('Sandero Coupé');
   });
 
   it('repairs a broken "à" whose second byte became a plain space', () => {
     // As in the dataset: the marker, the space that was the second byte, then the real space.
-    expect(only(row({ Description_Commerciale: "SANDERO pn de 17'' Ã  19''" })).variant).toBe(
-      "SANDERO pn de 17'' à 19''",
-    );
+    // The name drops "à" and what follows it, so the repair is read on the model, which is kept as it is.
+    const car = only(row({ Modèle: "SANDERO 17'' Ã  19''", Description_Commerciale: "SANDERO 17'' Ã  19''" }));
+    expect(car.model).toBe("SANDERO 17'' à 19''");
+    expect(car.variant).toBe("Sandero 17''");
   });
 
   it('repairs a marker at the very end of a text, where its space was trimmed away', () => {
-    expect(only(row({ Description_Commerciale: 'SANDERO ENGAGEÂ Â Â' })).variant).toBe('SANDERO ENGAGE');
+    expect(only(row({ Description_Commerciale: 'SANDERO ENGAGEÂ Â Â' })).variant).toBe('Sandero Engage');
   });
 
   it('repairs a broken no-break space into a normal space', () => {
-    expect(only(row({ Description_Commerciale: 'SANDERO BVMÂ N-CONNECTA' })).variant).toBe(
-      'SANDERO BVM N-CONNECTA',
-    );
+    // Once repaired, "BVM" is a whole word and is removed as a gearbox code.
+    expect(only(row({ Description_Commerciale: 'SANDERO BVMÂ N-CONNECTA' })).variant).toBe('Sandero N-Connecta');
+    expect(only(row({ Description_Commerciale: 'SANDERO TCeÂ Line' })).variant).toBe('Sandero TCe Line');
   });
 
   it('repairs broken encoding in the model as well', () => {
     const car = only(row({ Modèle: 'MÃ©GANE', Description_Commerciale: 'MÃ©GANE Techno' }));
     expect(car.model).toBe('MéGANE');
+    // "MéGANE" holds a lower-case letter, so the case rule leaves it as it is.
     expect(car.variant).toBe('MéGANE Techno');
-    expect(car.slug).toBe('dacia-megane-sedan-hatchback-petrol-manual-67kw');
+    expect(car.slug).toBe('dacia-megane-petrol-manual-91km');
   });
 
   it('leaves correctly encoded accented text alone', () => {
-    expect(only(row({ Description_Commerciale: 'SANDERO Coupé Élégance à 5 portes' })).variant).toBe(
-      'SANDERO Coupé Élégance à 5 portes',
-    );
+    expect(only(row({ Description_Commerciale: 'SANDERO Coupé Élégance' })).variant).toBe('Sandero Coupé Élégance');
+    expect(only(row({ Modèle: 'MÉGANE', Description_Commerciale: 'Mégane Coupé' })).model).toBe('MÉGANE');
   });
 
   it('trims strings and collapses repeated spaces', () => {
@@ -846,12 +855,12 @@ describe('buildCatalog - text clean-up', () => {
       row({
         Marque: '  DACIA ',
         Modèle: ' SANDERO  ',
-        Description_Commerciale: '   SANDERO    (91ch)  TCe ',
+        Description_Commerciale: '   SANDERO    Essential  TCe ',
       }),
     );
     expect(car.make).toBe('Dacia');
     expect(car.model).toBe('SANDERO');
-    expect(car.variant).toBe('SANDERO (91ch) TCe');
+    expect(car.variant).toBe('Sandero Essential TCe');
     expect(car.brandTier).toBe('budget');
   });
 
@@ -883,7 +892,7 @@ describe('buildCatalog - makes', () => {
       make: 'New Brand',
       brandTier: 'mainstream',
       valueRetention: 'average',
-      slug: 'new-brand-one-sedan-hatchback-petrol-manual-67kw',
+      slug: 'new-brand-one-petrol-manual-91km',
     });
     expect(result.unknownMakes).toEqual(['NEW BRAND']);
   });
@@ -919,18 +928,19 @@ describe('buildCatalog - makes', () => {
 describe('buildCatalog - power of electric cars', () => {
   // Power = the highest of: maximum power, horsepower in the description * 0.7355,
   // kilowatts in the description, rated electric power.
+  // The slug carries the power in KM: kW * 1.35962, rounded.
   it.each([
-    ['e-Soul Moteur électrique (204ch)', 29, 150], // 204 * 0.7355 = 150.04
-    ['EV6 Moteur électrique 239kW (325ch)', 81, 239], // 325 * 0.7355 = 239.04
-    ['MODEL 3 (88Kw)', 88, 88],
-    ['LEAF 62kWh', 90, 90],
-    ['SPRING (19Kw)', 18.6, 19],
-  ])('"%s" with rated power %f has %i kW', (description, rated, expected) => {
+    ['e-Soul Moteur électrique (204ch)', 29, 150, 204], // 204 * 0.7355 = 150.04; 150 * 1.35962 = 203.94
+    ['EV6 Moteur électrique 239kW (325ch)', 81, 239, 325], // 325 * 0.7355 = 239.04; 239 * 1.35962 = 324.95
+    ['MODEL 3 (88Kw)', 88, 88, 120], // 88 * 1.35962 = 119.65
+    ['LEAF 62kWh', 90, 90, 122], // 90 * 1.35962 = 122.37
+    ['SPRING (19Kw)', 18.6, 19, 26], // 19 * 1.35962 = 25.83
+  ])('"%s" with rated power %f has %i kW and %i KM in the slug', (description, rated, expected, km) => {
     const car = only(
       electricRow({ Description_Commerciale: description, Puissance_nominale_électrique: rated }),
     );
     expect(car.powerKw).toBe(expected);
-    expect(car.slug.endsWith(`-${expected}kw`)).toBe(true);
+    expect(car.slug.endsWith(`-${km}km`)).toBe(true);
   });
 
   it('horsepower in the description is converted with 0.7355', () => {
@@ -1038,20 +1048,21 @@ describe('buildCatalog - power of electric cars', () => {
 describe('displayVariant - the name shown after the make', () => {
   it.each([
     // make, dataset make, model, description, expected
-    ['Toyota', 'TOYOTA', 'C-HR', 'Toyota C-HR Hybride 140', 'C-HR Hybride 140'],
+    ['Toyota', 'TOYOTA', 'C-HR', 'Toyota C-HR Hybride 140', 'C-HR Hybrid 140'],
     ['MINI', 'MINI', 'MINI', 'MINI Cooper SE Hatch 3P (F56)', 'Cooper SE Hatch 3P (F56)'],
-    ['Nissan', 'NISSAN', 'ARIYA', '63kWh ENGAGE', 'ARIYA 63kWh ENGAGE'],
+    ['Nissan', 'NISSAN', 'ARIYA', '63kWh ENGAGE', 'Ariya 63kWh Engage'],
     ['BMW', 'B.M.W.', '218', '218i Active Tourer', '218i Active Tourer'],
     ['Mercedes-Benz', 'MERCEDES', 'E 200', 'E 220 d', 'E 220 d'],
-    ['Mercedes-Benz', 'MERCEDES', 'E 53 AMG', 'AMG E 53 4MATIC+', 'AMG E 53 4MATIC+'],
-    ['Dacia', 'DACIA', 'SANDERO', 'SANDERO (91ch)', 'SANDERO (91ch)'],
+    // A trailing "+" is a separator the name rule trims at the end of a name.
+    ['Mercedes-Benz', 'MERCEDES', 'E 53 AMG', 'AMG E 53 4MATIC+', 'AMG E 53 4MATIC'],
+    ['Dacia', 'DACIA', 'SANDERO', 'SANDERO (91ch)', 'Sandero'],
   ])('%s / %s / %s / "%s" -> "%s"', (make, marque, model, description, expected) => {
     expect(displayVariant(make, marque, model, description)).toBe(expected);
   });
 
   it('removes a leading make written in another letter case', () => {
-    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'TOYOTA YARIS Hybride')).toBe('YARIS Hybride');
-    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'toyota YARIS Hybride')).toBe('YARIS Hybride');
+    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'TOYOTA YARIS Hybride')).toBe('Yaris Hybrid');
+    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'toyota YARIS Hybride')).toBe('Yaris Hybrid');
   });
 
   it('removes a leading dataset make that differs from the display name', () => {
@@ -1061,26 +1072,24 @@ describe('displayVariant - the name shown after the make', () => {
   });
 
   it('removes the make only at the start and only when a space follows it', () => {
-    expect(displayVariant('MINI', 'MINI', 'COOPER', 'MINIMALIST COOPER')).toBe('MINIMALIST COOPER');
-    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'YARIS by Toyota Gazoo')).toBe('YARIS by Toyota Gazoo');
+    expect(displayVariant('MINI', 'MINI', 'COOPER', 'MINIMALIST COOPER')).toBe('Minimalist Cooper');
+    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'YARIS by Toyota Gazoo')).toBe('Yaris by Toyota Gazoo');
   });
 
   it('removes the make once per spelling (display name, then dataset make), not every repetition', () => {
-    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'Toyota Toyota Toyota YARIS')).toBe('Toyota YARIS');
+    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', 'Toyota Toyota Toyota YARIS')).toBe('Toyota Yaris');
   });
 
   it('adds the model when the name does not contain it', () => {
-    expect(displayVariant('Jeep', 'JEEP', 'AVENGER', '1.2 Turbo 100 Altitude')).toBe('AVENGER 1.2 Turbo 100 Altitude');
-    expect(displayVariant('Subaru', 'SUBARU', 'OUTBACK', '2.5i Lineartronic')).toBe('OUTBACK 2.5i Lineartronic');
+    expect(displayVariant('Jeep', 'JEEP', 'AVENGER', '1.2 Turbo 100 Altitude')).toBe('Avenger 1.2 Turbo 100 Altitude');
+    expect(displayVariant('Subaru', 'SUBARU', 'OUTBACK', '2.5i Lineartronic')).toBe('Outback 2.5i Lineartronic');
   });
 
   it('does not add the model when the name contains it in another spelling', () => {
     // Compared without accents, letter case, spaces and punctuation.
-    expect(displayVariant('Toyota', 'TOYOTA', 'C-HR', 'CHR Hybride')).toBe('CHR Hybride');
+    expect(displayVariant('Toyota', 'TOYOTA', 'C-HR', 'CHR Hybride')).toBe('CHR Hybrid');
     expect(displayVariant('Renault', 'RENAULT', 'MEGANE', 'Mégane E-Tech')).toBe('Mégane E-Tech');
-    expect(displayVariant('Kia', 'KIA', 'E-SOUL', 'e-Soul Moteur électrique (204ch)')).toBe(
-      'e-Soul Moteur électrique (204ch)',
-    );
+    expect(displayVariant('Kia', 'KIA', 'E-SOUL', 'e-Soul Moteur électrique (204ch)')).toBe('e-Soul');
     expect(displayVariant('Tesla', 'TESLA', 'MODEL 3', 'MODEL3 Grande Autonomie')).toBe('MODEL3 Grande Autonomie');
   });
 
@@ -1098,7 +1107,7 @@ describe('displayVariant - the name shown after the make', () => {
   });
 
   it('falls back to the model when nothing is left of the description', () => {
-    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', '')).toBe('YARIS');
+    expect(displayVariant('Toyota', 'TOYOTA', 'YARIS', '')).toBe('Yaris');
   });
 });
 
@@ -1108,14 +1117,14 @@ describe('buildCatalog - display names', () => {
       row({ Marque: 'TOYOTA', Modèle: 'C-HR', Description_Commerciale: '  Toyota   C-HR Hybride 140 ' }),
     );
     expect(car.make).toBe('Toyota');
-    expect(car.variant).toBe('C-HR Hybride 140');
+    expect(car.variant).toBe('C-HR Hybrid 140');
   });
 
   it('the car name gets the model in front when the description lacks it', () => {
     const car = only(
       electricRow({ Marque: 'NISSAN', Modèle: 'ARIYA', Description_Commerciale: '63kWh ENGAGE' }),
     );
-    expect(car.variant).toBe('ARIYA 63kWh ENGAGE');
+    expect(car.variant).toBe('Ariya 63kWh Engage');
     expect(car.model).toBe('ARIYA');
   });
 
@@ -1128,6 +1137,300 @@ describe('buildCatalog - display names', () => {
   it('for an unknown make the title-cased name is removed from the front as well', () => {
     const car = build([row({ Marque: 'NEW BRAND', Modèle: 'ONE', Description_Commerciale: 'NEW BRAND ONE Sport' })]).cars[0];
     expect(car.variant).toBe('ONE Sport');
+  });
+});
+
+describe('displayVariant - readable names', () => {
+  it.each([
+    // make, dataset make, model, description, expected
+    ['Renault', 'RENAULT', 'CLIO', 'CLIO (101ch)', 'Clio'],
+    ['Renault', 'RENAULT', 'CLIO', 'CLIO (94ch+24Kw)', 'Clio'],
+    ['Dacia', 'DACIA', 'SANDERO', 'SANDERO (91ch)', 'Sandero'],
+    ['Alfa Romeo', 'ALFA ROMEO', 'GIULIA', 'GIULIA 2.0 T Essence (200ch) AT8', 'Giulia 2.0 T AT8'],
+    ['Citroën', 'CITROEN', 'BERLINGO', 'BERLINGO M (130ch)', 'Berlingo M'],
+    ['Citroën', 'CITROEN', 'BERLINGO', 'e-BERLINGO M (57Kw)', 'e-Berlingo M'],
+    ['Audi', 'AUDI', 'A3', 'A3 Sportback facelift 35 TDI (150ch) S tronic 7', 'A3 Sportback 35 TDI S tronic 7'],
+    ['BMW', 'B.M.W.', '218', '218i Active Tourer', '218i Active Tourer'],
+    ['Tesla', 'TESLA', 'MODEL 3', 'MODEL 3 (88Kw)', 'Model 3'],
+  ])('%s / %s / %s / "%s" -> "%s"', (make, marque, model, description, expected) => {
+    expect(displayVariant(make, marque, model, description)).toBe(expected);
+  });
+
+  it.each([
+    ['(101ch)'],
+    ['(94ch+24Kw)'],
+    ['(19Kw)'],
+    ['(57Kw)'],
+    ['(110cv)'],
+    ['(101CH)'],
+    ['( 101 ch )'],
+    ['(94ch + 24kW)'],
+    ['(100ch+20kw+10kw)'],
+  ])('removes the power marker %s', (marker) => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', `CLIO ${marker} Techno`)).toBe('Clio Techno');
+  });
+
+  it('removes every power marker of a name, wherever it stands', () => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO (101ch) Techno (74Kw)')).toBe('Clio Techno');
+  });
+
+  it('keeps brackets that are not a power marker', () => {
+    expect(displayVariant('MINI', 'MINI', 'MINI', 'MINI Cooper SE Hatch 3P (F56)')).toBe('Cooper SE Hatch 3P (F56)');
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO (101)')).toBe('Clio (101)');
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO (ch)')).toBe('Clio (ch)');
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO (101ch Techno)')).toBe('Clio (101ch Techno)');
+  });
+
+  it.each([
+    ['Essence', 'CLIO Essence Techno', 'Clio Techno'],
+    ['Gazole', 'CLIO Gazole Techno', 'Clio Techno'],
+    ['facelift', 'CLIO facelift Techno', 'Clio Techno'],
+    ['upper-case ESSENCE', 'CLIO ESSENCE Techno', 'Clio Techno'],
+    ['gearbox code BVA', 'CLIO BVA Techno', 'Clio Techno'],
+    ['gearbox code BVM6', 'CLIO BVM6 Techno', 'Clio Techno'],
+    ['gearbox code bva8', 'CLIO bva8 Techno', 'Clio Techno'],
+  ])('removes the French or technical word: %s', (_what, description, expected) => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', description)).toBe(expected);
+  });
+
+  it.each([
+    ['Hybride', 'CLIO Hybride', 'Clio Hybrid'],
+    ['HYBRIDE', 'CLIO HYBRIDE', 'Clio Hybrid'],
+    ['Électrique', 'CLIO Électrique', 'Clio Electric'],
+    ['Electrique', 'CLIO Electrique', 'Clio Electric'],
+    ['électrique', 'CLIO électrique', 'Clio Electric'],
+  ])('translates the French word %s', (_what, description, expected) => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', description)).toBe(expected);
+  });
+
+  it('removes and translates whole words only', () => {
+    // "BVAX" is not a gearbox code; as an upper-case word of four letters it is title-cased.
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO Essentielle Hybrides BVAX')).toBe(
+      'Clio Essentielle Hybrides Bvax',
+    );
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO Electriques Gazoline')).toBe('Clio Electriques Gazoline');
+  });
+
+  it('cuts the French equipment text from its first word to the end and trims the separators left behind', () => {
+    expect(
+      displayVariant(
+        'Škoda',
+        'SKODA',
+        'KAROQ',
+        "Karoq 1.5 TSI 4*2 DSG7 norme AP freins 15'' Ambition Classe A avec alt 140A famA",
+      ),
+    ).toBe('Karoq 1.5 TSI 4*2 DSG7');
+    expect(displayVariant('Kia', 'KIA', 'SPORTAGE', 'Sportage 1.6T-GDi / Electric 4x2 Système Hybrid')).toBe(
+      'Sportage 1.6T-GDi / Electric 4x2',
+    );
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO Techno, pour la ville')).toBe('Clio Techno');
+  });
+
+  it.each([
+    'de',
+    'à',
+    'avec',
+    'et',
+    'pour',
+    'sans',
+    'norme',
+    'freins',
+    'système',
+    'moteur',
+    'nouvelle',
+    'rechargeable',
+    'famille',
+    'jantes',
+    'châssis',
+    'berline',
+    'classique',
+    'créative',
+    'pn',
+    'alt',
+    'opt',
+  ])('the French word "%s" starts the cut text', (word) => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', `CLIO Techno ${word} Extra`)).toBe('Clio Techno');
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', `CLIO Techno ${word.toUpperCase()} Extra`)).toBe('Clio Techno');
+  });
+
+  it('does not cut at "Classe", which is part of Mercedes model names', () => {
+    expect(displayVariant('Mercedes-Benz', 'MERCEDES', 'CLASSE A', 'Classe A 180')).toBe('Classe A 180');
+  });
+
+  it('removes an opening bracket left at the end of a name, with the separators before it', () => {
+    expect(displayVariant('Nissan', 'NISSAN', 'JUKE', 'Juke DIG-T N-CONNECTA. BUSINESS+. Tekna (')).toBe(
+      'Juke DIG-T N-Connecta. BUSINESS+. Tekna',
+    );
+    expect(displayVariant('Nissan', 'NISSAN', 'JUKE', 'Juke Tekna - [')).toBe('Juke Tekna');
+  });
+
+  it('keeps the model when the cut leaves nothing after it', () => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO de base')).toBe('Clio');
+  });
+
+  it('uses the model, title-cased, when nothing is left of the name', () => {
+    expect(displayVariant('Renault', 'RENAULT', 'FACELIFT', 'FACELIFT')).toBe('Facelift');
+    expect(displayVariant('Renault', 'RENAULT', 'ESSENCE', 'Essence (101ch)')).toBe('Essence');
+  });
+
+  it('collapses the spaces left by removed words and trims the name', () => {
+    expect(displayVariant('Renault', 'RENAULT', 'CLIO', 'CLIO  (101ch)   Essence   Techno  ')).toBe('Clio Techno');
+  });
+});
+
+describe('normalizeNameCase - the case rule', () => {
+  it.each([
+    ['CLIO', 'Clio'],
+    ['SANDERO', 'Sandero'],
+    ['e-BERLINGO', 'e-Berlingo'],
+    ['XCEED', 'Xceed'],
+    ['ÉLYSÉE', 'Élysée'],
+    ['ACENTA/TEKNA/BUSINESS', 'Acenta/Tekna/Business'],
+    ['N-CONNECTA.', 'N-Connecta.'],
+    ['MINIMALIST COOPER', 'Minimalist Cooper'],
+  ])('an upper-case word of letters is title-cased per part: %s -> %s', (input, expected) => {
+    expect(normalizeNameCase(input)).toBe(expected);
+  });
+
+  it.each([
+    ['C-HR', 'C-HR'],
+    ['GT', 'GT'],
+    ['RS', 'RS'],
+    ['AMG', 'AMG'],
+    ['GTI', 'GTI'],
+    ['DS', 'DS'],
+    ['GT-LINE', 'GT-Line'],
+  ])('a part of three letters or fewer stays as it is: %s -> %s', (input, expected) => {
+    expect(normalizeNameCase(input)).toBe(expected);
+  });
+
+  it.each(['ID.3', 'MX-30', '2.2', 'M340i', 'iX3', '4MATIC', 'BUSINESS+', 'Euro6d-FULL', "15''"])(
+    'a token with digits or other characters stays as it is: %s',
+    (input) => {
+      expect(normalizeNameCase(input)).toBe(input);
+    },
+  );
+
+  it.each(['Sportback', 'Active', 'MéGANE', 'e-Soul', 'eDrive40'])('a word that is not all upper-case stays: %s', (input) => {
+    expect(normalizeNameCase(input)).toBe(input);
+  });
+
+  it('works word by word and joins the words with single spaces', () => {
+    expect(normalizeNameCase('  GIULIA   2.0 T  AT8 ')).toBe('Giulia 2.0 T AT8');
+    expect(normalizeNameCase('')).toBe('');
+  });
+
+  it('uses the spelling of the exceptions file for its tokens', () => {
+    expect(normalizeNameCase('RIO')).toBe('Rio');
+    expect(normalizeNameCase('ZOE')).toBe('Zoe');
+    expect(normalizeNameCase('T-ROC')).toBe('T-Roc');
+    expect(normalizeNameCase('TFSI')).toBe('TFSI');
+    expect(normalizeNameCase('MHEV')).toBe('MHEV');
+    expect(normalizeNameCase('PHEV')).toBe('PHEV');
+    expect(normalizeNameCase('Q3 SPORTBACK 35 TFSI MHEV')).toBe('Q3 Sportback 35 TFSI MHEV');
+  });
+
+  it('honours every entry of the exceptions file, alone and inside a name', () => {
+    const exceptions = JSON.parse(readFileSync(path.join(process.cwd(), 'data', 'model-names.json'), 'utf8')) as Record<
+      string,
+      string
+    >;
+    expect(Object.keys(exceptions).length).toBeGreaterThan(0);
+    for (const [token, spelling] of Object.entries(exceptions)) {
+      expect(normalizeNameCase(token), token).toBe(spelling);
+      expect(normalizeNameCase(`SPORT ${token}`), token).toBe(`Sport ${spelling}`);
+    }
+  });
+
+  it('an exception applies to an exact upper-case match only', () => {
+    expect(normalizeNameCase('RIOS')).toBe('Rios');
+    expect(normalizeNameCase('Rio')).toBe('Rio');
+  });
+});
+
+describe('buildCatalog - readable names in the catalogue', () => {
+  it('the Renault Clio diesel of 74 kW is named Clio and its address shows 101 KM', () => {
+    const car = only(
+      row({
+        Marque: 'RENAULT',
+        Modèle: 'CLIO',
+        Description_Commerciale: 'CLIO (101ch)',
+        Energie: 'GAZOLE',
+        Puissance_maximale: 74,
+      }),
+    );
+    expect(car.variant).toBe('Clio');
+    expect(car.slug).toBe('renault-clio-diesel-manual-101km');
+  });
+});
+
+describe('buildCatalog - slug rule', () => {
+  it.each([
+    ['BERLINE', 'dacia-sandero-petrol-manual-91km'],
+    ['BREAK', 'dacia-sandero-estate-petrol-manual-91km'],
+    ['TS TERRAINS/CHEMINS', 'dacia-sandero-suv-petrol-manual-91km'],
+    ['COUPE', 'dacia-sandero-coupe-petrol-manual-91km'],
+    ['CABRIOLET', 'dacia-sandero-convertible-petrol-manual-91km'],
+    ['MONOSPACE', 'dacia-sandero-mpv-petrol-manual-91km'],
+    ['COMBISPACE', 'dacia-sandero-van-petrol-manual-91km'],
+  ])('body %s gives the slug %s: the body part is left out only for sedan_hatchback', (body, slug) => {
+    expect(only(row({ Carrosserie: body })).slug).toBe(slug);
+  });
+
+  it.each([
+    [49, 67], // 66.62
+    [66, 90], // 89.73
+    [67, 91], // 91.09
+    [70, 95], // 95.17
+    [74, 101], // 100.61
+    [32, 44], // 43.508: just above the half rounds up
+    [57, 77], // 77.498: just below the half rounds down (a factor of 1.36 would give 78)
+    [118, 160], // 160.44
+    [375, 510], // 509.86
+  ])('%i kW is %i KM in the slug (kW * 1.35962, rounded)', (kw, km) => {
+    expect(only(row({ Puissance_maximale: kw })).slug).toBe(`dacia-sandero-petrol-manual-${km}km`);
+  });
+
+  it('the power part follows fuel and gearbox, and the slug never carries kW', () => {
+    const car = only(row({ Energie: 'GAZOLE', Type_de_boite: 'AUTOMATIQUE', Puissance_maximale: 110 }));
+    // 110 * 1.35962 = 149.56
+    expect(car.slug).toBe('dacia-sandero-diesel-automatic-150km');
+    expect(car.slug).not.toMatch(/-\d+kw/);
+    expect(car.powerKw).toBe(110);
+  });
+
+  it('two cars that differ only in kW still get different slugs, since one kW is more than one KM', () => {
+    const slugs = build([row({ Puissance_maximale: 73 }), row({ Puissance_maximale: 74 })]).cars.map((car) => car.slug);
+    // 73 * 1.35962 = 99.25; 74 * 1.35962 = 100.61
+    expect(slugs).toEqual(['dacia-sandero-petrol-manual-101km', 'dacia-sandero-petrol-manual-99km']);
+  });
+
+  it('a car whose slug collides keeps the -2 suffix after the KM part', () => {
+    const cars = build([
+      row({ Modèle: 'C4 X', Description_Commerciale: 'C4 X Feel', Carrosserie: 'BREAK', Prix_véhicule: 20000 }),
+      row({ Modèle: 'C4-X', Description_Commerciale: 'C4-X Shine', Carrosserie: 'BREAK', Prix_véhicule: 21000 }),
+    ]).cars;
+    expect(cars.map((car) => car.slug)).toEqual([
+      'dacia-c4-x-estate-petrol-manual-91km',
+      'dacia-c4-x-estate-petrol-manual-91km-2',
+    ]);
+    for (const car of cars) expect(car.slug).toMatch(/-\d+km(-\d+)?$/);
+  });
+});
+
+describe('toSlug', () => {
+  it.each([
+    ['Renault', 'renault'],
+    ['Alfa Romeo', 'alfa-romeo'],
+    ['Škoda', 'skoda'],
+    ['Citroën', 'citroen'],
+    ['Ë-C4 X', 'e-c4-x'],
+    ['ENYAQ  iV / 80', 'enyaq-iv-80'],
+    ['CLASSE_A (W177)', 'classe-a-w177'],
+    ['  --Ökö--Modèle__X!  ', 'oko-modele-x'],
+    ['', ''],
+  ])('%s -> %s', (input, expected) => {
+    expect(toSlug(input)).toBe(expected);
   });
 });
 

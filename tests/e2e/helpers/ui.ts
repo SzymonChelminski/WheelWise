@@ -42,9 +42,16 @@ export async function interactive(locator: Locator): Promise<Locator> {
   return locator;
 }
 
-/** Opens a page and waits until its header controls respond. */
-export async function visit(page: Page, path: string): Promise<void> {
-  await page.goto(path);
+/**
+ * Opens a page and waits until its header controls respond. `waitUntil: "domcontentloaded"`
+ * does not wait for images, for pages whose images a test holds back.
+ */
+export async function visit(
+  page: Page,
+  path: string,
+  options: { waitUntil?: "load" | "domcontentloaded" } = {},
+): Promise<void> {
+  await page.goto(path, options);
   const locale = localeOf(page);
   await interactive(
     page
