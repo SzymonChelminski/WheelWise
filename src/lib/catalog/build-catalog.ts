@@ -313,7 +313,7 @@ function normalizeCase(token: string): string {
     .join('');
 }
 
-function normalizeNameCase(text: string): string {
+export function normalizeNameCase(text: string): string {
   return text.split(/\s+/).filter(Boolean).map(normalizeCase).join(' ');
 }
 
@@ -355,7 +355,7 @@ function groupKey(row: MappedRow): string {
   return JSON.stringify([row.make, row.model, row.bodyType, row.fuelType, row.transmission, power]);
 }
 
-function toSlug(text: string): string {
+export function toSlug(text: string): string {
   return text
     .normalize('NFD')
     .replace(/\p{M}+/gu, '')
