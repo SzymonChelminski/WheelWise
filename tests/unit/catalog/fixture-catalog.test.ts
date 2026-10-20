@@ -305,14 +305,19 @@ describe('committed catalogue - readable names and addresses', () => {
     expect(wrong.map((entry) => entry.variant)).toEqual([]);
   });
 
-  it('no car name contains a gearbox code such as BVM6 or BVA', () => {
-    const wrong = cars.filter((entry) => wholeWord('bv[am]\\d*').test(entry.variant));
+  it('no car name contains a gearbox code such as BVM6, BVA, BVR7 or BVMA5', () => {
+    const wrong = cars.filter((entry) => wholeWord('bv(?:ma|[amr])\\d*').test(entry.variant));
     expect(wrong.map((entry) => entry.variant)).toEqual([]);
   });
 
-  it('no car name ends with an opening bracket or a separator', () => {
-    const wrong = cars.filter((entry) => /[([\s/\-.,+]$/.test(entry.variant));
+  it('no car name ends with an opening bracket or a separator (a "+" attached to a word is part of the name)', () => {
+    const wrong = cars.filter((entry) => /(?:[([\s/\-.,]|(?:^|\s)\+)$/.test(entry.variant));
     expect(wrong.map((entry) => entry.variant)).toEqual([]);
+  });
+
+  it('keeps the "+" that belongs to a name: AMG E 53 4MATIC+ and EQA 250+', () => {
+    expect(car('mercedes-benz-e-53-amg-estate-hybrid-automatic-435km').variant).toBe('AMG E 53 4MATIC+');
+    expect(car('mercedes-benz-eqa-250-suv-ev-automatic-129km').variant).toBe('EQA 250+');
   });
 
   it('the Renault Clio diesel of 74 kW is "Renault Clio" at renault-clio-diesel-manual-101km', () => {

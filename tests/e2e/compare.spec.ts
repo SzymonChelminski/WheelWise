@@ -32,10 +32,10 @@ test.describe("comparison", () => {
     // Several cars can share a name, so each toggle is found in the row of its car.
     for (const [index, car] of [first, second].entries()) {
       const row = list.getByRole("listitem").nth(index);
-      const toggle = compareToggle(row, pl, nameOf(car));
+      const toggle = compareToggle(row, pl, car);
       await interactive(toggle);
       await toggle.click();
-      await expect(compareToggle(row, pl, nameOf(car), true)).toHaveAttribute("aria-pressed", "true");
+      await expect(compareToggle(row, pl, car, true)).toHaveAttribute("aria-pressed", "true");
     }
     await expect(bar.disclosure(2)).toBeVisible();
     await bar.compareLink(2).click();
@@ -65,7 +65,7 @@ test.describe("comparison", () => {
     const full = compareToggle(
       rankingList(page, listTitle(pl, "totalCost")).getByRole("listitem").nth(3),
       pl,
-      nameOf(fourth),
+      fourth,
     );
     await expect(full).toHaveAttribute("aria-disabled", "true");
     await interactive(full);
@@ -177,7 +177,7 @@ test.describe("comparison", () => {
   test("the comparison bar keeps the same room under the footer open or closed", async ({ page, isMobile }) => {
     await visit(page, "/pl/rankings");
     const car = ranking("totalCost")[0].car;
-    const toggle = compareToggle(rankingList(page, listTitle(pl, "totalCost")).getByRole("listitem").first(), pl, nameOf(car));
+    const toggle = compareToggle(rankingList(page, listTitle(pl, "totalCost")).getByRole("listitem").first(), pl, car);
     await interactive(toggle);
     await toggle.click();
 

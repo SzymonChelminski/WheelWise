@@ -1053,8 +1053,14 @@ describe('displayVariant - the name shown after the make', () => {
     ['Nissan', 'NISSAN', 'ARIYA', '63kWh ENGAGE', 'Ariya 63kWh Engage'],
     ['BMW', 'B.M.W.', '218', '218i Active Tourer', '218i Active Tourer'],
     ['Mercedes-Benz', 'MERCEDES', 'E 200', 'E 220 d', 'E 220 d'],
-    // A trailing "+" is a separator the name rule trims at the end of a name.
-    ['Mercedes-Benz', 'MERCEDES', 'E 53 AMG', 'AMG E 53 4MATIC+', 'AMG E 53 4MATIC'],
+    // A "+" attached to the last word is part of the name and stays.
+    ['Mercedes-Benz', 'MERCEDES', 'E 53 AMG', 'AMG E 53 4MATIC+', 'AMG E 53 4MATIC+'],
+    ['Mercedes-Benz', 'MERCEDES', 'EQA', 'EQA 250+', 'EQA 250+'],
+    // A separator left standing apart by a removed word is trimmed.
+    ['Mercedes-Benz', 'MERCEDES', 'EQA', 'EQA 250 +', 'EQA 250'],
+    // Gearbox codes are removed, including the robotised BVR7 and BVMA5.
+    ['Renault', 'RENAULT', 'CLIO', 'CLIO TCe 90 BVR7', 'Clio TCe 90'],
+    ['Renault', 'RENAULT', 'CLIO', 'CLIO TCe 90 BVMA5', 'Clio TCe 90'],
     ['Dacia', 'DACIA', 'SANDERO', 'SANDERO (91ch)', 'Sandero'],
   ])('%s / %s / %s / "%s" -> "%s"', (make, marque, model, description, expected) => {
     expect(displayVariant(make, marque, model, description)).toBe(expected);

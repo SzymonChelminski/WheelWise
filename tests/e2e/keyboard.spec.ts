@@ -125,11 +125,11 @@ test.describe("keyboard", () => {
       // Two cars can share a name, so each toggle is taken from its own row.
       const row = list.getByRole("listitem").nth(index);
       await expect(row.getByRole("heading", { level: 3 })).toHaveText(`${index + 1}. ${nameOf(car)}`);
-      const toggle = compareToggle(row, "pl", nameOf(car));
+      const toggle = compareToggle(row, "pl", car);
       await interactive(toggle);
       await tabTo(page, toggle);
       await page.keyboard.press("Enter");
-      await expect(compareToggle(row, "pl", nameOf(car), true)).toBeFocused();
+      await expect(compareToggle(row, "pl", car, true)).toBeFocused();
     }
 
     // Open the comparison from the bar.

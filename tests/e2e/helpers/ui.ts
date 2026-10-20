@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import type { RankedCar, RankingMetric } from "@/lib/costs";
-import type { DriverAgeBand, Period } from "@/lib/domain/types";
+import type { Car, DriverAgeBand, Period } from "@/lib/domain/types";
 import { COST_FIELD, nameOf, periodCosts } from "./catalogue";
 import { expect } from "./fixtures";
 import { decimal, escapeRegExp, msg, pln, squash, type Locale } from "./text";
@@ -340,10 +340,31 @@ export function compareBar(page: Page) {
   };
 }
 
-/** The "Compare" toggle of a car in a list or on its page. */
-export function compareToggle(scope: Page | Locator, locale: Locale, name: string, added = false): Locator {
+type ToggleCar = Pick<Car, "make" | "variant" | "bodyType" | "fuelType" | "transmission" | "powerKw">;
+
+/**
+ * The name of a car as a compare toggle reads it out: name, body type (left out for
+ * "hatchback lub sedan"), fuel, gearbox and the short power text, so that cars of the
+ * same name are told apart ("Dacia Sandero, benzyna, manualna, 91 KM").
+ */
+export function toggleCarName(locale: Locale, car: ToggleCar): string {
+  const kind = car.fuelType === "ev" ? "source" : car.fuelType === "hybrid" || car.fuelType === "phev" ? "engine" : "plain";
+  const hp = `${Math.round(car.powerKw * 1.35962)} ${msg(locale, "attr.horsepower")}`;
+  return [
+    nameOf(car),
+    car.bodyType === "sedan_hatchback" ? "" : msg(locale, `attr.body.${car.bodyType}`),
+    msg(locale, `attr.fuel.${car.fuelType}`),
+    msg(locale, `attr.transmission.${car.transmission}`),
+    msg(locale, `power.${kind}.short`, { hp }),
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+/** The "Compare" toggle of a car in a list or on its page: "Porównaj: {name}, [body,] {fuel}, {gearbox}, {power}". */
+export function compareToggle(scope: Page | Locator, locale: Locale, car: ToggleCar, added = false): Locator {
   const label = msg(locale, added ? "compareToggle.added" : "compareToggle.add");
-  return scope.getByRole("button", { name: `${label}: ${name}`, exact: true });
+  return scope.getByRole("button", { name: `${label}: ${toggleCarName(locale, car)}`, exact: true });
 }
 
 // ---------------------------------------------------------------------------

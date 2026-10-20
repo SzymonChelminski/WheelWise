@@ -1,16 +1,19 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
-import { carBySlug, cars, cheapest, nameOf } from "./helpers/catalogue";
+import type { Car } from "@/lib/domain/types";
+import { carBySlug, cars, cheapest, nameOf, ranking } from "./helpers/catalogue";
 import { comparisonTable } from "./helpers/comparison";
 import { expect, NOT_FOUND_LINE, PHOTO_FAILED_LINE, photoRoute, test } from "./helpers/fixtures";
 import { LOCALES, msg, type Locale } from "./helpers/text";
 import {
   compareBar,
+  compareToggle,
   interactive,
   listTitle,
   openAssumptions,
   openFilters,
   rankingList,
+  toggleCarName,
   visit,
 } from "./helpers/ui";
 
@@ -294,5 +297,34 @@ test.describe("target size", () => {
       "comparison bar (open)": [],
       filters: [],
     });
+  });
+});
+
+test.describe("compare toggles", () => {
+  test("toggles of cars with the same name on /pl/rankings have distinct accessible names", async ({ page }) => {
+    const shown = ranking("totalCost")
+      .slice(0, 10)
+      .map((item) => item.car);
+    const sharesName = (car: Car) => shown.filter((other) => nameOf(other) === nameOf(car)).length > 1;
+    // The case only exists when at least two of the listed cars share a name.
+    expect(shown.filter(sharesName).length, "listed cars that share a name").toBeGreaterThan(1);
+    const expectedNames = shown.map((car) => toggleCarName("pl", car));
+    expect(new Set(expectedNames).size, "distinct toggle names expected").toBe(shown.length);
+
+    await visit(page, "/pl/rankings");
+    const list = rankingList(page, listTitle("pl", "totalCost"));
+    await expect(list.getByRole("listitem")).toHaveCount(shown.length);
+    for (const [index, car] of shown.entries()) {
+      const row = list.getByRole("listitem").nth(index);
+      // The visible name stays the plain name; only the accessible name of the toggle adds the attributes.
+      await expect(row.getByRole("heading", { level: 3 })).toHaveText(`${index + 1}. ${nameOf(car)}`);
+      await expect(compareToggle(row, "pl", car)).toBeVisible();
+      // Exactly one toggle in the whole list carries this name.
+      await expect(compareToggle(list, "pl", car)).toHaveCount(1);
+    }
+    const names = await list
+      .getByRole("button", { name: new RegExp(`^${msg("pl", "compareToggle.add")}: `) })
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label") ?? button.textContent ?? ""));
+    expect(new Set(names).size, `toggle names: ${names.join(" | ")}`).toBe(shown.length);
   });
 });

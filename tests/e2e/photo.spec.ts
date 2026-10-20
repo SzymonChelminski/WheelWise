@@ -154,7 +154,7 @@ test.describe("model photo on the car page", () => {
     const figure = photoFigure(page);
     await expect(figure.getByRole("img")).toBeVisible();
     const { heading, attributes } = parts(page, "pl");
-    const toggle = compareToggle(page.getByRole("main"), "pl", "Renault Clio");
+    const toggle = compareToggle(page.getByRole("main"), "pl", clio);
     await expect(toggle).toBeVisible();
 
     // DOM order: head (with the compare toggle), photo, body (attributes).
