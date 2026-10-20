@@ -110,7 +110,7 @@ export const KW_TO_METRIC_HORSEPOWER = 1.35962;
 export const POWER_MARKER_PATTERN = /^\d+(?:ch|cv|kw)(?:\+\d+(?:ch|kw))*$/i;
 
 /** French and technical words dropped from car names (whole words, any case). */
-export const NAME_NOISE_PATTERN = /(?<![\p{L}\p{N}])(?:essence|gazole|facelift|bv[am]\d*)(?![\p{L}\p{N}])/giu;
+export const NAME_NOISE_PATTERN = /(?<![\p{L}\p{N}])(?:essence|gazole|facelift|bv(?:ma|[amr])\d*)(?![\p{L}\p{N}])/giu;
 
 /** French words replaced by their English form in car names (whole words, any case). */
 export const NAME_WORD_REPLACEMENTS: readonly { pattern: RegExp; replacement: string }[] = [
@@ -128,6 +128,9 @@ export const NAME_TAIL_START_PATTERN =
 
 /** Separators left dangling at the end of a name after the cut. */
 export const NAME_TRAILING_SEPARATORS_PATTERN = /[\s/\-.,+]+$/;
+
+/** A separator set apart by a space at the end of a name, left behind by a removed word. */
+export const NAME_DETACHED_SEPARATORS_PATTERN = /\s+[/\-.,+]+$/;
 
 /** An upper-case name part up to this many letters is an abbreviation and stays as it is. */
 export const NAME_ABBREVIATION_MAX_LETTERS = 3;

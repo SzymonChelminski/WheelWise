@@ -16,6 +16,7 @@ import {
   KW_TO_METRIC_HORSEPOWER,
   MODEL_NAME_EXCEPTIONS,
   NAME_ABBREVIATION_MAX_LETTERS,
+  NAME_DETACHED_SEPARATORS_PATTERN,
   NAME_NOISE_PATTERN,
   NAME_TAIL_START_PATTERN,
   NAME_TRAILING_SEPARATORS_PATTERN,
@@ -282,14 +283,20 @@ const UNBALANCED_OPENING_BRACKET_PATTERN = /\s*[([]$/;
 
 /**
  * Cuts the French equipment text that follows the model name, the trailing separators it leaves and
- * a trailing opening bracket (and the separators before it).
+ * a trailing opening bracket (and the separators before it). Without a cut only a separator that
+ * stands apart (left behind by a removed word, as in "V8 - BVA") is trimmed: a "+" that is part of
+ * the name ("4MATIC+", "EQA 250+") stays.
  */
 function withoutFrenchTail(text: string): string {
   const cutAt = text.search(NAME_TAIL_START_PATTERN);
-  return (cutAt < 0 ? text : text.slice(0, cutAt))
-    .replace(NAME_TRAILING_SEPARATORS_PATTERN, '')
-    .replace(UNBALANCED_OPENING_BRACKET_PATTERN, '')
-    .replace(NAME_TRAILING_SEPARATORS_PATTERN, '');
+  const wasCut = cutAt >= 0;
+  const result = (wasCut ? text.slice(0, cutAt) : text)
+    .trimEnd()
+    .replace(wasCut ? NAME_TRAILING_SEPARATORS_PATTERN : NAME_DETACHED_SEPARATORS_PATTERN, '');
+  const withoutBracket = result.replace(UNBALANCED_OPENING_BRACKET_PATTERN, '');
+  return withoutBracket === result
+    ? result
+    : withoutBracket.replace(NAME_TRAILING_SEPARATORS_PATTERN, '');
 }
 
 function titleCaseWord(word: string): string {
