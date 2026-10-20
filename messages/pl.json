@@ -79,7 +79,7 @@
   },
   "attr": {
     "body": {
-      "sedan_hatchback": "sedan / hatchback",
+      "sedan_hatchback": "hatchback lub sedan",
       "estate": "kombi",
       "suv": "SUV",
       "coupe": "coupé",
@@ -342,19 +342,19 @@
     "levels": {
       "comfortable": {
         "label": "komfortowo",
-        "note": "auto zajmuje do 10% dochodu"
+        "note": "auto zajmuje do 15% dochodu"
       },
       "reasonable": {
         "label": "rozsądnie",
-        "note": "auto zajmuje 10–15% dochodu"
+        "note": "auto zajmuje 15–20% dochodu"
       },
       "stretch": {
         "label": "na granicy",
-        "note": "auto zajmuje 15–20% dochodu"
+        "note": "auto zajmuje 20–25% dochodu"
       },
       "not_recommended": {
         "label": "niezalecane",
-        "note": "auto zajmuje ponad 20% dochodu"
+        "note": "auto zajmuje ponad 25% dochodu"
       }
     },
     "rangeFrom": "od {min}",
@@ -453,13 +453,13 @@
         "id": "zarobki",
         "heading": "Skala zarobków",
         "paragraphs": [
-          "Skala pokazuje miesięczny dochód netto (na rękę), przy którym całkowity koszt auta, z utratą wartości, zajmuje określoną część budżetu. Opieramy się na regule 20/4/10 i na powszechnych zaleceniach doradców finansowych. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna."
+          "Skala pokazuje miesięczny dochód netto (na rękę), przy którym całkowity koszt auta, z utratą wartości, zajmuje określoną część budżetu. Opieramy się na polskich zaleceniach: wydatki na transport nie powinny przekraczać 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Nasz koszt obejmuje też utratę wartości, dlatego ostatni próg to 25%. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna."
         ],
         "list": [
-          "komfortowo: auto zajmuje do 10% dochodu",
-          "rozsądnie: od 10% do 15%",
-          "na granicy: od 15% do 20%",
-          "niezalecane: ponad 20%"
+          "komfortowo: auto zajmuje do 15% dochodu",
+          "rozsądnie: od 15% do 20%",
+          "na granicy: od 20% do 25%",
+          "niezalecane: ponad 25%"
         ]
       },
       "freshness": {

@@ -116,9 +116,11 @@ export const COST_MODEL = {
   },
   income: {
     // Share of net monthly income taken by the total monthly cost, per level upper bound.
-    shareComfortable: 0.1,
-    shareReasonable: 0.15,
-    shareStretch: 0.2,
+    // Polish guidance (see the methodology page): transport up to 15-20% of net income;
+    // the cost includes depreciation, hence the last threshold of 25%.
+    shareComfortable: 0.15,
+    shareReasonable: 0.2,
+    shareStretch: 0.25,
     roundingStepPln: 100,
   },
 } as const;

@@ -79,7 +79,7 @@
   },
   "attr": {
     "body": {
-      "sedan_hatchback": "saloon / hatchback",
+      "sedan_hatchback": "hatchback or saloon",
       "estate": "estate",
       "suv": "SUV",
       "coupe": "coupé",
@@ -342,19 +342,19 @@
     "levels": {
       "comfortable": {
         "label": "comfortable",
-        "note": "the car takes up to 10% of income"
+        "note": "the car takes up to 15% of income"
       },
       "reasonable": {
         "label": "reasonable",
-        "note": "the car takes 10–15% of income"
+        "note": "the car takes 15–20% of income"
       },
       "stretch": {
         "label": "stretching it",
-        "note": "the car takes 15–20% of income"
+        "note": "the car takes 20–25% of income"
       },
       "not_recommended": {
         "label": "not recommended",
-        "note": "the car takes over 20% of income"
+        "note": "the car takes over 25% of income"
       }
     },
     "rangeFrom": "from {min}",
@@ -453,13 +453,13 @@
         "id": "income",
         "heading": "The income scale",
         "paragraphs": [
-          "The scale shows the net monthly income (take-home pay) at which the total cost of the car, depreciation included, takes a given share of the budget. It follows the 20/4/10 rule and common guidance from financial advisers. Amounts are rounded to 100 zł, and the yearly view is 12 times the monthly amount."
+          "The scale shows the net (take-home) monthly income at which the total cost of the car, including loss of value, takes a given share of the budget. We follow Polish guidance: transport should take no more than 15–20% of net income, and a car that takes over 20% is usually too expensive. Our cost also includes loss of value, so the last threshold is 25%. Amounts are rounded to 100 zł, and the yearly view is 12 times the monthly amount."
         ],
         "list": [
-          "comfortable: the car takes up to 10% of income",
-          "reasonable: 10% to 15%",
-          "stretching it: 15% to 20%",
-          "not recommended: over 20%"
+          "comfortable: the car takes up to 15% of income",
+          "reasonable: 15% to 20%",
+          "stretching it: 20% to 25%",
+          "not recommended: over 25%"
         ]
       },
       "freshness": {
