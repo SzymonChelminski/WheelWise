@@ -74,12 +74,14 @@ Przełącznik jest w rankingach, na stronie auta i w porównaniu. Nie pojawia si
 
 Wybierz auto na liście, aby otworzyć jego stronę. Strona pokazuje:
 
-- Nazwę auta i jego cenę z oznaczeniem „cena orientacyjna”. Pod nią widzisz datę cennika („Cennik z ...”) i link „źródło: ADEME Car Labelling”. Link otwiera otwarty zbiór danych, z którego pochodzi cena.
+- Nazwę auta i, gdy serwis ma zdjęcie modelu, to zdjęcie (zobacz niżej). Strona pokazuje cenę z oznaczeniem „cena orientacyjna”. Pod nią widzisz datę cennika („Cennik z ...”) i link „źródło: ADEME Car Labelling”. Link otwiera otwarty zbiór danych, z którego pochodzi cena.
 - Dane auta: „Nadwozie”, „Segment”, „Napęd”, „Skrzynia biegów”, moc, „Pojemność silnika” i „Zużycie (WLTP)”. Dla hybryd moc to moc samego silnika spalinowego. Dla aut elektrycznych to moc z danych źródłowych, zwykle moc znamionowa, która jest niższa od mocy szczytowej podawanej przez producenta.
 - „Koszt posiadania”: całkowity koszt za wybrany okres i tabelę „Koszty według kategorii” z wierszami „Utrata wartości”, „Paliwo i energia”, „Ubezpieczenie”, „Serwis”, „Części i eksploatacja”, „Opłaty” i „Razem”. Kolumna „Udział” pokazuje, jaką część sumy zajmuje każda kategoria.
 - Dwa wiersze pod tabelą: ile auto będzie warte na końcu Twojego okresu („Po 5 latach auto będzie warte ... (... ceny)”) i ile kosztuje każdy kilometr.
 - „Jakie zarobki na to auto”: skala zarobków (sekcja 6).
 - Przycisk „Porównaj”, który dodaje auto do porównania (sekcja 7).
+
+**Zdjęcie.** Zdjęcie jest poglądowe. Pokazuje model, a niekoniecznie tę samą wersję lub generację co auto na stronie, i ma oznaczenie „Zdjęcie poglądowe”. Zdjęcia pochodzą z Wikimedia Commons. Pod każdym zdjęciem widzisz jego autora, licencję i link do strony pliku w Wikimedia Commons. Gdy serwis nie ma zdjęcia danego modelu, strona go nie pokazuje.
 
 Znak ≈ przed kwotą oznacza szacunek. Cena nie jest ofertą. Link „Jak liczymy” otwiera stronę metodologii, która wyjaśnia każdą liczbę.
 
@@ -95,20 +97,20 @@ Skala ma cztery poziomy. Udział to część Twojego dochodu netto, którą zajm
 
 | Poziom | Znaczenie |
 |---|---|
-| „komfortowo” | auto zajmuje do 10% dochodu |
-| „rozsądnie” | auto zajmuje 10–15% dochodu |
-| „na granicy” | auto zajmuje 15–20% dochodu |
-| „niezalecane” | auto zajmuje ponad 20% dochodu |
+| „komfortowo” | auto zajmuje do 15% dochodu |
+| „rozsądnie” | auto zajmuje 15–20% dochodu |
+| „na granicy” | auto zajmuje 20–25% dochodu |
+| „niezalecane” | auto zajmuje ponad 25% dochodu |
 
 Każdy poziom ma przedział dochodu:
 
 - „od X” oznacza dochód X lub wyższy.
 - „od X do Y” oznacza dochód między X a Y.
-- „do Y” oznacza dochód Y lub niższy. To ostatni poziom, „niezalecane”. Jeśli Twój dochód netto mieści się w tym przedziale, całkowity koszt auta przekracza 20% tego dochodu, a serwis odradza takie auto.
+- „do Y” oznacza dochód Y lub niższy. To ostatni poziom, „niezalecane”. Jeśli Twój dochód netto mieści się w tym przedziale, całkowity koszt auta przekracza 25% tego dochodu, a serwis odradza takie auto.
 
-Przykład dla całkowitego kosztu 2 000 zł miesięcznie: „komfortowo” zaczyna się od 20 000 zł, „rozsądnie” to od 13 300 do 20 000 zł, „na granicy” to od 10 000 do 13 300 zł, a „niezalecane” to do 10 000 zł. Kwoty są zaokrąglone do 100 zł.
+Przykład dla całkowitego kosztu 2 000 zł miesięcznie: „komfortowo” zaczyna się od 13 300 zł, „rozsądnie” to od 10 000 do 13 300 zł, „na granicy” to od 8 000 do 10 000 zł, a „niezalecane” to do 8 000 zł. Kwoty są zaokrąglone do 100 zł.
 
-Skala opiera się na regule 20/4/10 i na powszechnych zaleceniach doradców finansowych. Używa całkowitego kosztu miesięcznego z utratą wartości. To wskazówka, a nie decyzja finansowa.
+Skala opiera się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Całkowity koszt w serwisie obejmuje też utratę wartości, dlatego ostatni próg to 25%. To wskazówka, a nie decyzja finansowa.
 
 ## 7. Porównaj dwa lub trzy auta
 
@@ -135,6 +137,7 @@ Wybierz „PL” lub „EN” w górnym pasku, aby przełączyć się między po
 - **Gama aut jest francuska.** Katalog ma 37 marek. Części aut sprzedawanych w Polsce brakuje. Są wersje sprzedawane tylko we Francji.
 - **Zużycie to wartość WLTP.** Zwykle jest niższe niż w codziennej jeździe, szczególnie w hybrydach plug-in. Rzeczywisty koszt paliwa prawdopodobnie będzie wyższy niż pokazany.
 - **Jak często dane się zmieniają.** Serwis sprawdza wszystkie źródła raz na dobę. Ceny paliw pochodzą ze źródła tygodniowego, cennik aut ze źródła aktualizowanego mniej więcej co kwartał, cena prądu co pół roku, a kurs w dni robocze. Stopka pokazuje, kiedy dane sprawdzono, i datę każdego cennika. Data przy cenie auta to dzień, w którym źródło zaktualizowało dane, a nie dzień sprawdzenia.
-- **Nazwy.** Nazwy aut pochodzą ze źródła. Mogą być pisane wielkimi literami albo zawierać francuskie słowa. Niektóre nazwy mają dwa auta, najczęściej wersję manualną i automatyczną. Listy zawsze pokazują obok nazwy nadwozie, napęd, skrzynię biegów i moc.
+- **Nazwy.** Nazwy aut pochodzą z opisów ze źródła. Serwis usuwa z nich oznaczenie mocy i francuskie słowa oraz zapisuje nazwy modeli zwykłą pisownią, więc kilka nazw może nadal wyglądać nietypowo. Kilka aut może mieć tę samą nazwę, na przykład gdy różnią się paliwem, skrzynią biegów lub mocą. Listy zawsze pokazują obok nazwy nadwozie, napęd, skrzynię biegów i moc. Nadwozie „hatchback lub sedan” to jedna grupa: źródło nie rozróżnia tych dwóch.
+- **Zdjęcia.** Zdjęcia są poglądowe i pochodzą z Wikimedia Commons (sekcja 5). Nowy model może przez pewien czas występować bez zdjęcia.
 - **Przeglądarka.** Serwis wymaga JavaScriptu. Przycisk Wstecz przeglądarki wraca do poprzedniej strony, a nie do poprzedniego filtra.
 - **To nie jest porada.** WheelWise nie jest ofertą handlową ani poradą finansową lub ubezpieczeniową. Przed zakupem sprawdź cenę u dealera i poproś o wycenę ubezpieczenia.

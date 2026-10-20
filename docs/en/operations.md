@@ -234,7 +234,8 @@ The snapshot `data/fixtures/ademe-snapshot.json` and the fixtures are used for l
 3. Save the file as `{ "dataUpdatedAt": "<value>", "rows": [ ... ] }`. The script validates the shape with `ademeRowSchema`.
 4. Run `npm run fixtures:build`. Check the printed counts and the list of unknown makes.
 5. Run `npm run test`. Several tests contain literal values that come from the current snapshot (the number of cars, skipped rows, prices of reference cars). Update them after you have checked that the new values are right.
-6. Commit the snapshot, `data/fixtures/cars.json` and the tests.
+6. If the catalogue has new models, refresh the photos (section 5.7).
+7. Commit the snapshot, `data/fixtures/cars.json`, the photo files and the tests.
 
 ### 5.5 Force a catalogue write
 
@@ -261,6 +262,26 @@ Read the release notes and the security advisories on the [Next.js blog](https:/
 3. Run `npm run test:e2e` (it needs `npx playwright install chromium` once).
 4. Commit `package.json` and `package-lock.json`, and deploy.
 
+### 5.7 Refresh the model photos
+
+The car pages show one photo for each make and model. The photos are not loaded at run time. A script finds them on Wikimedia Commons, and the result is committed in `data/model-images.json`. A model that has no entry in that file shows no photo, and the page works without it. A new model gets a photo only after you do the steps below.
+
+Do this when the catalogue has new models, for example after you refresh the snapshot (section 5.4). The script reads the models from `data/fixtures/cars.json`, not from the database. Run `npm run fixtures:build` first, so that the file holds the new models.
+
+1. Run the script. It calls the live Wikipedia and Wikimedia Commons APIs, so it needs network access, and it takes about two minutes for the current catalogue. It waits between requests on purpose. Do not run it in a loop. The table goes to a file, and the progress goes to the terminal:
+
+   ```bash
+   npm run images:build --silent > images.tsv
+   ```
+
+2. If the script stops with a message such as `Network error while requesting commons.wikimedia.org` or `commons.wikimedia.org answered 429`, no file was changed. Wait and run it again.
+3. Open `images.tsv`. Each line has the model key, the Wikipedia article, the Commons file, the licence and, when there is no photo, the reason. For each new model, check that the article is the same make and model, and that the generation is close to the car in the catalogue. Open the file page if you are not sure.
+4. If a model has the wrong photo or none, add an entry to `data/model-image-overrides.json` and run the script again. The entry is `{ "article": "<English Wikipedia title>" }`, `{ "file": "File:<name on Commons>" }`, or `null` for no photo. The format is in the [developer guide](developer-guide.md#76-model-photos).
+5. Run `git diff data/model-images.json`. The script resolves every model again, so also check the lines that changed for models you did not touch. A lead image on Wikipedia can change.
+6. Delete `images.tsv`. Commit `data/model-images.json` and `data/model-image-overrides.json`, then deploy. The site reads the file at build time, so the photos appear after a new deployment.
+
+The script accepts only files with the licence CC0, public domain, CC BY or CC BY-SA, at least 1280 px wide. A model with no such file gets no photo. The site shows the author, the licence and a link to Commons under each photo, and this is the attribution that the licences ask for. Keep it.
+
 ## 6. Running cost
 
 Every service that the project uses is free:
@@ -270,6 +291,7 @@ Every service that the project uses is free:
 | Vercel | Hobby | Hosting, one daily Cron Job, one function with a 300 second limit. |
 | Neon | Free | One Postgres database. The data is about 1 MB. |
 | Data sources | Free | ADEME, European Commission, NBP, Eurostat. No key and no account. |
+| Wikimedia Commons | Free | Photos of car models. The visitor's browser loads them from `upload.wikimedia.org`. The site calls no API at run time. The photo script uses the public APIs without a key. |
 
 Limits that matter for this project:
 

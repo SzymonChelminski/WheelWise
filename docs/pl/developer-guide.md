@@ -13,6 +13,7 @@ Ten przewodnik jest dla programisty, który zaczyna pracę z projektem. Wyjaśni
 | Pobieranie danych | `src/ingest/` | Adaptery źródeł i codzienne zadanie. Uruchamia je Vercel Cron Job przez `GET /api/cron/daily`. Skrypt `scripts/refresh.ts` uruchamia je z wiersza poleceń. |
 | Silnik kosztów | `src/lib/costs/` | Czyste funkcje bez operacji wejścia i wyjścia. Liczą koszty, skalę zarobków i rankingi. Serwer i przeglądarka używają tego samego kodu. |
 | Dostęp do danych | `src/lib/data/` | Funkcje odczytu z pamięcią podręczną, które wywołują strony. |
+| Zdjęcia modeli | `scripts/build-model-images.ts`, `data/model-images.json`, `src/lib/catalog/model-images.ts`, `src/components/ui/CarPhoto.tsx` | Skrypt uruchamiany ręcznie znajduje na Wikimedia Commons jedno wolne zdjęcie każdego modelu auta. Strona auta czyta wynik z zatwierdzonego pliku. Zobacz sekcję 7.6. |
 | Interfejs | `src/app/[locale]/`, `src/components/` | Strony, komponenty systemu projektowego i komponenty funkcji. |
 | Konfiguracja | `src/config/` | Parametry modelu kosztów, reguły katalogu, adresy i limity źródeł, adres serwisu, czasy wyszukiwania aut. |
 
@@ -102,11 +103,14 @@ data/brands.json                     marka -> nazwa wyświetlana, klasa, utrzyma
 data/fixtures/ademe-snapshot.json    zapisane wiersze ADEME (3604 wiersze, zbiór z 2026-09-14)
 data/fixtures/cars.json              katalog zbudowany z migawki (489 aut)
 data/fixtures/market-prices.json     przykładowe ceny rynkowe dla trybu lokalnego i bootstrapu
+data/model-names.json                wyjątki od reguły wielkości liter w nazwach aut (sekcja 7.2)
+data/model-images.json               zdjęcie każdego modelu auta, tworzone przez images:build (sekcja 7.6)
+data/model-image-overrides.json      ręczne wybory dla images:build (sekcja 7.6)
 design/DESIGN.md, design/screens/    specyfikacja projektu i zrzuty ekranu
 docs/en/, docs/pl/                   dokumentacja
 drizzle/                             migracje SQL wygenerowane przez drizzle-kit
 messages/pl.json, messages/en.json   wszystkie teksty interfejsu
-scripts/                             db-migrate, db-bootstrap, refresh, build-fixture-catalog
+scripts/                             db-migrate, db-bootstrap, refresh, build-fixture-catalog, build-model-images
 src/app/[locale]/                    strony: główna, rankings/, cars/[slug]/, compare/, methodology/, not-found, error
 src/app/[locale]/design-preview/     statyczne układy projektu (wyłączone, dopóki ich nie włączysz, zobacz sekcję 10)
 src/app/api/cron/daily/route.ts      trasa cron
@@ -117,7 +121,7 @@ src/config/                          cost-model.ts, catalog.ts, sources.ts, site
 src/db/                              schemat, klient, migracje, bootstrap, repozytoria
 src/i18n/                            routing next-intl, konfiguracja żądania, pomocnicy nawigacji
 src/ingest/                          uruchamianie zadania, adaptery źródeł, pomocnicy HTTP
-src/lib/catalog/                     budowanie katalogu
+src/lib/catalog/                     budowanie katalogu i wyszukiwanie zdjęć (model-images.ts)
 src/lib/costs/                       silnik kosztów i skala zarobków
 src/lib/data/                        funkcje odczytu z pamięcią podręczną
 src/lib/domain/                      typy, schematy Zod, wczytywanie założeń
@@ -147,7 +151,7 @@ Zmienne środowiskowe:
 | `NEXT_PUBLIC_DESIGN_PREVIEW` | Nie | Wartość `1` włącza trasy `/design-preview`. |
 | `VERCEL_PROJECT_PRODUCTION_URL` | Ustawia Vercel | Domena produkcyjna projektu, bez schematu. Nie ustawiaj jej sam. |
 
-Plik `.env.example` wymienia zmienne. Skopiuj go do `.env.local`, aby ustawić wartości dla `npm run dev`, `npm run build` i `npm run start`. Next.js czyta ten plik. Skrypty uruchamiane przez `tsx` (`db:migrate`, `db:bootstrap`, `refresh`, `fixtures:build`) go nie czytają. Dla nich ustaw zmienną w powłoce:
+Plik `.env.example` wymienia zmienne. Skopiuj go do `.env.local`, aby ustawić wartości dla `npm run dev`, `npm run build` i `npm run start`. Next.js czyta ten plik. Skrypty uruchamiane przez `tsx` (`db:migrate`, `db:bootstrap`, `refresh`, `fixtures:build`, `images:build`) go nie czytają. Dla nich ustaw zmienną w powłoce:
 
 ```bash
 DATABASE_URL="postgres://..." npm run db:migrate
@@ -183,6 +187,7 @@ Na Vercel adres nigdy nie jest `localhost`, chyba że sam tak ustawisz. Operator
 | `npm run db:migrate` | Stosuje migracje z `drizzle/` do bazy z `DATABASE_URL`. Zastosowane migracje są pomijane. W trybie lokalnym wypisuje `local mode: nothing to migrate`. |
 | `npm run db:bootstrap` | Ładuje dane przykładowe do pustej bazy (zobacz sekcję 7). W trybie lokalnym tylko sprawdza dane przykładowe i wypisuje ich liczbę. |
 | `npm run fixtures:build` | Odtwarza `data/fixtures/cars.json` z `data/fixtures/ademe-snapshot.json` i `data/brands.json`, przy stałym kursie 4,3 PLN za EUR. Wypisuje liczby aut według marki, napędu, nadwozia i powodu pominięcia. |
+| `npm run images:build` | Znajduje jedno zdjęcie każdego modelu auta przez API Wikipedii i Wikimedia Commons i zapisuje `data/model-images.json`. Wymaga dostępu do sieci. Zobacz sekcję 7.6. |
 | `npm run refresh` | Uruchamia codzienne zadanie jeden raz. Z `-- --dry-run` niczego nie zapisuje. Zobacz sekcję 8. |
 
 ## 5. Model domeny i model kosztów
@@ -242,14 +247,18 @@ Aby zmienić parametr:
 
 | Poziom (`AffordabilityLevel`) | Udział dochodu | Przedział dochodu |
 |---|---|---|
-| `comfortable` | do 10% | od kosztu / 0,10 |
-| `reasonable` | od 10% do 15% | od kosztu / 0,15 do kosztu / 0,10 |
-| `stretch` | od 15% do 20% | od kosztu / 0,20 do kosztu / 0,15 |
-| `not_recommended` | ponad 20% | do kosztu / 0,20 |
+| `comfortable` | do 15% | od kosztu / 0,15 |
+| `reasonable` | od 15% do 20% | od kosztu / 0,20 do kosztu / 0,15 |
+| `stretch` | od 20% do 25% | od kosztu / 0,25 do kosztu / 0,20 |
+| `not_recommended` | ponad 25% | do kosztu / 0,25 |
 
-Każda granica jest zaokrąglana do 100 PLN. Koszt, który nie jest liczbą dodatnią, daje zerowe granice. Dla całkowitego kosztu miesięcznego 2000 PLN granice to 20000, 13300 i 10000. Widok roczny mnoży granice miesięczne przez 12 (`earningsLevels` w `src/components/features/car/car-format.ts`).
+Każda granica jest zaokrąglana do 100 PLN. Koszt, który nie jest liczbą dodatnią, daje zerowe granice. Dla całkowitego kosztu miesięcznego 2000 PLN granice to 13300, 10000 i 8000. Widok roczny mnoży granice miesięczne przez 12 (`earningsLevels` w `src/components/features/car/car-format.ts`).
 
-Udziały to `shareComfortable` (0,1), `shareReasonable` (0,15) i `shareStretch` (0,2) w `COST_MODEL.income`. Krok zaokrąglenia to `roundingStepPln` (100). Procenty występują też w tekstach: `car.levels.*.note` i lista dochodu w `methodology.sections.income` w obu plikach tekstów. Zmieniaj je razem z liczbami.
+Udziały to `shareComfortable` (0,15), `shareReasonable` (0,2) i `shareStretch` (0,25) w `COST_MODEL.income`. Krok zaokrąglenia to `roundingStepPln` (100).
+
+Progi opierają się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Całkowity koszt w WheelWise obejmuje też utratę wartości, dlatego ostatni próg to 25%. Strona metodologii podaje ten sam powód (`methodology.sections.income` w plikach tekstów).
+
+Procenty występują też w tekstach: `car.levels.*.note` i lista dochodu w `methodology.sections.income` w obu plikach tekstów. Zmieniaj je razem z liczbami.
 
 ## 7. Katalog
 
@@ -273,7 +282,7 @@ Katalog pochodzi z otwartego zbioru ADEME „Car Labelling”, przez jego API JS
    | | `ESS+ELEC HNR` (w tym miękkie hybrydy) | `hybrid` |
    | | `ELEC+ESSENC HR` | `phev` |
    | | `ELECTRIC` | `ev` |
-   | `Carrosserie` | `BERLINE` | `sedan_hatchback` |
+   | `Carrosserie` | `BERLINE` | `sedan_hatchback` (etykieta „hatchback lub sedan”) |
    | | `BREAK` | `estate` |
    | | `TS TERRAINS/CHEMINS` | `suv` |
    | | `COUPE` | `coupe` |
@@ -289,8 +298,19 @@ Katalog pochodzi z otwartego zbioru ADEME „Car Labelling”, przez jego API JS
 6. **Grupowanie.** Jedno auto to jedna grupa wierszy o tej samej marce, modelu, nadwoziu, napędzie, skrzyni biegów i mocy. Dla aut na LPG moc nie należy do klucza grupy, bo zbiór wymienia wersję dwupaliwową dwa razy (po jednym wierszu dla każdego paliwa) z różną mocą.
 7. **Wersja reprezentatywna.** Grupę reprezentuje najtańszy wiersz. Remisy rozstrzyga niższe zużycie, potem opis, potem pojemność silnika. Dla aut na LPG moc i zużycie to najwyższe wartości spośród wierszy o takim samym opisie jak wiersz reprezentatywny. Nazwa i cena należą do wersji reprezentatywnej. Wersje, które różnią się tylko napędem, pojemnością baterii, liczbą miejsc lub długością, stają się jednym autem.
 8. **Przeliczenie ceny.** `listPricePln = round_to_100(priceEur x eurPln x 1.23 / 1.20)`. Funkcja zamienia francuski VAT 20% na polski VAT 23%. `eurPln` to średni kurs NBP z tabeli A. Francuska premia i kara ekologiczna (bonus i malus) nie wchodzą do ceny.
-9. **Slug.** Małe litery ASCII połączone myślnikami: marka, model, nadwozie, napęd, skrzynia biegów i `<moc>kw`, na przykład `alfa-romeo-giulia-sedan-hatchback-diesel-automatic-118kw`. Jeśli dwa auta dostają ten sam slug, najtańsze go zachowuje, a pozostałe dostają `-2`, `-3` i tak dalej.
-10. **Nazwa.** Wariant to opis handlowy wiersza reprezentatywnego, bez powtórzonej marki i z dodanym modelem, gdy opis go nie ma. Nazwy zostają takie, jak podaje źródło, do 103 znaków.
+9. **Slug.** Adres strony auta. Małe litery ASCII połączone myślnikami: marka (nazwa wyświetlana), kod modelu, nadwozie, napęd, skrzynia biegów i moc w KM (koniach mechanicznych) jako `<n>km`. Nadwozie jest pomijane, gdy ma wartość `sedan_hatchback`, którą interfejs nazywa „hatchback lub sedan”. Liczba to `Math.round(powerKw * 1.35962)`, czyli ten sam współczynnik, którego interfejs używa do pokazania mocy. Jednostka `km` zostaje także w angielskich adresach. Przykłady: `renault-clio-diesel-manual-101km`, `dacia-jogger-estate-lpg-manual-101km`. Jeśli dwa auta dostają ten sam slug, najtańsze go zachowuje, a pozostałe dostają `-2`, `-3` i tak dalej. W obecnym katalogu przykładowym żaden slug nie ma takiej końcówki.
+10. **Nazwa.** Wariant to opis handlowy wiersza reprezentatywnego, uczytelniony w tych krokach (`displayVariant`):
+    1. Usuń powtórzoną markę (nazwę wyświetlaną i zapis ze zbioru) z początku. Dodaj nazwę modelu, gdy opis jej nie ma.
+    2. Usuń każde oznaczenie mocy w nawiasie, na przykład `(101ch)`, `(94ch+24Kw)` lub `(57Kw)`. Interfejs pokazuje moc osobno w KM i hp (`POWER_MARKER_PATTERN`).
+    3. Usuń słowa `Essence`, `Gazole`, `facelift` i kody skrzyń biegów, takie jak `BVM6` (`NAME_NOISE_PATTERN`). Zamień `Hybride` na `Hybrid` i `Électrique` na `Electric` (`NAME_WORD_REPLACEMENTS`).
+    4. Utnij francuski opis wyposażenia po modelu. Nazwa kończy się przed pierwszym całym słowem ze stałej listy (`de`, `avec`, `et`, `pour`, `sans`, `norme`, `freins`, `système`, `moteur` i inne, zobacz `NAME_TAIL_START_PATTERN`). Znaki rozdzielające `/ - . , +` i niezamknięty nawias na końcu są usuwane. Słowa `Classe` nie ma na liście, bo jest częścią nazw modeli Mercedesa.
+    5. Zastosuj regułę wielkości liter (niżej). Jeśli wynik jest pusty, nazwą jest kod modelu zapisany zwykłą pisownią.
+
+    Reguła wielkości liter działa na każdym słowie. Znaki `-`, `/` i `.` dzielą słowo na części. Część pisana w całości wielkimi literami i dłuższa niż 3 litery dostaje wielką pierwszą literę i małe pozostałe (`CLIO` daje `Clio`). Krótsza część zostaje bez zmian (`GT`, `RS`, `C-HR`). Słowo z cyframi lub innymi znakami zostaje bez zmian (`ID.3`, `M340i`). Plik `data/model-names.json` zawiera wyjątki: słowo lub część wielkimi literami i pisownię, której trzeba użyć. Są tam prawdziwe pisownie, w których reguła się myli, na przykład `RIO` (`Rio`), `T-ROC` (`T-Roc`) oraz skróty `TFSI`, `MHEV` i `PHEV`. Aby dodać wyjątek, dopisz klucz i wartość, a potem uruchom `npm run fixtures:build`.
+
+    Przykłady: `GIULIA 2.0 T Essence (200ch) AT8` daje `Giulia 2.0 T AT8`. `Karoq 1.5 TSI 4*2 DSG7 norme AP freins 15'' Ambition Classe A avec alt 140A famA` daje `Karoq 1.5 TSI 4*2 DSG7`.
+
+    Auta, które różnią się tylko paliwem, skrzynią biegów lub mocą, mogą mieć tę samą nazwę. Interfejs pokazuje obok każdej nazwy nadwozie, napęd, skrzynię biegów i moc, a slug jest unikalny.
 11. **Dane marki.** Marka, której nie ma w `data/brands.json`, dostaje nazwę ze zbioru zapisaną w formie „Tytułowej”, klasę `mainstream` i utrzymanie wartości `average`. Funkcja wpisuje ją do `unknownMakes`, a codzienne zadanie zgłasza ją jako błąd.
 
 ### 7.3 `data/brands.json`
@@ -311,7 +331,7 @@ Aby zmienić nazwę, klasę lub utrzymanie wartości, zmień wpis. Aby dodać ma
 
 - `src/config/catalog.ts` zawiera mapowania wartości, poprawne zakresy, stawki VAT, zaokrąglenie ceny, reguły mocy aut elektrycznych i wartości domyślne dla nieznanych marek. Aby obsłużyć nową wartość zbioru, dodaj ją do właściwej tabeli i odtwórz dane przykładowe.
 - `data/fixtures/ademe-snapshot.json` to zapisana kopia zbioru. Jej kształt to `{ "dataUpdatedAt": "<data i czas ISO>", "rows": [ ... ] }`, a każdy wiersz ma pola z `ademeRowSchema` (`src/lib/catalog/ademe-schema.ts`). Nieznane pola są ignorowane, a puste wartości to `null`.
-- `npm run fixtures:build` czyta migawkę i `data/brands.json`, buduje katalog przy stałym kursie 4,3 PLN za EUR i zapisuje `data/fixtures/cars.json`. Przy niezmienionych danych wejściowych wynik jest równy zatwierdzonemu plikowi. Po poleceniu uruchom `git diff`, aby to sprawdzić.
+- `npm run fixtures:build` czyta migawkę, `data/brands.json` i (przez `src/config/catalog.ts`) `data/model-names.json`, buduje katalog przy stałym kursie 4,3 PLN za EUR i zapisuje `data/fixtures/cars.json`. Przy niezmienionych danych wejściowych wynik jest równy zatwierdzonemu plikowi. Po poleceniu uruchom `git diff`, aby to sprawdzić.
 - Tryb lokalny i pierwsze wdrożenie ładują `data/fixtures/cars.json` i `data/fixtures/market-prices.json`. Przykładowe ceny rynkowe mają źródło `fixture`. Prawdziwe dane zawsze je zastępują.
 
 ### 7.5 Bootstrap przy pierwszym wdrożeniu
@@ -323,6 +343,65 @@ Aby zmienić nazwę, klasę lub utrzymanie wartości, zmień wpis. Aby dodać ma
 - Nigdy nie zmienia ani nie usuwa istniejących wierszy, więc można go bezpiecznie uruchomić ponownie.
 
 Polecenie wypisuje `bootstrap done: <n> cars loaded, <m> market prices loaded`. Przy drugim uruchomieniu obie liczby to 0.
+
+### 7.6 Zdjęcia modeli
+
+Strona auta pokazuje jedno poglądowe zdjęcie modelu, a pod nim autora, licencję i link do źródła. Zdjęcia pochodzą z Wikimedia Commons. Skrypt znajduje je wcześniej, a wynik jest zatwierdzony w repozytorium. Działający serwis nie wysyła żadnych zapytań do Wikipedii ani do Commons. Przeglądarka pobiera każdy obraz z `upload.wikimedia.org`.
+
+**Pliki.**
+
+| Plik | Rola |
+|---|---|
+| `scripts/build-model-images.ts` | Skrypt uruchamiany przez `npm run images:build`. |
+| `data/model-images.json` | Tworzony przez skrypt i zatwierdzany. Obiekt, który przypisuje kluczowi modelu rekord zdjęcia albo `null`, gdy model nie ma użytecznego zdjęcia. |
+| `data/model-image-overrides.json` | Prowadzony ręcznie. Wybory, które zastępują automatyczne wyszukiwanie (zobacz niżej). |
+| `src/lib/catalog/model-images.ts` | `modelKey(car)` i `getModelImage(car)`. Sprawdza `data/model-images.json` przez Zod przy ładowaniu modułu i nie używa sieci. |
+| `src/components/ui/CarPhoto.tsx` | Komponent. Eksportuje też typ `CarPhotoData`. |
+| `src/components/features/car/CarDetails.tsx` | Przekazuje `getModelImage(car)` i teksty `car.photo.*` do `CarPhoto`. |
+
+**Klucz.** `modelKey(car)` to `toSlug(make) + "/" + toSlug(model)`, na przykład `renault/clio`. Używa nazwy wyświetlanej marki i kodu modelu ze zbioru, więc wszystkie wersje modelu mają jedno zdjęcie.
+
+**Rekord zdjęcia (`CarPhotoData`).**
+
+| Pole | Znaczenie |
+|---|---|
+| `sources` | Trzy miniatury o szerokościach 500, 960 i 1280, jako adresy `https://upload.wikimedia.org/...`. Komponent używa ich jako `srcset`. |
+| `width`, `height` | Rozmiar pliku oryginalnego w pikselach. Z nich komponent bierze proporcje ramki. |
+| `author` | Zwykły tekst, najwyżej 120 znaków. Pole autora z Commons bez HTML albo nazwa osoby, która wgrała plik, gdy pole jest puste. |
+| `license`, `licenseUrl` | Krótka nazwa licencji, na przykład `CC BY-SA 4.0`, i jej adres (`null`, gdy Commons go nie podaje). |
+| `sourceUrl` | Strona pliku na `commons.wikimedia.org`. |
+
+**Jak działa skrypt.** Czyta `data/fixtures/cars.json` (nie bazę danych) i `data/model-image-overrides.json`. Każdy klucz modelu obsługuje po kolei:
+
+1. Jeśli klucz ma wpis w pliku wyjątków, skrypt go używa. `{ "article": "<tytuł w angielskiej Wikipedii>" }` bierze główny obraz tego artykułu. `{ "file": "File:<nazwa w Commons>" }` bierze ten plik. `null` oznacza brak zdjęcia celowo.
+2. W przeciwnym razie szuka w angielskiej Wikipedii frazy „marka model” (pięć wyników). Bierze pierwszy artykuł, którego tytuł zawiera markę i model (wielkość liter, akcenty i znaki interpunkcyjne nie mają znaczenia) i którego krótki opis nazywa samochód (automobile, car, vehicle, SUV i podobne słowa). Potem bierze główny obraz artykułu.
+3. Pyta Commons o plik. Wpis dostaje wartość `null`, gdy pliku nie ma na Commons, gdy licencji nie ma na liście dozwolonych, gdy plik ma oznaczenie `NonFree`, gdy jest to SVG, gdy jego szerokość jest mniejsza niż 1280 px, gdy brakuje jednej z trzech miniatur albo gdy nie znamy autora.
+4. Lista dozwolonych licencji to CC0, domena publiczna, CC BY i CC BY-SA. Limit szerokości wynika stąd, że Wikimedia podaje plik węższy niż żądana szerokość jako oryginał, a nie jako miniaturę.
+5. Adresy miniatur pochodzą z odpowiedzi API. API podaje host `thumb.wikimedia.org`, a skrypt zapisuje tę samą ścieżkę z hostem `upload.wikimedia.org`.
+
+Gdy wszystkie klucze są gotowe, skrypt zapisuje `data/model-images.json`, posortowany po kluczu, z wcięciem dwóch spacji i końcowym znakiem nowego wiersza. Błąd (sieci, HTTP lub API) zatrzymuje skrypt z kodem wyjścia 1, zanim cokolwiek zapisze, więc plik nigdy nie jest niepełny. Skrypt przestrzega zasad Wikimedia dla zautomatyzowanych klientów. Wysyła jedno zapytanie naraz, czeka co najmniej 150 ms między zapytaniami, wysyła User-Agent z adresem repozytorium, ustawia `maxlag=5` i powtarza zapytanie raz po odpowiedzi 429, odpowiedzi 5xx lub błędzie `maxlag`.
+
+**Wyjście.** Standardowe wyjście ma jeden wiersz na model, rozdzielony tabulatorami: klucz, artykuł, plik, licencja i uwaga z powodem, gdy zdjęcia nie ma. Postęp i ostrzeżenia idą na standardowe wyjście błędów. Ostrzeżenie pojawia się, gdy wyjątek podaje klucz, którego nie ma żaden model katalogu. Aby zapisać tabelę w pliku:
+
+```bash
+npm run images:build --silent > images.tsv
+```
+
+Opcja `--silent` zapobiega temu, by npm dopisał do tabeli własny nagłówek.
+
+**Wyjątki.** Automatyczne wyszukiwanie może wybrać złą generację albo zły model, a dla niektórych modeli niczego nie znajduje. Dodaj wpis do `data/model-image-overrides.json`, uruchom skrypt ponownie i sprawdź wynik:
+
+```json
+{
+  "bmw/118": { "article": "BMW 1 Series (F70)" },
+  "alfa-romeo/giulia": { "file": "File:Alfa Romeo Giulia 952 Veloce Banchise White 01.jpg" },
+  "some-make/some-model": null
+}
+```
+
+**Na stronie.** `CarPhoto` nie rysuje niczego, gdy model nie ma wpisu w `data/model-images.json` (model z nowszego katalogu), gdy wpis ma wartość `null` albo gdy obraz nie wczyta się w przeglądarce. Układ strony zamyka wtedy lukę. Komponent pokazuje oznaczenie „Zdjęcie poglądowe”, bo zdjęcie pokazuje model, a niekoniecznie tę samą wersję lub generację. Używa zwykłego `<img>`, a nie `next/image`, więc obrazy nie zużywają limitu obrazów planu hostingu. Teksty to `car.photo.*` w plikach tekstów. Strona metodologii wymienia Wikimedia Commons w tabeli źródeł i mówi, że zdjęcia są poglądowe.
+
+Kroki odświeżenia zdjęć opisuje [przewodnik operatora](operations.md#57-odśwież-zdjęcia-modeli).
 
 ## 8. Pobieranie danych
 
@@ -440,7 +519,9 @@ Dane i model:
 - Zbiór jest aktualizowany mniej więcej co kwartał. Data ceny jest pokazana przy każdej cenie.
 - Utrata wartości, ubezpieczenie, serwis, części i opłaty to szacunki modelu. Zużycie to wartość WLTP, która jest niższa niż w rzeczywistej jeździe, szczególnie dla hybryd plug-in.
 - Auta elektryczne pokazują dla większości modeli moc znamionową (ciągłą). Hybrydy pokazują tylko moc silnika spalinowego.
-- Nazwy aut to opisy ze źródła. 39 nazw ma po dwa auta (głównie wersje manualna i automatyczna), więc interfejs zawsze pokazuje obok nazwy nadwozie, napęd, skrzynię biegów i moc.
+- Nazwy aut to opisy ze źródła, z usuniętym oznaczeniem mocy i francuskimi słowami oraz z nazwami modeli zapisanymi zwykłą pisownią (sekcja 7.2). Reguła jest mechaniczna, więc kilka nazw może nadal zawierać francuskie lub techniczne słowo, którego reguła nie zna. 59 nazw ma po dwa auta lub więcej (do 8), więc interfejs zawsze pokazuje obok nazwy nadwozie, napęd, skrzynię biegów i moc.
+- Adresy aut zmieniły się razem z regułą sluga (sekcja 7.2). Adresy w starym formacie zwracają `404` i nie są przekierowywane. Pasek porównania po cichu usuwa z zapisanego porównania auta, których adresu nie ma w katalogu.
+- Zdjęcia są poglądowe. Zdjęcie może pokazywać inną wersję lub generację modelu niż strona. Skrypt wybiera po tytule artykułu i krótkim opisie, więc człowiek musi sprawdzić wynik (sekcja 7.6). Nowy model nie ma zdjęcia, dopóki skrypt nie zostanie uruchomiony ponownie.
 - Model zakłada zakup za gotówkę. Nie obejmuje kredytu, leasingu, parkingu, opłat drogowych, mandatów, mycia i przechowywania opon.
 - Zmiana w `data/brands.json` lub w mapowaniach trafia do bazy dopiero przy następnym zapisie katalogu (sekcja 8.4).
 - `replaceCatalog` nie jest atomowa. Jeśli zapis zawiedzie w środku, baza zawiera mieszankę starych i nowych poprawnych cen. W takim przypadku żadne auto nie jest dezaktywowane, a następne codzienne uruchomienie zapisuje katalog ponownie.

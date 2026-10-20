@@ -234,7 +234,8 @@ Migawka `data/fixtures/ademe-snapshot.json` i dane przykładowe służą do tryb
 3. Zapisz plik jako `{ "dataUpdatedAt": "<wartość>", "rows": [ ... ] }`. Skrypt sprawdza kształt przez `ademeRowSchema`.
 4. Uruchom `npm run fixtures:build`. Sprawdź wypisane liczby i listę nieznanych marek.
 5. Uruchom `npm run test`. Kilka testów zawiera dosłowne wartości pochodzące z obecnej migawki (liczba aut, pominięte wiersze, ceny aut wzorcowych). Zmień je po sprawdzeniu, że nowe wartości są poprawne.
-6. Zatwierdź migawkę, `data/fixtures/cars.json` i testy.
+6. Jeśli katalog ma nowe modele, odśwież zdjęcia (sekcja 5.7).
+7. Zatwierdź migawkę, `data/fixtures/cars.json`, pliki zdjęć i testy.
 
 ### 5.5 Wymuś zapis katalogu
 
@@ -261,6 +262,26 @@ Przeczytaj uwagi o wydaniu i ostrzeżenia bezpieczeństwa na [blogu Next.js](htt
 3. Uruchom `npm run test:e2e` (wymaga jednorazowo `npx playwright install chromium`).
 4. Zatwierdź `package.json` i `package-lock.json` i wdróż.
 
+### 5.7 Odśwież zdjęcia modeli
+
+Strony aut pokazują jedno zdjęcie dla każdej marki i modelu. Zdjęcia nie są pobierane w czasie działania serwisu. Skrypt znajduje je na Wikimedia Commons, a wynik jest zatwierdzony w `data/model-images.json`. Model, który nie ma wpisu w tym pliku, nie pokazuje zdjęcia, a strona działa bez niego. Nowy model dostaje zdjęcie dopiero po wykonaniu poniższych kroków.
+
+Zrób to, gdy w katalogu pojawią się nowe modele, na przykład po odświeżeniu migawki (sekcja 5.4). Skrypt czyta modele z `data/fixtures/cars.json`, a nie z bazy danych. Najpierw uruchom `npm run fixtures:build`, aby plik zawierał nowe modele.
+
+1. Uruchom skrypt. Wywołuje on prawdziwe API Wikipedii i Wikimedia Commons, więc wymaga dostępu do sieci, a dla obecnego katalogu trwa około dwóch minut. Celowo czeka między zapytaniami. Nie uruchamiaj go w pętli. Tabela trafia do pliku, a postęp do terminala:
+
+   ```bash
+   npm run images:build --silent > images.tsv
+   ```
+
+2. Jeśli skrypt zatrzyma się z komunikatem takim jak `Network error while requesting commons.wikimedia.org` lub `commons.wikimedia.org answered 429`, żaden plik nie został zmieniony. Poczekaj i uruchom go ponownie.
+3. Otwórz `images.tsv`. Każdy wiersz ma klucz modelu, artykuł z Wikipedii, plik z Commons, licencję i, gdy zdjęcia nie ma, powód. Dla każdego nowego modelu sprawdź, czy artykuł dotyczy tej samej marki i modelu oraz czy generacja jest zbliżona do auta w katalogu. Gdy nie masz pewności, otwórz stronę pliku.
+4. Jeśli model ma złe zdjęcie albo żadne, dodaj wpis do `data/model-image-overrides.json` i uruchom skrypt ponownie. Wpis to `{ "article": "<tytuł w angielskiej Wikipedii>" }`, `{ "file": "File:<nazwa w Commons>" }` albo `null` dla braku zdjęcia. Format opisuje [przewodnik programisty](developer-guide.md#76-zdjęcia-modeli).
+5. Uruchom `git diff data/model-images.json`. Skrypt ustala zdjęcia wszystkich modeli od nowa, więc sprawdź też zmienione wiersze modeli, których nie ruszałeś. Główny obraz artykułu w Wikipedii może się zmienić.
+6. Usuń `images.tsv`. Zatwierdź `data/model-images.json` i `data/model-image-overrides.json`, a potem wdróż. Serwis czyta plik podczas budowania, więc zdjęcia pojawiają się po nowym wdrożeniu.
+
+Skrypt przyjmuje tylko pliki z licencją CC0, domena publiczna, CC BY lub CC BY-SA, o szerokości co najmniej 1280 px. Model bez takiego pliku nie dostaje zdjęcia. Serwis pokazuje pod każdym zdjęciem autora, licencję i link do Commons. To jest podanie autorstwa, którego wymagają licencje. Zachowaj je.
+
 ## 6. Koszt utrzymania
 
 Każda usługa używana przez projekt jest darmowa:
@@ -270,6 +291,7 @@ Każda usługa używana przez projekt jest darmowa:
 | Vercel | Hobby | Hosting, jedno codzienne zadanie Cron, jedna funkcja z limitem 300 sekund. |
 | Neon | Free | Jedna baza Postgres. Dane zajmują około 1 MB. |
 | Źródła danych | Darmowe | ADEME, Komisja Europejska, NBP, Eurostat. Bez klucza i bez konta. |
+| Wikimedia Commons | Darmowe | Zdjęcia modeli aut. Przeglądarka odwiedzającego pobiera je z `upload.wikimedia.org`. Serwis nie wywołuje żadnego API w czasie działania. Skrypt zdjęć używa publicznych API bez klucza. |
 
 Limity ważne dla tego projektu:
 

@@ -74,12 +74,14 @@ The switch is on the rankings, the car page and the comparison. It does not appe
 
 Select a car in a list to open its page. The page shows:
 
-- The name of the car and its price with the tag "indicative price". Below it you see the date of the price list ("Price list of ...") and a link "source: ADEME Car Labelling". The link opens the open dataset where the price comes from.
+- The name of the car, and a photo of the model when the site has one (see below). The page shows the price with the tag "indicative price". Below it you see the date of the price list ("Price list of ...") and a link "source: ADEME Car Labelling". The link opens the open dataset where the price comes from.
 - The details of the car: "Body type", "Segment", "Powertrain", "Gearbox", power, "Engine size" and "Consumption (WLTP)". For hybrid cars the power is the power of the combustion engine only. For electric cars it is the power in the source data, usually the rated power, which is lower than the peak power that the manufacturer quotes.
 - "Cost of ownership": the total cost for the period that you chose, and a table "Costs by category" with the rows "Depreciation", "Fuel and energy", "Insurance", "Servicing", "Parts and wear", "Fees" and "Total". The column "Share" shows the part of each category in the total.
 - Two lines under the table: what the car will be worth at the end of your period ("After 5 years the car will be worth ... (... of the price)") and what every kilometer costs.
 - "The income this car calls for": the earnings scale (section 6).
 - A button "Compare" that adds the car to a comparison (section 7).
+
+**The photo.** The photo is illustrative. It shows the model, not necessarily the same version or generation as the car on the page, and it carries the tag "Illustrative photo". The photos come from Wikimedia Commons. Under each photo you see its author, its licence and a link to the file page on Wikimedia Commons. When the site has no photo for a model, the page shows none.
 
 The sign ≈ before an amount means an estimate. The price is not an offer. The link "How we calculate" opens the methodology page, which explains each number.
 
@@ -95,20 +97,20 @@ The scale has four levels. The share is the part of your net income that the tot
 
 | Level | Meaning |
 |---|---|
-| "comfortable" | the car takes up to 10% of income |
-| "reasonable" | the car takes 10–15% of income |
-| "stretching it" | the car takes 15–20% of income |
-| "not recommended" | the car takes over 20% of income |
+| "comfortable" | the car takes up to 15% of income |
+| "reasonable" | the car takes 15–20% of income |
+| "stretching it" | the car takes 20–25% of income |
+| "not recommended" | the car takes over 25% of income |
 
 Each level has a range of income:
 
 - "from X" means an income of X or more.
 - "from X to Y" means an income between X and Y.
-- "up to Y" means an income of Y or less. This is the last level, "not recommended". If your net income is in this range, the total cost of the car is above 20% of it, and the site advises against the car.
+- "up to Y" means an income of Y or less. This is the last level, "not recommended". If your net income is in this range, the total cost of the car is above 25% of it, and the site advises against the car.
 
-Example for a total cost of 2,000 zł per month: "comfortable" starts at 20,000 zł, "reasonable" is 13,300 to 20,000 zł, "stretching it" is 10,000 to 13,300 zł, and "not recommended" is up to 10,000 zł. The amounts are rounded to 100 zł.
+Example for a total cost of 2,000 zł per month: "comfortable" starts at 13,300 zł, "reasonable" is 10,000 to 13,300 zł, "stretching it" is 8,000 to 10,000 zł, and "not recommended" is up to 8,000 zł. The amounts are rounded to 100 zł.
 
-The scale follows the 20/4/10 rule and common advice of financial advisers. It uses the total monthly cost with depreciation. It is a guide, not a financial decision.
+The scale follows Polish guidance: transport should take 15–20% of net income at most, and a car that takes more than 20% is usually too expensive. The total cost on this site also includes depreciation, so the last threshold is 25%. It is a guide, not a financial decision.
 
 ## 7. Compare two or three cars
 
@@ -135,6 +137,7 @@ Select "PL" or "EN" in the top bar to switch between Polish and English. You sta
 - **The range of cars is the French one.** The catalogue has 37 makes. Some cars sold in Poland are missing. Some versions sold only in France are there.
 - **Consumption is the WLTP value.** It is usually lower than in everyday driving, plug-in hybrids especially. The real fuel cost is likely to be higher than shown.
 - **How often the data changes.** The site checks all sources once a day. Fuel prices come from a weekly source, the car price list from a source that updates about every quarter, the electricity price every half-year, and the exchange rate on working days. The footer shows when the data was checked and the date of each price list. The date next to a car price is the day that the source updated its data, not the day of the check.
-- **Names.** Car names come from the source. They can be in capital letters or contain French words. Some names are shared by two cars, mostly the manual and the automatic version. The lists always show the body type, powertrain, gearbox and power next to the name.
+- **Names.** Car names come from the source descriptions. The site removes the power marker and the French words from them and writes model names in normal case, so a few names can still look unusual. Several cars can have the same name, for example when they differ in fuel, gearbox or power. The lists always show the body type, powertrain, gearbox and power next to the name. The body type "hatchback or saloon" is one group: the source does not tell the two apart.
+- **Photos.** The photos are illustrative and come from Wikimedia Commons (section 5). A new model can appear without a photo for some time.
 - **Browser.** The site needs JavaScript. The Back button of the browser goes back to the previous page, not to the previous filter.
 - **Not advice.** WheelWise is neither a sales offer nor financial or insurance advice. Before you buy, check the price with a dealer and ask for an insurance quote.

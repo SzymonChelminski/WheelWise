@@ -12,8 +12,8 @@ The interface is in Polish and English. There are no accounts and no login. Your
 - Filters by make, body type, powertrain, gearbox, segment and price range, and a search by make or model.
 - Your own assumptions: yearly mileage, ownership period, and insurance (estimate from driver age and cover, or your own premium).
 - Costs per month or per year.
-- A car page with the cost breakdown, the value of the car after the ownership period, and the cost per kilometer.
-- An earnings scale with four levels. The last level is "niezalecane" ("not recommended").
+- A car page with an illustrative photo of the model, the cost breakdown, the value of the car after the ownership period, and the cost per kilometer.
+- An earnings scale with four levels, from "up to 15% of income" to "over 25%". The last level is "niezalecane" ("not recommended").
 - A comparison of two or three cars.
 - Data refreshed once a day from public sources.
 
@@ -99,9 +99,12 @@ The visual rules of the interface are in [design/DESIGN.md](design/DESIGN.md).
 | European Commission, Weekly Oil Bulletin | Petrol, diesel and LPG prices in Poland | Reuse with source acknowledgement |
 | Narodowy Bank Polski, table A | EUR to PLN mid rate | NBP public data |
 | Eurostat, `nrg_pc_204` | Household electricity price in Poland | Reuse with source acknowledgement (CC BY 4.0) |
+| [Wikimedia Commons](https://commons.wikimedia.org/) | One photo of each car model, with the author and licence shown under it | CC0, public domain, CC BY or CC BY-SA, checked for each photo |
 | Rankomat report | Average third-party insurance premiums by driver age, used to calibrate the insurance estimate | Published report, cited with its source |
 
 Depreciation, insurance, servicing, parts and fees come from a cost model with parameters in `src/config/cost-model.ts`. No open data exists for these values per car model. The methodology page lists the sources with their update frequency and licence.
+
+The photos are found ahead of time by `npm run images:build` and stored in `data/model-images.json`. The running site does not call Wikimedia. The [operations guide](docs/en/operations.md#57-refresh-the-model-photos) describes when and how to run the command.
 
 ## Status
 
