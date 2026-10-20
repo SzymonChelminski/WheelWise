@@ -285,10 +285,12 @@ const UNBALANCED_OPENING_BRACKET_PATTERN = /\s*[([]$/;
  * Cuts the French equipment text that follows the model name, the trailing separators it leaves and
  * a trailing opening bracket (and the separators before it). Without a cut only a separator that
  * stands apart (left behind by a removed word, as in "V8 - BVA") is trimmed: a "+" that is part of
- * the name ("4MATIC+", "EQA 250+") stays.
+ * the name ("4MATIC+", "EQA 250+") stays. A tail-start word that opens the name is removed alone:
+ * the model follows it ("Nouvelle i10 1.0" -> "i10 1.0").
  */
 function withoutFrenchTail(text: string): string {
   const cutAt = text.search(NAME_TAIL_START_PATTERN);
+  if (cutAt === 0) return withoutFrenchTail(text.replace(NAME_TAIL_START_PATTERN, '').trimStart());
   const wasCut = cutAt >= 0;
   const result = (wasCut ? text.slice(0, cutAt) : text)
     .trimEnd()
