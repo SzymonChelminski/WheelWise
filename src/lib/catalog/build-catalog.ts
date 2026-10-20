@@ -13,9 +13,17 @@ import {
   ENERGY_TO_FUEL_TYPE,
   FRENCH_VAT_RATE,
   HORSEPOWER_TO_KW,
+  KW_TO_METRIC_HORSEPOWER,
+  MODEL_NAME_EXCEPTIONS,
+  NAME_ABBREVIATION_MAX_LETTERS,
+  NAME_NOISE_PATTERN,
+  NAME_TAIL_START_PATTERN,
+  NAME_TRAILING_SEPARATORS_PATTERN,
+  NAME_WORD_REPLACEMENTS,
   PLN_PRICE_ROUNDING,
   POLISH_VAT_RATE,
   POWER_KW_RANGE,
+  POWER_MARKER_PATTERN,
   PRICE_EUR_RANGE,
   SEGMENT_MAP,
   TRANSMISSION_MAP,
@@ -256,11 +264,56 @@ function normalizedWords(text: string): string[] {
     .filter((word) => word !== '');
 }
 
+function removePowerMarkers(text: string): string {
+  return text.replace(/\(([^()]*)\)/g, (group, content: string) =>
+    POWER_MARKER_PATTERN.test(content.replace(/\s+/g, '')) ? '' : group,
+  );
+}
+
+function replaceFrenchWords(text: string): string {
+  return NAME_WORD_REPLACEMENTS.reduce(
+    (result, { pattern, replacement }) => result.replace(pattern, replacement),
+    text.replace(NAME_NOISE_PATTERN, ''),
+  );
+}
+
+/** Cuts the French equipment text that follows the model name and the trailing separators it leaves. */
+function withoutFrenchTail(text: string): string {
+  const cutAt = text.search(NAME_TAIL_START_PATTERN);
+  return (cutAt < 0 ? text : text.slice(0, cutAt)).replace(NAME_TRAILING_SEPARATORS_PATTERN, '');
+}
+
+function titleCaseWord(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+/**
+ * Title-cases the upper-case parts of a token (parts are separated by "-", "/"
+ * or "."); short parts are abbreviations and stay as they are.
+ */
+function normalizeCase(token: string): string {
+  if (Object.hasOwn(MODEL_NAME_EXCEPTIONS, token)) return MODEL_NAME_EXCEPTIONS[token];
+  if (!/^[\p{L}\-/.]+$/u.test(token)) return token;
+  return token
+    .split(/([-/.])/)
+    .map((part) => {
+      if (Object.hasOwn(MODEL_NAME_EXCEPTIONS, part)) return MODEL_NAME_EXCEPTIONS[part];
+      const isUpperCase = part === part.toUpperCase() && part !== part.toLowerCase();
+      return isUpperCase && part.length > NAME_ABBREVIATION_MAX_LETTERS ? titleCaseWord(part) : part;
+    })
+    .join('');
+}
+
+function normalizeNameCase(text: string): string {
+  return text.split(/\s+/).filter(Boolean).map(normalizeCase).join(' ');
+}
+
 /**
  * Display name of a version, shown after the make ("make variant"): drops the
- * make that the commercial description repeats and adds the model name when
- * the description lacks it. `make` is the display name, `marque` the
- * dataset's brand value.
+ * make that the commercial description repeats, adds the model name when the
+ * description lacks it, then removes power markers, French or technical words
+ * and the French equipment text after the model, and puts upper-case words in normal case. `make` is the display
+ * name, `marque` the dataset's brand value.
  *
  * The model is added only when its first word is not already a word of the
  * name: for some makes `Modèle` is an engine or trim code of the same family
@@ -283,7 +336,8 @@ export function displayVariant(
   ) {
     variant = `${model} ${variant}`.trim();
   }
-  return variant || model;
+  const name = normalizeNameCase(withoutFrenchTail(replaceFrenchWords(removePowerMarkers(variant || model))));
+  return name || normalizeNameCase(model);
 }
 
 function groupKey(row: MappedRow): string {
@@ -344,11 +398,11 @@ function buildCar(rows: MappedRow[], opts: BuildOptions, brand: BrandInfo | unde
       [
         make,
         representative.model,
-        representative.bodyType,
+        representative.bodyType === 'sedan_hatchback' ? '' : representative.bodyType,
         fuelType,
         representative.transmission,
-        `${powerKw}kw`,
-      ].join('-'),
+        `${Math.round(powerKw * KW_TO_METRIC_HORSEPOWER)}km`,
+      ].join(' '),
     ),
     make,
     model: representative.model,

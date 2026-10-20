@@ -1,3 +1,4 @@
+import modelNames from '../../data/model-names.json';
 import type {
   BodyType,
   BrandTier,
@@ -98,3 +99,38 @@ export const CONSUMPTION_ROUNDING_SIGNIFICANT_DIGITS = 12;
 /** Used for a make that is missing from data/brands.json. */
 export const DEFAULT_BRAND_TIER: BrandTier = 'mainstream';
 export const DEFAULT_VALUE_RETENTION: ValueRetention = 'average';
+
+/** 1 kW = 1.35962 metric horsepower (KM); the UI converts with the same factor. */
+export const KW_TO_METRIC_HORSEPOWER = 1.35962;
+
+/**
+ * A parenthesised group is a power marker such as "(101ch)" or "(94ch+24Kw)"
+ * when its content, without spaces, matches this. The UI shows power separately.
+ */
+export const POWER_MARKER_PATTERN = /^\d+(?:ch|cv|kw)(?:\+\d+(?:ch|kw))*$/i;
+
+/** French and technical words dropped from car names (whole words, any case). */
+export const NAME_NOISE_PATTERN = /(?<![\p{L}\p{N}])(?:essence|gazole|facelift|bv[am]\d*)(?![\p{L}\p{N}])/giu;
+
+/** French words replaced by their English form in car names (whole words, any case). */
+export const NAME_WORD_REPLACEMENTS: readonly { pattern: RegExp; replacement: string }[] = [
+  { pattern: /(?<![\p{L}\p{N}])hybride(?![\p{L}\p{N}])/giu, replacement: 'Hybrid' },
+  { pattern: /(?<![\p{L}\p{N}])[ée]lectrique(?![\p{L}\p{N}])/giu, replacement: 'Electric' },
+];
+
+/**
+ * First whole word of the French equipment text that follows the model name
+ * ("norme AP freins 15'' ..."); the name is cut there. "Classe" is a Mercedes
+ * model name and is not listed.
+ */
+export const NAME_TAIL_START_PATTERN =
+  /(?<![\p{L}\p{N}])(?:de|à|avec|et|pour|sans|norme|freins|système|moteur|nouvelle|rechargeable|famille|jantes|châssis|berline|classique|créative|pn|alt|opt)(?![\p{L}\p{N}])/iu;
+
+/** Separators left dangling at the end of a name after the cut. */
+export const NAME_TRAILING_SEPARATORS_PATTERN = /[\s/\-.,+]+$/;
+
+/** An upper-case name part up to this many letters is an abbreviation and stays as it is. */
+export const NAME_ABBREVIATION_MAX_LETTERS = 3;
+
+/** Real brand spellings that the case rule breaks, keyed by the upper-case token. */
+export const MODEL_NAME_EXCEPTIONS: Readonly<Record<string, string>> = modelNames;
