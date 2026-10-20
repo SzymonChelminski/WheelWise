@@ -362,7 +362,16 @@
     "rangeTo": "up to {max}",
     "costErrorTitle": "The costs of this car could not be calculated",
     "costErrorText": "The data needed for the calculation, such as fuel and electricity prices, is not available right now. Try again in a moment. Your assumptions are kept.",
-    "loading": "Loading the car…"
+    "loading": "Loading the car…",
+    "photo": {
+      "alt": "{name}: illustrative photo of the model",
+      "marker": "Illustrative photo",
+      "credit": "Photo: {author}, licence {license}, source: {source}",
+      "creditPublicDomain": "Photo: {author}, {license}, source: {source}",
+      "publicDomain": "public domain",
+      "source": "Wikimedia Commons",
+      "unknownAuthor": "unknown author"
+    }
   },
   "compare": {
     "title": "Car comparison",
@@ -410,7 +419,8 @@
           "We convert the price to złoty: the French price in euro times the NBP mid euro rate, with French VAT of 20% replaced by Polish VAT of 23%, rounded to 100 zł. That is why every price is marked “indicative price” and carries the date of the price list.",
           "The price at a Polish dealer may differ from the one shown by several percent or more, because manufacturers set prices country by country. The range of models and versions is the French one, so some cars sold in Poland are missing. The French ecological bonus and malus are not included in the prices.",
           "One car is a model in one body type, with one powertrain, one gearbox and one power figure. From each such group we show the cheapest version.",
-          "Car names are the commercial descriptions of the source, unchanged. Versions that differ in drive (2WD / 4WD), battery size, number of seats or equipment are shown as one car at the price of the cheapest of them; the others cost more."
+          "Car names come from the source's commercial descriptions; we remove the power marker and French words and write model names in normal case. Versions that differ in drive (2WD / 4WD), battery size, number of seats or equipment are shown as one car at the price of the cheapest of them; the others cost more.",
+          "Car photos are illustrative: they show the model, not necessarily the same version or generation, and come from Wikimedia Commons. The author and licence of each photo are given under it."
         ]
       },
       "costs": {
@@ -514,6 +524,13 @@
           "what": "Average third-party (OC) premiums by driver age, which the insurance estimate is calibrated on",
           "updated": "by hand, from new reports (currently the first half of 2026)",
           "licence": "Published report, cited with its source"
+        },
+        {
+          "name": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/",
+          "what": "Photos of car models",
+          "updated": "by hand, when new models enter the catalogue",
+          "licence": "CC BY-SA / CC BY / CC0 / public domain, per photo"
         }
       ]
     },

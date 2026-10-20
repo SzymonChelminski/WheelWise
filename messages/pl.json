@@ -362,7 +362,16 @@
     "rangeTo": "do {max}",
     "costErrorTitle": "Nie udało się obliczyć kosztów tego auta",
     "costErrorText": "Nie mamy teraz danych potrzebnych do obliczeń, na przykład cen paliw i prądu. Spróbuj ponownie za chwilę. Założenia zostały zachowane.",
-    "loading": "Wczytuję dane auta…"
+    "loading": "Wczytuję dane auta…",
+    "photo": {
+      "alt": "{name}: zdjęcie poglądowe modelu",
+      "marker": "Zdjęcie poglądowe",
+      "credit": "Zdjęcie: {author}, licencja {license}, źródło: {source}",
+      "creditPublicDomain": "Zdjęcie: {author}, {license}, źródło: {source}",
+      "publicDomain": "domena publiczna",
+      "source": "Wikimedia Commons",
+      "unknownAuthor": "autor nieznany"
+    }
   },
   "compare": {
     "title": "Porównanie aut",
@@ -410,7 +419,8 @@
           "Cenę przeliczamy na złote: francuską cenę w euro mnożymy przez średni kurs euro NBP, zamieniamy francuski VAT 20% na polski 23% i zaokrąglamy do 100 zł. Dlatego przy każdej cenie piszemy „cena orientacyjna” i podajemy datę cennika.",
           "Cena w polskim salonie może się różnić od pokazanej o kilka procent lub więcej, bo producenci ustalają ceny osobno dla każdego kraju. Zakres modeli i wersji jest francuski, więc części aut sprzedawanych w Polsce w katalogu nie ma. Francuskiej premii ani kary ekologicznej (bonus / malus) do cen nie wliczamy.",
           "Jedno auto to model w jednym nadwoziu, z jednym rodzajem napędu, jedną skrzynią biegów i jedną mocą. Z każdej takiej grupy pokazujemy najtańszą wersję.",
-          "Nazwy aut to opisy handlowe ze źródła, bez zmian. Wersje, które różnią się napędem (2WD / 4WD), pojemnością baterii, liczbą miejsc lub wyposażeniem, pokazujemy jako jedno auto w cenie najtańszej z nich; pozostałe kosztują więcej."
+          "Nazwy aut pochodzą z opisów handlowych źródła; usuwamy z nich oznaczenie mocy i francuskie słowa, a nazwy modeli zapisujemy zwykłą pisownią. Wersje, które różnią się napędem (2WD / 4WD), pojemnością baterii, liczbą miejsc lub wyposażeniem, pokazujemy jako jedno auto w cenie najtańszej z nich; pozostałe kosztują więcej.",
+          "Zdjęcia aut są poglądowe: pokazują model, niekoniecznie tę samą wersję lub generację, i pochodzą z Wikimedia Commons. Autora i licencję każdego zdjęcia podajemy pod nim."
         ]
       },
       "costs": {
@@ -514,6 +524,13 @@
           "what": "Średnie składki OC według wieku kierowcy, na których opieramy szacunek ubezpieczenia",
           "updated": "ręcznie, z nowych zestawień (obecnie pierwsze półrocze 2026)",
           "licence": "Opublikowane zestawienie, przywołane ze wskazaniem źródła"
+        },
+        {
+          "name": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/",
+          "what": "Zdjęcia modeli aut",
+          "updated": "ręcznie, gdy w katalogu pojawiają się nowe modele",
+          "licence": "CC BY-SA / CC BY / CC0 / domena publiczna, osobno dla każdego zdjęcia"
         }
       ]
     },

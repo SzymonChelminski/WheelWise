@@ -4,11 +4,13 @@ import { Suspense, type ReactNode } from "react";
 import { Container } from "@/components/layout/SiteShell";
 import { PowerDetail } from "@/components/ui/CarMeta";
 import { CarName, nameWrapClass } from "@/components/ui/CarName";
+import { CarPhoto, type CarPhotoLabels } from "@/components/ui/CarPhoto";
 import { cn } from "@/components/ui/cn";
 import { CarPageSkeleton } from "@/components/ui/Feedback";
 import { Icon } from "@/components/ui/Icon";
 import { IndicativeTag, InfoNote, PriceDate } from "@/components/ui/Markers";
 import { h1Class, h2Class, linkClass, panelClass } from "@/components/ui/styles";
+import { getModelImage } from "@/lib/catalog/model-images";
 import type { Car, MarketPrices } from "@/lib/domain/types";
 import { formatDate, formatPln, type Locale } from "@/lib/format";
 import { AssumptionsControls } from "../assumptions/AssumptionsControls";
@@ -72,6 +74,17 @@ export async function CarContent({ car, prices }: { car: Car; prices: MarketPric
   const href = sourceLink(car.priceSourceUrl);
   const notes = powerNotes(t, car);
   const anchor = t("power.methodologyAnchor");
+  // The component fills the {name}, {author}, {license} and {source} placeholders itself.
+  const photoText = (key: keyof CarPhotoLabels): string => t.raw(`car.photo.${key}`) as string;
+  const photoLabels: CarPhotoLabels = {
+    alt: photoText("alt"),
+    marker: photoText("marker"),
+    credit: photoText("credit"),
+    creditPublicDomain: photoText("creditPublicDomain"),
+    publicDomain: photoText("publicDomain"),
+    source: photoText("source"),
+    unknownAuthor: photoText("unknownAuthor"),
+  };
 
   const attributes: [string, ReactNode][] = [
     [t("car.body"), t(`attr.body.${car.bodyType}`)],
@@ -100,8 +113,11 @@ export async function CarContent({ car, prices }: { car: Car; prices: MarketPric
   ];
 
   return (
-    <div className="mt-2 grid gap-x-10 gap-y-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0">
+    // From 1024 px the photo takes the top of the right column beside the name and price and the
+    // assumptions aside starts under it. Without a photo (none, or it failed to load) dense placement
+    // moves the aside up to the top, as on a page without photos.
+    <div className="mt-2 lg:grid lg:grid-flow-row-dense lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-x-10">
+      <div className="min-w-0 lg:col-start-1">
         <h1 className={`${h1Class} ${nameWrapClass}`}>
           <CarName>{name}</CarName>
         </h1>
@@ -138,7 +154,16 @@ export async function CarContent({ car, prices }: { car: Car; prices: MarketPric
           <InfoNote className="mt-4 max-w-md">{t("car.versionsNote")}</InfoNote>
           <CompareToggleButton standalone className="mt-5" slug={car.slug} name={name} />
         </div>
+      </div>
 
+      <CarPhoto
+        className="mt-8 max-w-md lg:col-start-2 lg:mt-0 lg:max-w-none lg:self-start"
+        photo={getModelImage(car)}
+        carName={name}
+        labels={photoLabels}
+      />
+
+      <div className="min-w-0 lg:col-start-1">
         <section aria-label={t("car.attributes")} className="mt-8">
           <h2 className="sr-only">
             {t("car.attributes")}
@@ -174,7 +199,10 @@ export async function CarContent({ car, prices }: { car: Car; prices: MarketPric
         )}
       </div>
 
-      <aside aria-label={t("assumptions.title")} className="hidden lg:block">
+      <aside
+        aria-label={t("assumptions.title")}
+        className="hidden lg:col-start-2 lg:row-span-2 lg:block lg:[[data-car-photo]~&]:mt-8"
+      >
         <div className={`${panelClass} sticky top-6 p-5`}>
           <h2 className="mb-4 font-display text-xl font-semibold text-ink">
             {t("assumptions.title")}
