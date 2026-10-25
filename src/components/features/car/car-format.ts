@@ -88,15 +88,18 @@ export function costShares(costs: CostBreakdown): Record<(typeof COST_ORDER)[num
   ) as Record<(typeof COST_ORDER)[number], number>;
 }
 
-/** The four levels of the earnings scale; a year is twelve times the monthly amounts. */
+/**
+ * The four levels of the earnings scale for the monthly affordability cost (purchase spread
+ * over the ownership months plus fuel); a year is twelve times the monthly amounts.
+ */
 export function earningsLevels(
   t: Translate,
   locale: Locale,
-  monthlyTotalPln: number,
+  monthlyAffordabilityPln: number,
   period: Period,
 ): EarningsLevel[] {
   const factor = period === "year" ? 12 : 1;
-  return requiredIncome(monthlyTotalPln).map((range) => {
+  return requiredIncome(monthlyAffordabilityPln).map((range) => {
     const min = range.minIncomePln === null ? null : formatPln(range.minIncomePln * factor, locale);
     const max = range.maxIncomePln === null ? null : formatPln(range.maxIncomePln * factor, locale);
     let text: string;

@@ -28,6 +28,7 @@ import {
 import { SheetDisclosure } from "@/components/ui/Sheet";
 import { h1Class, h2Class, linkClass, panelClass } from "@/components/ui/styles";
 import { Link } from "@/i18n/navigation";
+import { monthlyAffordabilityCost } from "@/lib/costs";
 import { mockCosts, mockIncomeRanges } from "@/mocks/cars";
 import { copy } from "@/mocks/copy";
 import type { Car } from "@/mocks/types";
@@ -71,7 +72,9 @@ export function CarScreen({
     // residualValuePct is a percentage from 0 to 100; formatPercent takes a share from 0 to 1.
     formatPercent(costs.residualValuePct / 100, locale),
   );
-  const earningsIntro = t.car.earningsLead(total);
+  const earningsIntro = t.car.earningsLead(
+    formatPln(monthlyAffordabilityCost(costs, MOCK_OWNERSHIP_YEARS), locale),
+  );
   const inComparison = compareSlugs.includes(car.slug);
   const power = t.power[powerKind(car)];
 

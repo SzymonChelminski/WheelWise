@@ -337,24 +337,24 @@
     "perKm": "Every kilometre costs <value>{amount}</value>.",
     "estimateNote": "marks an estimate for your assumptions, not an offer.",
     "earningsTitle": "The income this car calls for",
-    "earningsIntroMonth": "Net monthly income (take-home pay) at which a cost of <value>{amount}</value> per month takes the given share of the budget.",
-    "earningsIntroYear": "Net yearly income (take-home pay) at which a cost of <value>{amount}</value> per year takes the given share of the budget.",
+    "earningsIntroMonth": "The price of the car spread over the months you keep it, plus fuel or electricity, comes to <value>{amount}</value> per month. The scale shows the net monthly income (take-home pay) at which this amount takes a given share of the budget.",
+    "earningsIntroYear": "The price of the car spread over the years you keep it, plus fuel or electricity, comes to <value>{amount}</value> per year. The scale shows the net yearly income (take-home pay) at which this amount takes a given share of the budget.",
     "levels": {
       "comfortable": {
         "label": "comfortable",
-        "note": "the car takes up to 15% of income"
+        "note": "purchase and fuel take up to 15% of income"
       },
       "reasonable": {
         "label": "reasonable",
-        "note": "the car takes 15–20% of income"
+        "note": "purchase and fuel take 15–20% of income"
       },
       "stretch": {
         "label": "stretching it",
-        "note": "the car takes 20–25% of income"
+        "note": "purchase and fuel take 20–25% of income"
       },
       "not_recommended": {
         "label": "not recommended",
-        "note": "the car takes over 25% of income"
+        "note": "purchase and fuel take over 25% of income"
       }
     },
     "rangeFrom": "from {min}",
@@ -463,10 +463,12 @@
         "id": "income",
         "heading": "The income scale",
         "paragraphs": [
-          "The scale shows the net (take-home) monthly income at which the total cost of the car, including loss of value, takes a given share of the budget. We follow Polish guidance: transport should take no more than 15–20% of net income, and a car that takes over 20% is usually too expensive. Our cost also includes loss of value, so the last threshold is 25%. Amounts are rounded to 100 zł, and the yearly view is 12 times the monthly amount."
+          "The scale shows the net (take-home) monthly income at which purchase and fuel take a given share of the budget. We divide the price of the car evenly over the months of the chosen ownership period, like an instalment without interest, and add the monthly cost of fuel or electricity.",
+          "Insurance, servicing, parts, fees and depreciation are not counted in the scale. They are part of the cost of ownership on the car page, in the rankings and in the comparison.",
+          "The thresholds follow Polish guidance: transport should take no more than 15–20% of net income. The other costs of the car come on top of purchase and fuel, so above 25% the car is not recommended. Amounts are rounded to 100 zł, and the yearly view is 12 times the monthly amount."
         ],
         "list": [
-          "comfortable: the car takes up to 15% of income",
+          "comfortable: purchase and fuel take up to 15% of income",
           "reasonable: 15% to 20%",
           "stretching it: 20% to 25%",
           "not recommended: over 25%"

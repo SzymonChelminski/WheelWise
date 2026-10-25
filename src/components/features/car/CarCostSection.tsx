@@ -6,7 +6,7 @@ import { CostBreakdown } from "@/components/ui/CostBreakdown";
 import { EarningsScale } from "@/components/ui/EarningsScale";
 import { Estimate, EstimateNote } from "@/components/ui/Markers";
 import { h2Class, linkClass, panelClass } from "@/components/ui/styles";
-import { calculateCosts } from "@/lib/costs";
+import { calculateCosts, monthlyAffordabilityCost } from "@/lib/costs";
 import type { Car, MarketPrices } from "@/lib/domain/types";
 import { formatPercent, formatPln, formatPlnExact, type Locale } from "@/lib/format";
 import { useAssumptions } from "@/lib/state/assumptions-client";
@@ -31,6 +31,8 @@ export function CarCostSection({ car, prices }: { car: Car; prices: MarketPrices
   const total = formatPln(map.total, locale);
   const periodText = period === "year" ? t("common.perYear") : t("common.perMonth");
   const years = t("assumptions.yearsValue", { count: assumptions.ownershipYears });
+  const affordability = monthlyAffordabilityCost(costs, assumptions.ownershipYears);
+  const earningsAmount = formatPln(period === "year" ? affordability * 12 : affordability, locale);
 
   const estimate = (chunks: ReactNode) => (
     <Estimate srLabel={t("common.estimateSr")} className="font-semibold text-ink">
@@ -105,13 +107,13 @@ export function CarCostSection({ car, prices }: { car: Car; prices: MarketPrices
         </h2>
         <p className="mt-2 max-w-prose text-base text-ink-muted">
           {t.rich(period === "year" ? "car.earningsIntroYear" : "car.earningsIntroMonth", {
-            amount: total,
+            amount: earningsAmount,
             value: estimate,
           })}
         </p>
         <EarningsScale
           className="mt-5"
-          levels={earningsLevels(t, locale, costs.perMonth.total, period)}
+          levels={earningsLevels(t, locale, affordability, period)}
         />
       </section>
     </>

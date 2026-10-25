@@ -337,24 +337,24 @@
     "perKm": "Każdy kilometr kosztuje <value>{amount}</value>.",
     "estimateNote": "oznacza szacunek dla Twoich założeń, nie ofertę.",
     "earningsTitle": "Jakie zarobki na to auto",
-    "earningsIntroMonth": "Miesięczny dochód netto (na rękę), przy którym koszt <value>{amount}</value> miesięcznie zajmuje daną część budżetu.",
-    "earningsIntroYear": "Roczny dochód netto (na rękę), przy którym koszt <value>{amount}</value> rocznie zajmuje daną część budżetu.",
+    "earningsIntroMonth": "Cena auta rozłożona na miesiące posiadania i paliwo lub prąd to razem <value>{amount}</value> miesięcznie. Skala pokazuje, przy jakim miesięcznym dochodzie netto (na rękę) ta kwota zajmuje daną część budżetu.",
+    "earningsIntroYear": "Cena auta rozłożona na lata posiadania i paliwo lub prąd to razem <value>{amount}</value> rocznie. Skala pokazuje, przy jakim rocznym dochodzie netto (na rękę) ta kwota zajmuje daną część budżetu.",
     "levels": {
       "comfortable": {
         "label": "komfortowo",
-        "note": "auto zajmuje do 15% dochodu"
+        "note": "zakup i paliwo zajmują do 15% dochodu"
       },
       "reasonable": {
         "label": "rozsądnie",
-        "note": "auto zajmuje 15–20% dochodu"
+        "note": "zakup i paliwo zajmują 15–20% dochodu"
       },
       "stretch": {
         "label": "na granicy",
-        "note": "auto zajmuje 20–25% dochodu"
+        "note": "zakup i paliwo zajmują 20–25% dochodu"
       },
       "not_recommended": {
         "label": "niezalecane",
-        "note": "auto zajmuje ponad 25% dochodu"
+        "note": "zakup i paliwo zajmują ponad 25% dochodu"
       }
     },
     "rangeFrom": "od {min}",
@@ -463,10 +463,12 @@
         "id": "zarobki",
         "heading": "Skala zarobków",
         "paragraphs": [
-          "Skala pokazuje miesięczny dochód netto (na rękę), przy którym całkowity koszt auta, z utratą wartości, zajmuje określoną część budżetu. Opieramy się na polskich zaleceniach: wydatki na transport nie powinny przekraczać 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Nasz koszt obejmuje też utratę wartości, dlatego ostatni próg to 25%. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna."
+          "Skala pokazuje miesięczny dochód netto (na rękę), przy którym zakup auta i paliwo zajmują określoną część budżetu. Cenę auta dzielimy równo na miesiące wybranego okresu posiadania, jak ratę bez odsetek, i dodajemy miesięczny koszt paliwa lub prądu.",
+          "Ubezpieczenia, serwisu, części, opłat i utraty wartości w skali nie liczymy. Te kwoty są w koszcie posiadania na stronie auta, w rankingach i w porównaniu.",
+          "Progi opieramy na polskich zaleceniach: wydatki na transport nie powinny przekraczać 15–20% dochodu netto. Do zakupu i paliwa dochodzą jeszcze inne koszty auta, dlatego powyżej 25% auto jest niezalecane. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna."
         ],
         "list": [
-          "komfortowo: auto zajmuje do 15% dochodu",
+          "komfortowo: zakup i paliwo zajmują do 15% dochodu",
           "rozsądnie: od 15% do 20%",
           "na granicy: od 20% do 25%",
           "niezalecane: ponad 25%"

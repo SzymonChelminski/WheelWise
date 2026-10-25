@@ -231,33 +231,34 @@ export const mockCarElectric = bySlug(TESLA);
 export const mockCarLongName = bySlug(JEEP_STRESS);
 
 /**
- * Car page: income ranges per car for its total monthly cost, as requiredIncome() returns them
- * (shares 15%, 20% and 25% of net income, rounded to 100 zł).
+ * Car page: income ranges per car for its monthly affordability cost (purchase price / 60
+ * months + monthly fuel, monthlyAffordabilityCost() with the mock assumptions), as requiredIncome()
+ * returns them (shares 15%, 20% and 25% of net income, rounded to 100 zł).
  */
 export const mockIncomeRanges: Record<string, IncomeRange[]> = {
   [SANDERO_MANUAL]: [
-    { level: "comfortable", minIncomePln: 8400, maxIncomePln: null },
-    { level: "reasonable", minIncomePln: 6300, maxIncomePln: 8400 },
-    { level: "stretch", minIncomePln: 5000, maxIncomePln: 6300 },
-    { level: "not_recommended", minIncomePln: null, maxIncomePln: 5000 },
+    { level: "comfortable", minIncomePln: 9800, maxIncomePln: null },
+    { level: "reasonable", minIncomePln: 7300, maxIncomePln: 9800 },
+    { level: "stretch", minIncomePln: 5900, maxIncomePln: 7300 },
+    { level: "not_recommended", minIncomePln: null, maxIncomePln: 5900 },
   ],
   [TESLA]: [
-    { level: "comfortable", minIncomePln: 19100, maxIncomePln: null },
-    { level: "reasonable", minIncomePln: 14300, maxIncomePln: 19100 },
-    { level: "stretch", minIncomePln: 11500, maxIncomePln: 14300 },
-    { level: "not_recommended", minIncomePln: null, maxIncomePln: 11500 },
+    { level: "comfortable", minIncomePln: 27500, maxIncomePln: null },
+    { level: "reasonable", minIncomePln: 20600, maxIncomePln: 27500 },
+    { level: "stretch", minIncomePln: 16500, maxIncomePln: 20600 },
+    { level: "not_recommended", minIncomePln: null, maxIncomePln: 16500 },
   ],
   [JEEP]: [
-    { level: "comfortable", minIncomePln: 17000, maxIncomePln: null },
-    { level: "reasonable", minIncomePln: 12800, maxIncomePln: 17000 },
-    { level: "stretch", minIncomePln: 10200, maxIncomePln: 12800 },
-    { level: "not_recommended", minIncomePln: null, maxIncomePln: 10200 },
+    { level: "comfortable", minIncomePln: 22800, maxIncomePln: null },
+    { level: "reasonable", minIncomePln: 17100, maxIncomePln: 22800 },
+    { level: "stretch", minIncomePln: 13700, maxIncomePln: 17100 },
+    { level: "not_recommended", minIncomePln: null, maxIncomePln: 13700 },
   ],
   [JEEP_STRESS]: [
-    { level: "comfortable", minIncomePln: 17500, maxIncomePln: null },
-    { level: "reasonable", minIncomePln: 13100, maxIncomePln: 17500 },
-    { level: "stretch", minIncomePln: 10500, maxIncomePln: 13100 },
-    { level: "not_recommended", minIncomePln: null, maxIncomePln: 10500 },
+    { level: "comfortable", minIncomePln: 23500, maxIncomePln: null },
+    { level: "reasonable", minIncomePln: 17600, maxIncomePln: 23500 },
+    { level: "stretch", minIncomePln: 14100, maxIncomePln: 17600 },
+    { level: "not_recommended", minIncomePln: null, maxIncomePln: 14100 },
   ],
 };
 

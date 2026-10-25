@@ -1,4 +1,6 @@
 import { COST_MODEL } from '@/config/cost-model';
+import { DEFAULT_ASSUMPTIONS } from '@/lib/domain/assumptions';
+import type { CostBreakdown } from './calculate';
 
 export type AffordabilityLevel = 'comfortable' | 'reasonable' | 'stretch' | 'not_recommended';
 
@@ -32,4 +34,18 @@ export function requiredIncome(monthlyTotalCostPln: number): IncomeRange[] {
     { level: 'stretch', minIncomePln: stretchMin, maxIncomePln: reasonableMin },
     { level: 'not_recommended', minIncomePln: null, maxIncomePln: stretchMin },
   ];
+}
+
+/**
+ * Monthly amount the earnings scale is based on: the purchase price spread evenly over the
+ * months of ownership, plus the monthly fuel or energy cost. Insurance, servicing, parts, fees
+ * and depreciation are left out. Ownership years that are not a positive finite number count
+ * as the default.
+ */
+export function monthlyAffordabilityCost(costs: CostBreakdown, ownershipYears: number): number {
+  const years =
+    Number.isFinite(ownershipYears) && ownershipYears > 0
+      ? ownershipYears
+      : DEFAULT_ASSUMPTIONS.ownershipYears;
+  return costs.purchasePricePln / (years * 12) + costs.perMonth.fuel;
 }
