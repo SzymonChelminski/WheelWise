@@ -153,6 +153,24 @@
   }
 }
 
+/*
+ * Logo bar colours (T41): blue, green, orange, left to right. `static`: these
+ * variables are always written to the built CSS, whether or not a utility uses
+ * them, because the Logo component reads them through inline `fill: var(...)`
+ * and never through a generated `fill-*` class (a missing class falls back to
+ * black). design/DESIGN.md, section 3.1.
+ */
+@theme static {
+  /* On petrol surfaces (header, footer) and in the site icons. */
+  --color-logo-blue: #4d9cff;
+  --color-logo-green: #33d17a;
+  --color-logo-orange: #ff7a1a;
+  /* On light surfaces (Logo tone="brand"). */
+  --color-logo-blue-dark: #1f6feb;
+  --color-logo-green-dark: #15913f;
+  --color-logo-orange-dark: #db5f0d;
+}
+
 @layer base {
   :root {
     --focus-ring: var(--color-brand);
