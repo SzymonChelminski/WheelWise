@@ -41,7 +41,7 @@ In the "Fuel consumption" ranking, plug-in hybrids are left out, because their c
 
 The list "Active filters" shows what is on. Use "Remove filter" to switch one off, or "Clear filters" to switch all off. If no car matches, you see "No car matches these filters". Widen the price range or switch some filters off.
 
-**Clear all filters.** The button "Clear filters" is at the top of the filters. On a wide screen it is in the heading "Filters". On a phone it is in the header of the filters window. The button switches off the make, segment, body type, powertrain, gearbox, price range and text search. It keeps the ranking that you chose, the order, the cost period and your assumptions. The list starts again from the first 10 cars. While no filter is on, the button looks dimmed and does nothing. After you use it, a screen reader says "Filters cleared". The list "Active filters" and the message for an empty list have their own "Clear filters" link with the same effect.
+**Clear all filters.** The button "Clear filters" is at the top of the filters. On a wide screen it is in the heading "Filters". On a phone it is in the header of the filters window. The button switches off the make, segment, body type, powertrain, gearbox, price range and text search. It keeps the ranking that you chose, the order, the cost period and your assumptions. The list starts again from the first 10 cars. While no filter is on, the button looks dimmed and does nothing. After you use it, a screen reader says "Filters cleared". The list "Active filters" and the message for an empty list have their own "Clear filters" button with the same effect.
 
 **Change the order.** Next to the title of the list is a switch with two options: "Lowest first" and "Highest first". The list opens with "Lowest first". Select "Highest first" to see the highest value at the top. The number of a car is its place in the chosen order, so in "Highest first" the number 1 is the car with the highest value. A new order keeps your filters, the ranking, the cost period and your assumptions. The list starts again from the first 10 cars. Cars that have no value in a ranking are left out in both orders. Cars with the same value keep the same order in both directions. The lists on the home page always start with the lowest value and have no switch.
 
@@ -105,10 +105,10 @@ The scale has four levels. The share is the part of your net income that the amo
 
 | Level | Meaning |
 |---|---|
-| "comfortable" | the car takes up to 15% of income |
-| "reasonable" | the car takes 15–20% of income |
-| "stretching it" | the car takes 20–25% of income |
-| "not recommended" | the car takes over 25% of income |
+| "comfortable" | purchase and fuel take up to 15% of income |
+| "reasonable" | purchase and fuel take 15–20% of income |
+| "stretching it" | purchase and fuel take 20–25% of income |
+| "not recommended" | purchase and fuel take over 25% of income |
 
 Each level has a range of income:
 

@@ -41,7 +41,7 @@ W rankingu „Zużycie paliwa” nie ma hybryd plug-in, bo ich zużycie zależy 
 
 Lista „Włączone filtry” pokazuje, co jest włączone. Użyj „Usuń filtr”, aby wyłączyć jeden, albo „Wyczyść filtry”, aby wyłączyć wszystkie. Jeśli żadne auto nie pasuje, zobaczysz „Żadne auto nie pasuje do tych filtrów”. Poszerz zakres cen albo wyłącz część filtrów.
 
-**Wyczyść wszystkie filtry.** Przycisk „Wyczyść filtry” jest na górze filtrów. Na szerokim ekranie jest w nagłówku „Filtry”. Na telefonie jest w nagłówku okna filtrów. Przycisk wyłącza markę, segment, nadwozie, napęd, skrzynię biegów, zakres cen i wyszukiwanie tekstowe. Zachowuje wybrany ranking, kolejność, okres kosztów i Twoje założenia. Lista zaczyna się znowu od pierwszych 10 aut. Gdy żaden filtr nie jest włączony, przycisk jest przygaszony i nic nie robi. Po jego użyciu czytnik ekranu mówi „Filtry wyczyszczone”. Lista „Włączone filtry” i komunikat o pustej liście mają własny link „Wyczyść filtry” o tym samym skutku.
+**Wyczyść wszystkie filtry.** Przycisk „Wyczyść filtry” jest na górze filtrów. Na szerokim ekranie jest w nagłówku „Filtry”. Na telefonie jest w nagłówku okna filtrów. Przycisk wyłącza markę, segment, nadwozie, napęd, skrzynię biegów, zakres cen i wyszukiwanie tekstowe. Zachowuje wybrany ranking, kolejność, okres kosztów i Twoje założenia. Lista zaczyna się znowu od pierwszych 10 aut. Gdy żaden filtr nie jest włączony, przycisk jest przygaszony i nic nie robi. Po jego użyciu czytnik ekranu mówi „Filtry wyczyszczone”. Lista „Włączone filtry” i komunikat o pustej liście mają własny przycisk „Wyczyść filtry” o tym samym skutku.
 
 **Zmień kolejność.** Obok tytułu listy jest przełącznik z dwiema opcjami: „Od najniższej” i „Od najwyższej”. Lista otwiera się z opcją „Od najniższej”. Wybierz „Od najwyższej”, aby zobaczyć najwyższą wartość na górze. Numer auta to jego miejsce w wybranej kolejności, więc przy „Od najwyższej” numer 1 ma auto o najwyższej wartości. Nowa kolejność zachowuje filtry, ranking, okres kosztów i Twoje założenia. Lista zaczyna się znowu od pierwszych 10 aut. Aut, które nie mają wartości w danym rankingu, nie ma na liście w żadnej z kolejności. Auta o tej samej wartości zachowują w obu kierunkach tę samą kolejność. Listy na stronie głównej zawsze zaczynają się od najniższej wartości i nie mają przełącznika.
 
@@ -105,10 +105,10 @@ Skala ma cztery poziomy. Udział to część Twojego dochodu netto, którą zajm
 
 | Poziom | Znaczenie |
 |---|---|
-| „komfortowo” | auto zajmuje do 15% dochodu |
-| „rozsądnie” | auto zajmuje 15–20% dochodu |
-| „na granicy” | auto zajmuje 20–25% dochodu |
-| „niezalecane” | auto zajmuje ponad 25% dochodu |
+| „komfortowo” | zakup i paliwo zajmują do 15% dochodu |
+| „rozsądnie” | zakup i paliwo zajmują 15–20% dochodu |
+| „na granicy” | zakup i paliwo zajmują 20–25% dochodu |
+| „niezalecane” | zakup i paliwo zajmują ponad 25% dochodu |
 
 Każdy poziom ma przedział dochodu:
 
