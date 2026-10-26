@@ -85,7 +85,7 @@ Wybierz auto na liście, aby otworzyć jego stronę. Strona pokazuje:
 
 Znak ≈ przed kwotą oznacza szacunek. Cena nie jest ofertą. Link „Jak liczymy” otwiera stronę metodologii, która wyjaśnia każdą liczbę.
 
-Ceny zakupu nie dolicza się do kosztu całkowitego. Jej miejsce zajmuje utrata wartości: to ta część ceny, której nie odzyskasz przy sprzedaży auta. Serwis zakłada zakup za gotówkę i nie liczy kredytu, leasingu, parkingu, opłat drogowych, mandatów, mycia ani przechowywania opon.
+Ceny zakupu nie dolicza się do całkowitego kosztu posiadania. Jej miejsce zajmuje utrata wartości: to ta część ceny, której nie odzyskasz przy sprzedaży auta. Serwis zakłada zakup za gotówkę i nie liczy kredytu, leasingu, parkingu, opłat drogowych, mandatów, mycia ani przechowywania opon.
 
 Nazwa i cena należą do najtańszej wersji auta. Wersje, które różnią się tylko napędem, pojemnością baterii, liczbą miejsc lub długością nadwozia, liczymy tu jako jedno auto. Kosztują więcej.
 
@@ -93,7 +93,11 @@ Nazwa i cena należą do najtańszej wersji auta. Wersje, które różnią się 
 
 Sekcja „Jakie zarobki na to auto” pokazuje, ile dochodu netto potrzebujesz, aby auto nie zajmowało zbyt dużej części budżetu. Dochód netto to pieniądze, które dostajesz po odliczeniu podatków, czyli „na rękę”. Kwoty są miesięczne w widoku „Miesięcznie” i roczne w widoku „Rocznie”.
 
-Skala ma cztery poziomy. Udział to część Twojego dochodu netto, którą zajmuje całkowity koszt auta:
+**Co liczy skala.** Skala liczy dwie rzeczy: cenę auta i koszt paliwa lub prądu. Serwis dzieli cenę równo na miesiące Twojego okresu posiadania, jak ratę bez odsetek, i dodaje miesięczny koszt paliwa lub prądu. Tekst na początku sekcji pokazuje tę kwotę. W widoku „Rocznie” jest to kwota za 12 miesięcy.
+
+Skala nie liczy ubezpieczenia, serwisu, części i zużycia, opłat ani utraty wartości. Te koszty są w sekcji „Koszt posiadania”, w rankingach i w porównaniu.
+
+Skala ma cztery poziomy. Udział to część Twojego dochodu netto, którą zajmuje powyższa kwota:
 
 | Poziom | Znaczenie |
 |---|---|
@@ -106,11 +110,11 @@ Każdy poziom ma przedział dochodu:
 
 - „od X” oznacza dochód X lub wyższy.
 - „od X do Y” oznacza dochód między X a Y.
-- „do Y” oznacza dochód Y lub niższy. To ostatni poziom, „niezalecane”. Jeśli Twój dochód netto mieści się w tym przedziale, całkowity koszt auta przekracza 25% tego dochodu, a serwis odradza takie auto.
+- „do Y” oznacza dochód Y lub niższy. To ostatni poziom, „niezalecane”. Jeśli Twój dochód netto mieści się w tym przedziale, cena i paliwo auta zajmują ponad 25% tego dochodu, a serwis odradza takie auto.
 
-Przykład dla całkowitego kosztu 2 000 zł miesięcznie: „komfortowo” zaczyna się od 13 300 zł, „rozsądnie” to od 10 000 do 13 300 zł, „na granicy” to od 8 000 do 10 000 zł, a „niezalecane” to do 8 000 zł. Kwoty są zaokrąglone do 100 zł.
+Przykład: auto z ceną 48 400 zł, kosztem paliwa 431 zł miesięcznie i okresem posiadania 5 lat. Cena rozłożona na 60 miesięcy to 807 zł miesięcznie. Razem z paliwem kwota wynosi 1 237 zł miesięcznie. „Komfortowo” zaczyna się od 8 200 zł, „rozsądnie” to od 6 200 do 8 200 zł, „na granicy” to od 4 900 do 6 200 zł, a „niezalecane” to do 4 900 zł. Kwoty są zaokrąglone do 100 zł. Przy okresie 3 lat kwota jest wyższa, bo ta sama cena rozkłada się na mniej miesięcy.
 
-Skala opiera się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Całkowity koszt w serwisie obejmuje też utratę wartości, dlatego ostatni próg to 25%. To wskazówka, a nie decyzja finansowa.
+Skala opiera się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Inne koszty auta dochodzą do ceny i paliwa, dlatego ostatni próg to 25%. To wskazówka, a nie decyzja finansowa.
 
 ## 7. Porównaj dwa lub trzy auta
 

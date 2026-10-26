@@ -13,7 +13,7 @@ The interface is in Polish and English. There are no accounts and no login. Your
 - Your own assumptions: yearly mileage, ownership period, and insurance (estimate from driver age and cover, or your own premium).
 - Costs per month or per year.
 - A car page with an illustrative photo of the model, the cost breakdown, the value of the car after the ownership period, and the cost per kilometer.
-- An earnings scale with four levels, from "up to 15% of income" to "over 25%". The last level is "niezalecane" ("not recommended").
+- An earnings scale with four levels, from "up to 15% of income" to "over 25%". It counts the purchase price spread over the ownership period, plus fuel or electricity. The last level is "niezalecane" ("not recommended").
 - A comparison of two or three cars.
 - Data refreshed once a day from public sources.
 

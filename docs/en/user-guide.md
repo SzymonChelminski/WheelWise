@@ -85,7 +85,7 @@ Select a car in a list to open its page. The page shows:
 
 The sign ≈ before an amount means an estimate. The price is not an offer. The link "How we calculate" opens the methodology page, which explains each number.
 
-The purchase price is not added to the total cost. Depreciation takes its place: it is the part of the price that you do not get back when you sell the car. The site assumes that you pay in cash and it does not count loans, leasing, parking, tolls, fines, washing or tyre storage.
+The purchase price is not added to the total cost of ownership. Depreciation takes its place: it is the part of the price that you do not get back when you sell the car. The site assumes that you pay in cash and it does not count loans, leasing, parking, tolls, fines, washing or tyre storage.
 
 The name and the price belong to the cheapest version of the car. Versions that differ only in drive, battery size, number of seats or body length count as one car. They cost more.
 
@@ -93,7 +93,11 @@ The name and the price belong to the cheapest version of the car. Versions that 
 
 The section "The income this car calls for" shows how much net income you need so that the car does not take too much of your budget. Net income is the money that you get after taxes, "take-home pay". The amounts are monthly in the "Monthly" view and yearly in the "Yearly" view.
 
-The scale has four levels. The share is the part of your net income that the total cost of the car takes:
+**What the scale counts.** The scale counts two things: the price of the car and the cost of fuel or electricity. The site divides the price evenly over the months of your ownership period, like an instalment without interest, and adds the monthly cost of fuel or electricity. The text at the top of the section shows this amount. In the "Yearly" view it is the amount for 12 months.
+
+The scale does not count insurance, servicing, parts and wear, fees and depreciation. These costs are in "Cost of ownership", in the rankings and in the comparison.
+
+The scale has four levels. The share is the part of your net income that the amount above takes:
 
 | Level | Meaning |
 |---|---|
@@ -106,11 +110,11 @@ Each level has a range of income:
 
 - "from X" means an income of X or more.
 - "from X to Y" means an income between X and Y.
-- "up to Y" means an income of Y or less. This is the last level, "not recommended". If your net income is in this range, the total cost of the car is above 25% of it, and the site advises against the car.
+- "up to Y" means an income of Y or less. This is the last level, "not recommended". If your net income is in this range, the price and the fuel of the car take more than 25% of it, and the site advises against the car.
 
-Example for a total cost of 2,000 zł per month: "comfortable" starts at 13,300 zł, "reasonable" is 10,000 to 13,300 zł, "stretching it" is 8,000 to 10,000 zł, and "not recommended" is up to 8,000 zł. The amounts are rounded to 100 zł.
+Example: a car with a price of 48,400 zł, fuel costs of 431 zł per month and an ownership period of 5 years. The price over 60 months is 807 zł per month. With fuel, the amount is 1,237 zł per month. "Comfortable" starts at 8,200 zł, "reasonable" is 6,200 to 8,200 zł, "stretching it" is 4,900 to 6,200 zł, and "not recommended" is up to 4,900 zł. The amounts are rounded to 100 zł. With a period of 3 years the amount is higher, because the same price is spread over fewer months.
 
-The scale follows Polish guidance: transport should take 15–20% of net income at most, and a car that takes more than 20% is usually too expensive. The total cost on this site also includes depreciation, so the last threshold is 25%. It is a guide, not a financial decision.
+The scale follows Polish guidance: transport should take 15–20% of net income at most, and a car that takes more than 20% is usually too expensive. The other costs of the car come on top of the price and the fuel, so the last threshold is 25%. It is a guide, not a financial decision.
 
 ## 7. Compare two or three cars
 
