@@ -67,6 +67,7 @@ Parametry zapytania:
 | `period` | wszystkie | `month` lub `year`. Domyślnie `month`. |
 | `metric` | `/rankings` | Jedna z dziewięciu miar rankingu. Domyślnie `totalCost`. |
 | `make`, `segment`, `body`, `fuel`, `gear`, `pmin`, `pmax`, `q` | `/rankings` | Filtry. Filtry z listą przyjmują powtórzone parametry lub wartości rozdzielone przecinkami. |
+| `dir` | `/rankings` | Kolejność sortowania. Tylko dokładna wartość `desc` daje kolejność od najwyższej. Każda inna wartość albo brak parametru daje `asc` (od najniższej). Adres zawiera `dir` tylko wtedy, gdy jest to `desc`. |
 | `limit` | `/rankings` | Liczba pokazanych wierszy, wielokrotność 10, najwyżej 1000. Domyślnie 10. |
 | `cars` | `/compare` | Slugi rozdzielone przecinkami. Liczą się najwyżej trzy auta. |
 
@@ -81,6 +82,15 @@ Mechanizm, który utrzymuje ten stan spójnym, jest w `src/lib/state/intended-qu
 Każda kontrolka i każdy link, który niesie stan zapytania, musi trzymać się tych reguł. W przeciwnym razie link pokazuje nieaktualny adres, gdy nawigacja się ładuje, albo kontrolka nadpisuje zmianę, która jest jeszcze w drodze.
 
 Zapisy używają `router.replace`. Zapis dodaje wpis do historii tylko wtedy, gdy kliknięcie linku do tej samej ścieżki jeszcze się ładuje. Dlatego przycisk Wstecz nie cofa pojedynczych zmian filtrów (zobacz sekcję 12).
+
+**Kolejność i czyszczenie filtrów na `/rankings`.** Parametry strony czyta `parseRankingParams` w `src/components/features/rankings/params.ts`.
+
+- `dir` jest przenoszony tak samo jak `metric`, filtry i założenia. Cele `metric`, `more` i `clear` w `resolveTarget` go zachowują (`KEPT_ON_RANKINGS` w `link-target.ts`). Cel `carry` do innych stron go nie przenosi.
+- `SortDirectionControl` (`src/components/features/rankings/SortDirectionControl.tsx`) zapisuje `dir=desc` albo usuwa `dir` i zawsze usuwa `limit`. Nowa kolejność pokazuje listę znowu od pierwszej strony. Filtry, `metric`, `period` i założenia zostają.
+- `clearFilterParams` w `params.ts` usuwa `make`, `segment`, `body`, `fuel`, `gear`, `pmin`, `pmax`, `q` i `limit`. Zachowuje `metric`, `dir`, `period` i parametry założeń. Używają jej trzy elementy: `ClearFiltersControl`, link „Wyczyść filtry” w `ActiveFiltersControl` oraz cel `clear` w `resolveTarget`, którego używa komunikat o pustej liście.
+- `ClearFiltersControl` (`ClearFiltersControl.tsx`) renderuje przycisk `ClearFiltersButton` (`src/components/ui/FiltersPanel.tsx`). `RankingsContent.tsx` umieszcza go w nagłówku panelu filtrów (od 1024 px) i w nagłówku arkusza filtrów (`headerAction`). Przycisk jest zawsze wyrenderowany. Gdy żaden filtr nie jest włączony, ma `aria-disabled` i nic nie robi, więc fokus klawiatury zostaje na nim po kliknięciu. Obok jest obszar `role="status"` z tekstem „Filtry wyczyszczone” (`filters.cleared`) po wyczyszczeniu. Ponowne ustawienie filtra usuwa ten tekst. O tym, czy filtr jest włączony, decyduje `countActiveFilters`. Liczy ona tylko filtry, które przeżywają `parseRankingParams`, więc `make`, której nie ma w katalogu, się nie liczy.
+- Nazwa dostępna listy rankingu to `rankings.listLabel`: tytuł listy i kolejność, na przykład „Całkowity koszt, miesięcznie, od najniższej”. Przełącznik kolejności (`SortDirectionSwitch` w `src/components/ui/SortDirection.tsx`) ma ukrytą legendę „Kolejność” (`rankings.order.legend`) i opcje „Od najniższej” oraz „Od najwyższej”.
+- Listy na stronie głównej (`HomeLists.tsx`) wywołują `rankCars` bez kierunku. Pozostają rosnące i nie mają kontrolki.
 
 ### 1.5 Nagłówki odpowiedzi
 
@@ -224,7 +234,14 @@ Model zwraca też wartość końcową w PLN i w procentach oraz koszt kilometra.
 
 ### 5.3 Miary rankingu i filtry
 
-`rankCars` w `src/lib/costs/ranking.ts` filtruje auta, liczy miarę i sortuje rosnąco. Remisy są sortowane według sluga. Miary to `price`, `totalCost`, `depreciation`, `maintenance`, `service`, `parts`, `fuelConsumption`, `fuelCost` i `insurance`. Miary kosztów używają wartości miesięcznej.
+`rankCars(cars, prices, assumptions, metric, filters, direction?)` w `src/lib/costs/ranking.ts` filtruje auta, liczy miarę i sortuje je według wartości. Opcjonalny `direction` to `SortDirection`, czyli `'asc' | 'desc'`, eksportowany z `@/lib/costs`. Domyślnie jest `'asc'`.
+
+- `'asc'` stawia najniższą wartość pierwszą. `'desc'` stawia najwyższą wartość pierwszą.
+- Remisy są zawsze sortowane według sluga rosnąco, w obu kierunkach.
+- Auto bez wartości miary (`null`) nie trafia do rankingu w żadnym kierunku. Nie jest przesuwane na koniec. W `fuelConsumption` wartości nie mają hybrydy plug-in oraz, jeśli `ev` nie jest jedynym wybranym napędem, auta elektryczne.
+- `rank` to pozycja liczona od 1 w zwróconej kolejności. W `'desc'` rangę 1 ma najwyższa wartość.
+
+Miary to `price`, `totalCost`, `depreciation`, `maintenance`, `service`, `parts`, `fuelConsumption`, `fuelCost` i `insurance`. Miary kosztów używają wartości miesięcznej.
 
 Miara `fuelConsumption` porządkuje litry na 100 km. Hybrydy plug-in i auta elektryczne nie mają w niej miejsca. Gdy jedynym wybranym napędem jest `ev`, miara porządkuje kWh na 100 km i auta elektryczne się pojawiają.
 

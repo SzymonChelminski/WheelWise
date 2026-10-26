@@ -67,6 +67,7 @@ Query parameters:
 | `period` | all | `month` or `year`. Default `month`. |
 | `metric` | `/rankings` | One of the nine ranking metrics. Default `totalCost`. |
 | `make`, `segment`, `body`, `fuel`, `gear`, `pmin`, `pmax`, `q` | `/rankings` | Filters. List filters accept repeated or comma-separated values. |
+| `dir` | `/rankings` | Sort order. Only the exact value `desc` gives highest first. Any other value, or no parameter, gives `asc` (lowest first). The address holds `dir` only when it is `desc`. |
 | `limit` | `/rankings` | Number of rows shown, a multiple of 10, at most 1000. Default 10. |
 | `cars` | `/compare` | Comma-separated slugs. At most three cars count. |
 
@@ -81,6 +82,15 @@ The mechanism that keeps this state consistent is in `src/lib/state/intended-que
 Every control and every link that carries query state must follow these rules. Otherwise a link shows a stale address while a navigation is loading, or a control overwrites a change that is still on its way.
 
 Writes use `router.replace`. A write adds a history entry only when a link click to the same path is still loading. This is why the Back button does not step through single filter changes (see section 12).
+
+**Order and clear filters on `/rankings`.** The parameters of the page are read by `parseRankingParams` in `src/components/features/rankings/params.ts`.
+
+- `dir` is carried like `metric`, the filters and the assumptions. The `metric`, `more` and `clear` targets of `resolveTarget` keep it (`KEPT_ON_RANKINGS` in `link-target.ts`). The `carry` target to other pages does not.
+- `SortDirectionControl` (`src/components/features/rankings/SortDirectionControl.tsx`) writes `dir=desc` or removes `dir`, and always removes `limit`. A new order shows the list from the first page again. The filters, `metric`, `period` and the assumptions stay.
+- `clearFilterParams` in `params.ts` removes `make`, `segment`, `body`, `fuel`, `gear`, `pmin`, `pmax`, `q` and `limit`. It keeps `metric`, `dir`, `period` and the assumption parameters. Three controls use it: `ClearFiltersControl`, the "Clear filters" link of `ActiveFiltersControl`, and the `clear` target of `resolveTarget`, which the empty-list message uses.
+- `ClearFiltersControl` (`ClearFiltersControl.tsx`) renders the button of `ClearFiltersButton` (`src/components/ui/FiltersPanel.tsx`). `RankingsContent.tsx` places it in the heading of the filter panel (from 1024 px) and in the header of the filters sheet (`headerAction`). The button is always rendered. With no filter on, it has `aria-disabled` and does nothing, so keyboard focus stays on it after a click. A `role="status"` region next to it holds "Filters cleared" (`filters.cleared`) after a clear. A filter that is set again removes the text. `countActiveFilters` decides whether a filter is on. It counts only filters that survive `parseRankingParams`, so a `make` that is not in the catalogue does not count.
+- The accessible name of the ranking list is `rankings.listLabel`: the list title and the order, for example "Total cost, per month, lowest first". The order switch (`SortDirectionSwitch` in `src/components/ui/SortDirection.tsx`) has the hidden legend "Order" (`rankings.order.legend`) and the options "Lowest first" and "Highest first".
+- The lists on the home page (`HomeLists.tsx`) call `rankCars` without a direction. They stay ascending and have no control.
 
 ### 1.5 Response headers
 
@@ -224,7 +234,14 @@ The model also returns the residual value in PLN and in percent, and the cost pe
 
 ### 5.3 Ranking metrics and filters
 
-`rankCars` in `src/lib/costs/ranking.ts` filters the cars, computes the metric and sorts ascending. Ties are sorted by slug. The metrics are `price`, `totalCost`, `depreciation`, `maintenance`, `service`, `parts`, `fuelConsumption`, `fuelCost` and `insurance`. Cost metrics use the monthly value.
+`rankCars(cars, prices, assumptions, metric, filters, direction?)` in `src/lib/costs/ranking.ts` filters the cars, computes the metric and sorts them by value. The optional `direction` is `SortDirection`, `'asc' | 'desc'`, exported from `@/lib/costs`. The default is `'asc'`.
+
+- `'asc'` puts the lowest value first. `'desc'` puts the highest value first.
+- Ties are always sorted by slug in ascending order, in both directions.
+- A car that has no value for the metric (`null`) is not ranked in either direction. It is not moved to the end. For `fuelConsumption`, plug-in hybrids and, unless `ev` is the only selected powertrain, electric cars have no value.
+- `rank` is the 1-based position in the returned order. In `'desc'`, rank 1 is the highest value.
+
+The metrics are `price`, `totalCost`, `depreciation`, `maintenance`, `service`, `parts`, `fuelConsumption`, `fuelCost` and `insurance`. Cost metrics use the monthly value.
 
 The `fuelConsumption` metric ranks liters per 100 km. Plug-in hybrids and electric cars have no place in it. When the only selected powertrain is `ev`, the metric ranks kWh per 100 km instead, and electric cars appear.
 

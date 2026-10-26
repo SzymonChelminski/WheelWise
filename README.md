@@ -8,8 +8,8 @@ The interface is in Polish and English. There are no accounts and no login. Your
 
 ## Features
 
-- Nine rankings: purchase price, total cost, depreciation, maintenance, servicing, parts and wear, fuel consumption, fuel cost and insurance.
-- Filters by make, body type, powertrain, gearbox, segment and price range, and a search by make or model.
+- Nine rankings: purchase price, total cost, depreciation, maintenance, servicing, parts and wear, fuel consumption, fuel cost and insurance. Each ranking sorts lowest first or highest first.
+- Filters by make, body type, powertrain, gearbox, segment and price range, and a search by make or model. One button clears all filters.
 - Your own assumptions: yearly mileage, ownership period, and insurance (estimate from driver age and cover, or your own premium).
 - Costs per month or per year.
 - A car page with an illustrative photo of the model, the cost breakdown, the value of the car after the ownership period, and the cost per kilometer.

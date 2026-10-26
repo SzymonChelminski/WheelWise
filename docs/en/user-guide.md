@@ -14,7 +14,7 @@ There are no accounts. You do not log in, and the site does not save cars or com
 
 ## 2. Find the cheapest cars: rankings
 
-Open "Rankings" in the top menu. The page shows a list of cars, from the lowest value to the highest.
+Open "Rankings" in the top menu. The page shows a list of cars. At first the list starts with the lowest value. You can reverse the order (see "Change the order" below).
 
 **Choose what to rank by.** Use "Rank by". There are nine rankings:
 
@@ -40,6 +40,10 @@ In the "Fuel consumption" ranking, plug-in hybrids are left out, because their c
 - "Gearbox": "Any", "Manual" or "Automatic".
 
 The list "Active filters" shows what is on. Use "Remove filter" to switch one off, or "Clear filters" to switch all off. If no car matches, you see "No car matches these filters". Widen the price range or switch some filters off.
+
+**Clear all filters.** The button "Clear filters" is at the top of the filters. On a wide screen it is in the heading "Filters". On a phone it is in the header of the filters window. The button switches off the make, segment, body type, powertrain, gearbox, price range and text search. It keeps the ranking that you chose, the order, the cost period and your assumptions. The list starts again from the first 10 cars. While no filter is on, the button looks dimmed and does nothing. After you use it, a screen reader says "Filters cleared". The list "Active filters" and the message for an empty list have their own "Clear filters" link with the same effect.
+
+**Change the order.** Next to the title of the list is a switch with two options: "Lowest first" and "Highest first". The list opens with "Lowest first". Select "Highest first" to see the highest value at the top. The number of a car is its place in the chosen order, so in "Highest first" the number 1 is the car with the highest value. A new order keeps your filters, the ranking, the cost period and your assumptions. The list starts again from the first 10 cars. Cars that have no value in a ranking are left out in both orders. Cars with the same value keep the same order in both directions. The lists on the home page always start with the lowest value and have no switch.
 
 **Search for one car.** On the home page, type in "Search for a car" (for example "Clio"). Pick a suggestion to open the page of the car. If there is no match, you see "We don’t have that car". Check the spelling or type the make only.
 
