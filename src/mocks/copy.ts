@@ -239,6 +239,7 @@ const pl = {
     activeList: "Włączone filtry",
     remove: "Usuń filtr",
     clear: "Wyczyść filtry",
+    cleared: "Filtry wyczyszczone",
   },
   compareToggle: {
     add: "Porównaj",
@@ -281,6 +282,10 @@ const pl = {
     listTitle: (metric: string, period: string) => `${metric}, ${period}`,
     showing: (shown: string, total: string) => `Pokazano ${shown} z ${total}`,
     showMore: "Pokaż kolejne 10",
+    order: { legend: "Kolejność", asc: "Od najniższej", desc: "Od najwyższej" },
+    /** Accessible name of the list: "{title}, od najniższej". */
+    listLabel: (title: string, dir: "asc" | "desc") =>
+      `${title}, ${dir === "desc" ? "od najwyższej" : "od najniższej"}`,
     estimateNote: "oznacza szacunek dla Twoich założeń.",
     consumptionCaption: "WLTP",
     consumptionNote:
@@ -589,6 +594,7 @@ const en: Copy = {
     activeList: "Active filters",
     remove: "Remove filter",
     clear: "Clear filters",
+    cleared: "Filters cleared",
   },
   compareToggle: {
     add: "Compare",
@@ -631,6 +637,8 @@ const en: Copy = {
     listTitle: (metric, period) => `${metric}, ${period}`,
     showing: (shown, total) => `Showing ${shown} of ${total}`,
     showMore: "Show 10 more",
+    order: { legend: "Order", asc: "Lowest first", desc: "Highest first" },
+    listLabel: (title, dir) => `${title}, ${dir === "desc" ? "highest first" : "lowest first"}`,
     estimateNote: "marks an estimate for your assumptions.",
     consumptionCaption: "WLTP",
     consumptionNote:

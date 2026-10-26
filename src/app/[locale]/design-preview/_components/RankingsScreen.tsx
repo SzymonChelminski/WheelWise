@@ -3,12 +3,13 @@ import { AssumptionsSummary } from "@/components/ui/AssumptionsPanel";
 import { Button } from "@/components/ui/Button";
 import { SegmentedSwitch } from "@/components/ui/Choice";
 import { EmptyState, InlineError, RankingListSkeleton } from "@/components/ui/Feedback";
-import { ActiveFilters } from "@/components/ui/FiltersPanel";
+import { ActiveFilters, ClearFiltersButton, FiltersHeading } from "@/components/ui/FiltersPanel";
 import { formatInteger, type Locale } from "@/components/ui/format";
 import { EstimateNote, InfoNote } from "@/components/ui/Markers";
 import { MetricSelector } from "@/components/ui/MetricSelector";
 import { RankingList } from "@/components/ui/RankingItem";
 import { SheetDisclosure } from "@/components/ui/Sheet";
+import { SortDirectionSwitch } from "@/components/ui/SortDirection";
 import { h1Class, h2Class, linkClass, panelClass } from "@/components/ui/styles";
 import { Link } from "@/i18n/navigation";
 import {
@@ -43,7 +44,13 @@ export type RankingsState =
   /** Ranking by fuel consumption, with the note about what it leaves out. */
   | "consumption"
   /** Five cars whose names have about 100 characters. */
-  | "long-names";
+  | "long-names"
+  /** Order "highest first": the same cars from the most expensive, ranks counted from 1 again. */
+  | "desc"
+  /** No filter is on: no chips, no badge, "Wyczyść filtry" in its disabled look. */
+  | "no-filters"
+  /** The filters sheet open with no filter on. */
+  | "filters-open-none";
 
 export function RankingsScreen({
   locale,
@@ -56,14 +63,24 @@ export function RankingsScreen({
 }) {
   const t = copy[locale];
   const consumption = state === "consumption";
-  const items = consumption
+  const dir = state === "desc" ? "desc" : "asc";
+  const ascending = consumption
     ? mockRankingByConsumption
     : state === "long-names"
       ? mockLongNamesByTotalCost
       : mockRankingByTotalCost;
-  const max = items[items.length - 1].value;
+  // Descending: the same rows reversed; the rank is the position in the order shown.
+  const items =
+    dir === "desc"
+      ? [...ascending].reverse().map((item, index) => ({ ...item, rank: index + 1 }))
+      : ascending;
+  const max = Math.max(...items.map((item) => item.value));
   const total = formatInteger(mockFilteredSize, locale);
-  const filters = activeFilterItems(locale);
+  const noFilters = state === "no-filters" || state === "filters-open-none";
+  const filters = noFilters ? [] : activeFilterItems(locale);
+  const clearButton = (
+    <ClearFiltersButton label={t.filters.clear} active={!noFilters} />
+  );
   const selected = state === "full" ? mockCompareThree : mockCompareTwo;
   const metric = consumption ? "fuelConsumption" : "totalCost";
   const title = consumption
@@ -98,10 +115,8 @@ export function RankingsScreen({
         <div className="mt-6 grid gap-8 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
           <aside aria-label={t.filters.title} className="hidden lg:block">
             <div className={`${panelClass} p-5`}>
-              <h2 className="mb-4 font-display text-xl font-semibold text-ink">
-                {t.filters.title}
-              </h2>
-              <PreviewFilters locale={locale} idPrefix="side" />
+              <FiltersHeading title={t.filters.title} action={clearButton} />
+              <PreviewFilters locale={locale} idPrefix="side" noFilters={noFilters} />
             </div>
           </aside>
 
@@ -132,23 +147,27 @@ export function RankingsScreen({
                   {state === "empty" ? t.common.cars(0, "0") : t.common.cars(mockFilteredSize, total)}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Below 640 px the controls fill the row: one tidy column at 320 px, two rows at 375 px. */}
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                 <SheetDisclosure
-                  className="lg:hidden"
+                  className="max-sm:grow lg:hidden"
                   triggerLabel={t.filters.title}
                   triggerIcon="sliders"
-                  badge={String(filters.length)}
+                  badge={filters.length > 0 ? String(filters.length) : undefined}
                   title={t.filters.title}
                   closeLabel={t.common.close}
                   applyLabel={t.filters.apply(mockFilteredSize, total)}
-                  defaultOpen={state === "filters-open"}
+                  defaultOpen={state === "filters-open" || state === "filters-open-none"}
+                  headerAction={clearButton}
                 >
-                  <PreviewFilters locale={locale} idPrefix="sheet-f" />
+                  <PreviewFilters locale={locale} idPrefix="sheet-f" noFilters={noFilters} />
                 </SheetDisclosure>
                 {/* Price and consumption do not depend on the period: no switch. */}
                 {!consumption && (
                   <SegmentedSwitch
                     name="period"
+                    fullWidth="narrow"
+                    className="max-sm:grow"
                     legend={t.period.legend}
                     defaultValue="month"
                     options={[
@@ -157,6 +176,7 @@ export function RankingsScreen({
                     ]}
                   />
                 )}
+                <SortDirectionSwitch labels={t.rankings.order} defaultValue={dir} />
               </div>
             </div>
 
@@ -195,7 +215,7 @@ export function RankingsScreen({
               {state === "loading" && <RankingListSkeleton rows={5} label={t.rankings.loading} />}
               {showsList && (
                 <>
-                  <RankingList label={title}>
+                  <RankingList label={t.rankings.listLabel(title, dir)}>
                     {items.map((item) =>
                       consumption ? (
                         <ConsumptionRow

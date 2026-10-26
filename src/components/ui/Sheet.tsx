@@ -14,6 +14,11 @@ import { Icon, type IconName } from "./Icon";
  * list is a positioned element, which keeps visually hidden content (sr-only
  * labels and legends) inside it, and it has scroll padding, so a control that
  * receives focus is brought into view with room for its focus ring.
+ *
+ * `headerAction` (the filters sheet: "Wyczyść filtry") sits in the header
+ * between the title and the close button. Opening the sheet always puts focus
+ * on the close button, never on that action, so Enter right after opening
+ * cannot clear anything.
  */
 export function Sheet({
   open,
@@ -22,6 +27,7 @@ export function Sheet({
   closeLabel,
   children,
   footer,
+  headerAction,
 }: {
   open: boolean;
   onClose: () => void;
@@ -31,14 +37,21 @@ export function Sheet({
   children: ReactNode;
   /** Pinned under the scrolling content, usually the apply button. */
   footer?: ReactNode;
+  /** Text button in the header, left of the close button. */
+  headerAction?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      // The first focusable element would be the header action; start on "Zamknij" instead.
+      closeRef.current?.focus();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
@@ -56,14 +69,18 @@ export function Sheet({
         <h2 id={titleId} className="font-display text-xl font-semibold text-ink">
           {title}
         </h2>
-        <button
-          type="button"
-          aria-label={closeLabel}
-          onClick={onClose}
-          className="inline-flex size-11 items-center justify-center rounded-md text-ink transition-colors duration-(--duration-fast) hover:bg-brand-soft"
-        >
-          <Icon name="close" size={24} />
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {headerAction}
+          <button
+            ref={closeRef}
+            type="button"
+            aria-label={closeLabel}
+            onClick={onClose}
+            className="inline-flex size-11 items-center justify-center rounded-md text-ink transition-colors duration-(--duration-fast) hover:bg-brand-soft"
+          >
+            <Icon name="close" size={24} />
+          </button>
+        </div>
       </header>
       <div className="relative min-h-0 flex-1 scroll-py-4 overflow-y-auto overscroll-contain px-5 py-5">
         {children}
@@ -89,6 +106,7 @@ export function SheetDisclosure({
   applyLabel,
   children,
   defaultOpen = false,
+  headerAction,
   className,
 }: {
   triggerLabel: string;
@@ -104,6 +122,8 @@ export function SheetDisclosure({
   children: ReactNode;
   /** Preview only. */
   defaultOpen?: boolean;
+  /** Passed to Sheet: the filters sheet puts "Wyczyść filtry" here. */
+  headerAction?: ReactNode;
   className?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -129,6 +149,7 @@ export function SheetDisclosure({
         onClose={() => setOpen(false)}
         title={title}
         closeLabel={closeLabel}
+        headerAction={headerAction}
         footer={
           applyLabel ? (
             <Button className="w-full" onClick={() => setOpen(false)}>

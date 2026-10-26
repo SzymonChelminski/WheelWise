@@ -16,6 +16,7 @@ import {
   RankingListSkeleton,
 } from "@/components/ui/Feedback";
 import { NumberField, Select, TextField } from "@/components/ui/Fields";
+import { ClearFiltersButton, FiltersHeading } from "@/components/ui/FiltersPanel";
 import { formatDate, formatPln } from "@/components/ui/format";
 import {
   Estimate,
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/Markers";
 import { MetricSelector } from "@/components/ui/MetricSelector";
 import { RankingList } from "@/components/ui/RankingItem";
+import { SortDirectionSwitch } from "@/components/ui/SortDirection";
 import { h1Class, h2Class, linkClass, panelClass } from "@/components/ui/styles";
 import { Link } from "@/i18n/navigation";
 import {
@@ -303,6 +305,51 @@ export default async function ComponentsPreview({
             <CheckboxRow name="g-make" value="tesla" count="0" disabled>
               Tesla
             </CheckboxRow>
+          </div>
+        </Block>
+
+        <Block title="Ranking order switch">
+          <Row label="lowest first (default), highest first">
+            <SortDirectionSwitch name="g-dir-1" labels={t.rankings.order} />
+            <SortDirectionSwitch name="g-dir-2" labels={t.rankings.order} defaultValue="desc" />
+          </Row>
+          <Row label="hover on the other segment, keyboard focus on the selected segment">
+            <SortDirectionSwitch
+              name="g-dir-3"
+              labels={t.rankings.order}
+              demo={{ segment: "desc", state: "hover" }}
+            />
+            <SortDirectionSwitch
+              name="g-dir-4"
+              labels={t.rankings.order}
+              demo={{ segment: "asc", state: "focus" }}
+            />
+          </Row>
+        </Block>
+
+        <Block title="Clear filters (filter panel heading)">
+          <Row label="default, hover, focus, active, disabled (no filter on; stays focusable)">
+            <ClearFiltersButton label={t.filters.clear} active />
+            <ClearFiltersButton label={t.filters.clear} active demo="hover" />
+            <ClearFiltersButton label={t.filters.clear} active demo="focus" />
+            <ClearFiltersButton label={t.filters.clear} active demo="active" />
+            <ClearFiltersButton label={t.filters.clear} active={false} />
+          </Row>
+          <div className="grid max-w-2xl gap-5 sm:grid-cols-2">
+            <div className={`${panelClass} p-5`}>
+              <FiltersHeading
+                title={t.filters.title}
+                action={<ClearFiltersButton label={t.filters.clear} active />}
+              />
+              <p className="text-sm text-ink-muted">{t.filters.query}</p>
+            </div>
+            <div className={`${panelClass} p-5`}>
+              <FiltersHeading
+                title={t.filters.title}
+                action={<ClearFiltersButton label={t.filters.clear} active={false} />}
+              />
+              <p className="text-sm text-ink-muted">{t.filters.query}</p>
+            </div>
           </div>
         </Block>
 

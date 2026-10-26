@@ -192,15 +192,24 @@ export function assumptionsSummary(locale: Locale): string {
   return t.summary(formatInteger(mockAssumptions.annualMileageKm, locale), ownershipText(mockAssumptions.ownershipYears, locale));
 }
 
-export function PreviewFilters({ locale, idPrefix }: { locale: Locale; idPrefix: string }) {
+export function PreviewFilters({
+  locale,
+  idPrefix,
+  noFilters = false,
+}: {
+  locale: Locale;
+  idPrefix: string;
+  /** No filter on: every field empty, every option off. */
+  noFilters?: boolean;
+}) {
   const t = copy[locale];
   // Kept in step with the cars of the mock ranking: segments A to D, up to 200 000 zł.
-  const selectedSegments = ["A", "B", "C", "D"];
+  const selectedSegments = noFilters ? [] : ["A", "B", "C", "D"];
   return (
     <FiltersPanel
       idPrefix={idPrefix}
       labels={t.filters}
-      priceMax="200000"
+      priceMax={noFilters ? "" : "200000"}
       bodyTypes={Object.entries(t.attr.body).map(([value, label]) => ({
         value,
         label,

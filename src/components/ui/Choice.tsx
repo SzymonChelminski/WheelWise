@@ -24,6 +24,8 @@ const FOCUS_WITHIN =
 export interface SegmentedOption {
   value: string;
   label: string;
+  /** Preview only: shows a state of this segment without a pointer or keyboard. */
+  demo?: "hover" | "focus";
 }
 
 export function SegmentedSwitch({
@@ -45,7 +47,11 @@ export function SegmentedSwitch({
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
-  fullWidth?: boolean;
+  /**
+   * true: equal columns at every width. "narrow": equal columns over the whole
+   * row below 640 px, its own width from 640 px (the order switch on the rankings page).
+   */
+  fullWidth?: boolean | "narrow";
   className?: string;
 }) {
   // No handler object at all when uncontrolled: the component then also works in a Server Component.
@@ -62,18 +68,23 @@ export function SegmentedSwitch({
       <div
         className={cn(
           "rounded-md border border-line-strong bg-surface p-[3px]",
-          fullWidth ? "flex" : "inline-flex",
+          fullWidth === "narrow" ? "flex sm:inline-flex" : fullWidth ? "flex" : "inline-flex",
         )}
       >
         {options.map((option) => (
           <label
             key={option.value}
+            data-demo={option.demo}
             className={cn(
               "relative flex min-h-9 cursor-pointer items-center justify-center rounded-sm text-center text-sm font-medium text-ink transition-colors duration-(--duration-fast)",
               "hover:bg-brand-soft has-[:checked]:bg-brand has-[:checked]:font-semibold has-[:checked]:text-on-brand",
               FOCUS_WITHIN,
               "has-[:focus-visible]:outline-offset-2",
-              fullWidth ? "flex-1 px-2" : "px-3.5",
+              fullWidth === "narrow"
+                ? "flex-1 px-2 sm:flex-none sm:px-3.5"
+                : fullWidth
+                  ? "flex-1 px-2"
+                  : "px-3.5",
             )}
           >
             <input

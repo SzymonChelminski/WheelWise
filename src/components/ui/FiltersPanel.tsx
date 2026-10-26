@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { buttonClass } from "./Button";
 import { CheckboxRow, FilterChip, SegmentedSwitch } from "./Choice";
 import { cn } from "./cn";
 import { NumberField, TextField } from "./Fields";
@@ -257,6 +258,78 @@ export function ActiveFilters({
       >
         {labels.clear}
       </button>
+    </div>
+  );
+}
+
+/**
+ * "Wyczyść filtry" at the top of the filter panel: in the heading row of the
+ * sidebar (FiltersHeading) and in the header of the filters sheet (Sheet
+ * `headerAction`). Text button, size sm.
+ *
+ * It is always rendered. With no filter on it keeps its place in the disabled
+ * look and stays focusable with aria-disabled (as a full CompareToggle does), so
+ * after a click the focus stays on it instead of falling to <body>, and the
+ * panel never shifts. `status` fills a polite live region next to the button:
+ * set it to "Filtry wyczyszczone" after clearing, back to "" on the next change.
+ */
+export function ClearFiltersButton({
+  label,
+  active,
+  status = "",
+  onClear,
+  demo,
+  className,
+}: {
+  /** "Wyczyść filtry" */
+  label: string;
+  /** At least one filter (make, segment, body, fuel, gear, pmin, pmax, q) is on. */
+  active: boolean;
+  /** Announced text, "" when there is nothing to announce. */
+  status?: string;
+  onClear?: () => void;
+  /** Preview only. */
+  demo?: "hover" | "focus" | "active";
+  className?: string;
+}) {
+  return (
+    <span data-clear-filters className={cn("inline-flex", className)}>
+      <button
+        type="button"
+        aria-disabled={active ? undefined : true}
+        onClick={active ? onClear : undefined}
+        data-demo={demo}
+        className={buttonClass({ variant: "text", size: "sm", disabled: !active })}
+      >
+        {label}
+      </button>
+      <span role="status" className="sr-only">
+        {status}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Heading row of the filters sidebar (from 1024 px): the h2 "Filtry" left and
+ * the clear button right, on one 28 px line. The button's side padding hangs
+ * outside the panel's content edge, so its text lines up with the fields below.
+ */
+export function FiltersHeading({
+  title,
+  action,
+  className,
+}: {
+  /** "Filtry" */
+  title: string;
+  /** Normally <ClearFiltersButton>. */
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("mb-4 flex items-center justify-between gap-3", className)}>
+      <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
+      {action && <div className="-my-1 -mr-1 shrink-0">{action}</div>}
     </div>
   );
 }
