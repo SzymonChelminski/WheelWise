@@ -18,12 +18,11 @@ function roundToStep(valuePln: number): number {
 }
 
 /**
- * Net monthly income at which the monthly total cost stays within each share
- * of income. A cost that is not a positive finite number gives all zero bounds.
+ * Net monthly income at which the monthly cost stays within each share of income.
+ * A cost that is not a positive finite number gives all zero bounds.
  */
-export function requiredIncome(monthlyTotalCostPln: number): IncomeRange[] {
-  const cost =
-    Number.isFinite(monthlyTotalCostPln) && monthlyTotalCostPln > 0 ? monthlyTotalCostPln : 0;
+export function requiredIncome(monthlyCostPln: number): IncomeRange[] {
+  const cost = Number.isFinite(monthlyCostPln) && monthlyCostPln > 0 ? monthlyCostPln : 0;
   const comfortableMin = roundToStep(cost / MODEL.shareComfortable);
   const reasonableMin = roundToStep(cost / MODEL.shareReasonable);
   const stretchMin = roundToStep(cost / MODEL.shareStretch);

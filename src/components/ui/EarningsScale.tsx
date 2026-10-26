@@ -38,7 +38,7 @@ export interface EarningsLevel {
   label: string;
   /** "od 13 100 zł", "od 8 700 do 13 100 zł", "do 6 500 zł" */
   range: string;
-  /** "auto pochłania do 10% dochodu" */
+  /** "zakup i paliwo zajmują do 15% dochodu" */
   note: string;
 }
 

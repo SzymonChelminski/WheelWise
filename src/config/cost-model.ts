@@ -115,9 +115,10 @@ export const COST_MODEL = {
     inspectionDueYears: [3, 5, 6, 7, 8, 9],
   },
   income: {
-    // Share of net monthly income taken by the total monthly cost, per level upper bound.
+    // Share of net monthly income taken by the monthly base cost (purchase price spread over
+    // the ownership months plus fuel or energy), per level upper bound.
     // Polish guidance (see the methodology page): transport up to 15-20% of net income;
-    // the cost includes depreciation, hence the last threshold of 25%.
+    // other car costs come on top of the base, hence the last threshold of 25%.
     shareComfortable: 0.15,
     shareReasonable: 0.2,
     shareStretch: 0.25,
