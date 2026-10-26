@@ -243,7 +243,38 @@ Aby zmienić parametr:
 
 ## 6. Skala zarobków
 
-`requiredIncome(monthlyTotalCostPln)` w `src/lib/costs/income.ts` zwraca cztery przedziały **miesięcznego dochodu netto** (na rękę). Każdy przedział wynika z udziału dochodu, który zajmuje całkowity koszt miesięczny:
+### 6.1 Kwota bazowa
+
+`monthlyAffordabilityCost(costs, ownershipYears)` w `src/lib/costs/income.ts` podaje miesięczną kwotę, na której opiera się skala. To cena zakupu rozłożona równo na miesiące posiadania plus miesięczny koszt paliwa lub energii:
+
+```
+costs.purchasePricePln / (ownershipYears * 12) + costs.perMonth.fuel
+```
+
+- Wynik nie jest zaokrąglany, w PLN.
+- Jeśli `ownershipYears` nie jest dodatnią liczbą skończoną, funkcja używa `DEFAULT_ASSUMPTIONS.ownershipYears` (5).
+- Ubezpieczenie, serwis, części, opłaty i utrata wartości nie wchodzą do tej kwoty. Zostają w zestawieniu kosztów, w `CostMap.total`, w rankingach i w porównaniu.
+- `calculateCosts` i `CostMap` się nie zmieniają. Funkcja czyta dwa pola `CostBreakdown`.
+
+Funkcja jest używana w jednym miejscu: `CarCostSection` w `src/components/features/car/CarCostSection.tsx` (strona auta). Komponent przekazuje `assumptions.ownershipYears`, daje wynik do `earningsLevels` i pokazuje tę samą wartość we wstępie sekcji (`car.earningsIntroMonth`). W widoku rocznym wstęp pokazuje wartość pomnożoną przez 12 (`car.earningsIntroYear`). Strona podglądu projektu (`src/app/[locale]/design-preview/_components/CarScreen.tsx`) wywołuje ją z danymi przykładowymi.
+
+Przykład, wyliczony funkcją dla Dacii Sandero z `data/fixtures/cars.json` (`dacia-sandero-petrol-manual-67km`), domyślnych założeń (15000 km rocznie, 5 lat) i cen z `data/fixtures/market-prices.json`:
+
+| Wartość | Kwota (PLN) |
+|---|---|
+| `purchasePricePln` | 48400 |
+| Cena na miesiąc, 48400 / 60 | 806,67 |
+| `perMonth.fuel` | 430,62 |
+| `monthlyAffordabilityCost(costs, 5)` | 1237,29 |
+| `perMonth.total`, dla porównania | 1062,37 |
+| Ta sama funkcja dla 3 lat | 1775,07 |
+| Ta sama funkcja dla 0, `NaN` lub wartości ujemnej | 1237,29 (domyślnie 5 lat) |
+
+Dla 1237,29 PLN granice to 8200, 6200 i 4900. Koszt paliwa zależy od cen paliw w bazie, więc na działającym serwisie liczby się różnią.
+
+### 6.2 Przedziały
+
+`requiredIncome(monthlyCostPln)` w tym samym pliku zwraca cztery przedziały **miesięcznego dochodu netto** (na rękę). Strona auta przekazuje jej kwotę bazową z sekcji 6.1. W kodzie parametr nazywa się `monthlyCostPln`. Każdy przedział wynika z udziału dochodu, który zajmuje ta kwota:
 
 | Poziom (`AffordabilityLevel`) | Udział dochodu | Przedział dochodu |
 |---|---|---|
@@ -252,11 +283,11 @@ Aby zmienić parametr:
 | `stretch` | od 20% do 25% | od kosztu / 0,25 do kosztu / 0,20 |
 | `not_recommended` | ponad 25% | do kosztu / 0,25 |
 
-Każda granica jest zaokrąglana do 100 PLN. Koszt, który nie jest liczbą dodatnią, daje zerowe granice. Dla całkowitego kosztu miesięcznego 2000 PLN granice to 13300, 10000 i 8000. Widok roczny mnoży granice miesięczne przez 12 (`earningsLevels` w `src/components/features/car/car-format.ts`).
+Każda granica jest zaokrąglana do 100 PLN. Koszt, który nie jest liczbą dodatnią, daje zerowe granice. Dla kwoty 2000 PLN miesięcznie granice to 13300, 10000 i 8000. Widok roczny mnoży granice miesięczne przez 12 (`earningsLevels` w `src/components/features/car/car-format.ts`).
 
 Udziały to `shareComfortable` (0,15), `shareReasonable` (0,2) i `shareStretch` (0,25) w `COST_MODEL.income`. Krok zaokrąglenia to `roundingStepPln` (100).
 
-Progi opierają się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Całkowity koszt w WheelWise obejmuje też utratę wartości, dlatego ostatni próg to 25%. Strona metodologii podaje ten sam powód (`methodology.sections.income` w plikach tekstów).
+Progi opierają się na polskich zaleceniach: wydatki na transport powinny wynosić najwyżej 15–20% dochodu netto, a auto, które zabiera ponad 20%, jest zwykle za drogie. Inne koszty auta dochodzą do ceny i paliwa, dlatego ostatni próg to 25%. Strona metodologii podaje ten sam powód (`methodology.sections.income` w plikach tekstów).
 
 Procenty występują też w tekstach: `car.levels.*.note` i lista dochodu w `methodology.sections.income` w obu plikach tekstów. Zmieniaj je razem z liczbami.
 

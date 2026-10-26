@@ -243,7 +243,38 @@ To change a parameter:
 
 ## 6. Earnings scale
 
-`requiredIncome(monthlyTotalCostPln)` in `src/lib/costs/income.ts` returns four ranges of **net monthly income** (take-home pay). Each range follows from the share of income that the total monthly cost takes:
+### 6.1 The base amount
+
+`monthlyAffordabilityCost(costs, ownershipYears)` in `src/lib/costs/income.ts` gives the monthly amount that the scale is based on. It is the purchase price spread evenly over the months of ownership, plus the monthly fuel or energy cost:
+
+```
+costs.purchasePricePln / (ownershipYears * 12) + costs.perMonth.fuel
+```
+
+- The result is not rounded, in PLN.
+- If `ownershipYears` is not a positive finite number, the function uses `DEFAULT_ASSUMPTIONS.ownershipYears` (5).
+- Insurance, servicing, parts, fees and depreciation are not part of it. They stay in the breakdown, `CostMap.total`, the rankings and the comparison.
+- `calculateCosts` and `CostMap` do not change. The function reads two fields of the `CostBreakdown`.
+
+The function is used in one place: `CarCostSection` in `src/components/features/car/CarCostSection.tsx` (the car page). The component passes `assumptions.ownershipYears`, gives the result to `earningsLevels`, and shows the same value in the intro text of the section (`car.earningsIntroMonth`). In the yearly view the intro shows the value multiplied by 12 (`car.earningsIntroYear`). The design preview page (`src/app/[locale]/design-preview/_components/CarScreen.tsx`) calls it with mock data.
+
+Example, computed with the function for the Dacia Sandero in `data/fixtures/cars.json` (`dacia-sandero-petrol-manual-67km`), the default assumptions (15000 km per year, 5 years) and the prices in `data/fixtures/market-prices.json`:
+
+| Value | Amount (PLN) |
+|---|---|
+| `purchasePricePln` | 48400 |
+| Price per month, 48400 / 60 | 806.67 |
+| `perMonth.fuel` | 430.62 |
+| `monthlyAffordabilityCost(costs, 5)` | 1237.29 |
+| `perMonth.total`, for comparison | 1062.37 |
+| Same function with 3 years | 1775.07 |
+| Same function with 0, `NaN` or a negative value | 1237.29 (default of 5 years) |
+
+For 1237.29 PLN the bounds are 8200, 6200 and 4900. The fuel cost depends on the fuel prices in the database, so the figures on a live site differ.
+
+### 6.2 The ranges
+
+`requiredIncome(monthlyCostPln)` in the same file returns four ranges of **net monthly income** (take-home pay). The car page gives it the base amount of section 6.1. The parameter is called `monthlyCostPln` in the code. Each range follows from the share of income that the amount takes:
 
 | Level (`AffordabilityLevel`) | Share of income | Income range |
 |---|---|---|
@@ -252,11 +283,11 @@ To change a parameter:
 | `stretch` | 20% to 25% | from cost / 0.25 to cost / 0.20 |
 | `not_recommended` | over 25% | up to cost / 0.25 |
 
-Each bound is rounded to 100 PLN. A cost that is not a positive number gives zero bounds. For a total monthly cost of 2000 PLN the bounds are 13300, 10000 and 8000. The yearly view multiplies the monthly bounds by 12 (`earningsLevels` in `src/components/features/car/car-format.ts`).
+Each bound is rounded to 100 PLN. A cost that is not a positive number gives zero bounds. For an amount of 2000 PLN per month the bounds are 13300, 10000 and 8000. The yearly view multiplies the monthly bounds by 12 (`earningsLevels` in `src/components/features/car/car-format.ts`).
 
 The shares are `shareComfortable` (0.15), `shareReasonable` (0.2) and `shareStretch` (0.25) in `COST_MODEL.income`. The rounding step is `roundingStepPln` (100).
 
-The thresholds follow Polish guidance: transport should take 15% to 20% of net income at most, and a car that takes more than 20% is usually too expensive. The WheelWise total includes depreciation, so the last threshold is 25%. The methodology page gives the same reason (`methodology.sections.income` in the message files).
+The thresholds follow Polish guidance: transport should take 15% to 20% of net income at most, and a car that takes more than 20% is usually too expensive. The other costs of the car come on top of the price and the fuel, so the last threshold is 25%. The methodology page gives the same reason (`methodology.sections.income` in the message files).
 
 The percentages also appear in texts: `car.levels.*.note` and the income list in `methodology.sections.income` in both message files. Change them together with the numbers.
 
