@@ -154,7 +154,7 @@
 }
 
 /*
- * Logo bar colours (T41): blue, green, orange, left to right. `static`: these
+ * Logo bar colours: blue, green, orange, left to right. `static`: these
  * variables are always written to the built CSS, whether or not a utility uses
  * them, because the Logo component reads them through inline `fill: var(...)`
  * and never through a generated `fill-*` class (a missing class falls back to
