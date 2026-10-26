@@ -73,9 +73,14 @@ test.describe("methodology", () => {
       await expect(income.getByRole("listitem")).toHaveText(sections.income.list);
       expect(sections.income.list).toEqual(
         locale === "pl"
-          ? ["komfortowo: auto zajmuje do 15% dochodu", "rozsądnie: od 15% do 20%", "na granicy: od 20% do 25%", "niezalecane: ponad 25%"]
+          ? [
+              "komfortowo: zakup i paliwo zajmują do 15% dochodu",
+              "rozsądnie: od 15% do 20%",
+              "na granicy: od 20% do 25%",
+              "niezalecane: ponad 25%",
+            ]
           : [
-              "comfortable: the car takes up to 15% of income",
+              "comfortable: purchase and fuel take up to 15% of income",
               "reasonable: 15% to 20%",
               "stretching it: 20% to 25%",
               "not recommended: over 25%",
@@ -83,6 +88,26 @@ test.describe("methodology", () => {
       );
       for (const threshold of ["15%", "20%", "25%"]) await expect(income).toContainText(threshold);
       await expect(income).not.toContainText("10%");
+    });
+
+    test(`explains that the income scale counts purchase and fuel only (${locale})`, async ({ page }) => {
+      await visit(page, `/${locale}/methodology`);
+      const sections = messages(locale).methodology.sections;
+      const paragraphs =
+        locale === "pl"
+          ? [
+              "Skala pokazuje miesięczny dochód netto (na rękę), przy którym zakup auta i paliwo zajmują określoną część budżetu. Cenę auta dzielimy równo na miesiące wybranego okresu posiadania, jak ratę bez odsetek, i dodajemy miesięczny koszt paliwa lub prądu.",
+              "Ubezpieczenia, serwisu, części, opłat i utraty wartości w skali nie liczymy. Te kwoty są w koszcie posiadania na stronie auta, w rankingach i w porównaniu.",
+              "Progi opieramy na polskich zaleceniach: wydatki na transport nie powinny przekraczać 15–20% dochodu netto. Do zakupu i paliwa dochodzą jeszcze inne koszty auta, dlatego powyżej 25% auto jest niezalecane. Kwoty zaokrąglamy do 100 zł, a widok roczny to 12 razy kwota miesięczna.",
+            ]
+          : [
+              "The scale shows the net (take-home) monthly income at which purchase and fuel take a given share of the budget. We divide the price of the car evenly over the months of the chosen ownership period, like an instalment without interest, and add the monthly cost of fuel or electricity.",
+              "Insurance, servicing, parts, fees and depreciation are not counted in the scale. They are part of the cost of ownership on the car page, in the rankings and in the comparison.",
+              "The thresholds follow Polish guidance: transport should take no more than 15–20% of net income. The other costs of the car come on top of purchase and fuel, so above 25% the car is not recommended. Amounts are rounded to 100 zł, and the yearly view is 12 times the monthly amount.",
+            ];
+      const income = page.getByRole("main").getByRole("region", { name: sections.income.heading });
+      const shown = income.locator("p");
+      await expect.poll(async () => (await shown.allTextContents()).map(squash)).toEqual(paragraphs.map(squash));
     });
   }
 

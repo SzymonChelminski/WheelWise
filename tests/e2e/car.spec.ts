@@ -105,16 +105,16 @@ test.describe("car page", () => {
       const notes =
         locale === "pl"
           ? [
-              "auto zajmuje do 15% dochodu",
-              "auto zajmuje 15–20% dochodu",
-              "auto zajmuje 20–25% dochodu",
-              "auto zajmuje ponad 25% dochodu",
+              "zakup i paliwo zajmują do 15% dochodu",
+              "zakup i paliwo zajmują 15–20% dochodu",
+              "zakup i paliwo zajmują 20–25% dochodu",
+              "zakup i paliwo zajmują ponad 25% dochodu",
             ]
           : [
-              "the car takes up to 15% of income",
-              "the car takes 15–20% of income",
-              "the car takes 20–25% of income",
-              "the car takes over 25% of income",
+              "purchase and fuel take up to 15% of income",
+              "purchase and fuel take 15–20% of income",
+              "purchase and fuel take 20–25% of income",
+              "purchase and fuel take over 25% of income",
             ];
       for (const [index, note] of notes.entries()) await expect(levels.nth(index)).toContainText(note);
       await expect(levels.filter({ hasText: "10%" })).toHaveCount(0);
