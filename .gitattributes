@@ -1,1 +1,2 @@
-data/fixtures/*.json text eol=lf
+data/*.json text eol=lf
+data/**/*.json text eol=lf
