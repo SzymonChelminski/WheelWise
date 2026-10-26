@@ -21,6 +21,11 @@ const database = setupTestDatabase();
 
 const SECRET = 'correct-horse-battery-staple';
 const ENDPOINT = 'http://localhost:3000/api/cron/daily';
+/**
+ * The crash test starts an in-memory database of its own (PGlite), which takes several
+ * seconds on a busy machine; the default of 5 s is too short for that.
+ */
+const CRASH_TEST_TIMEOUT_MS = 60_000;
 
 function request(authorization?: string): Request {
   return new Request(ENDPOINT, { headers: authorization === undefined ? {} : { authorization } });
@@ -187,7 +192,7 @@ describe('GET /api/cron/daily - running the job', () => {
       setDbForTesting(database.db);
       await (broken as unknown as { $client: { close: () => Promise<void> } }).$client.close();
     }
-  });
+  }, CRASH_TEST_TIMEOUT_MS);
 
   it('does not put the secret into the response or the log', async () => {
     const logs = [

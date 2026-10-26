@@ -700,3 +700,165 @@ describe('rankCars - reaction to assumptions', () => {
     expect(ocAc[1].value).toBeCloseTo(5548.1 / 12, 6);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Sort direction
+// ---------------------------------------------------------------------------
+//
+// "desc" puts the highest value first. Ties stay ordered by slug ascending in both
+// directions, cars without a value are left out in both directions, and the rank is the
+// 1-based position in the returned order.
+
+describe('rankCars - direction "desc"', () => {
+  describe.each(METRIC_CASES)('metric $metric', (testCase) => {
+    // Input order b-tie, a-tie, c-lowest: with "desc" the two tied reference cars come first
+    // (a before b, by slug, although b is first in the input) and the lowest car comes last.
+    const cars = [
+      makeCar({ id: 2, slug: 'b-tie' }),
+      makeCar({ id: 1, slug: 'a-tie' }),
+      makeCar({ id: 3, slug: 'c-lowest', ...testCase.lowest }),
+    ];
+    const rank = () =>
+      rankCars(cars, testCase.prices ?? makePrices(), makeAssumptions(), testCase.metric, {}, 'desc');
+
+    it(`${testCase.metric}: highest value first, ties by slug ascending`, () => {
+      const ranked = rank();
+      expect(slugs(ranked)).toEqual(['a-tie', 'b-tie', 'c-lowest']);
+      expect(ranked[0].value).toBeCloseTo(testCase.tieValue, 6);
+      expect(ranked[1].value).toBeCloseTo(testCase.tieValue, 6);
+      expect(ranked[2].value).toBeCloseTo(testCase.lowestValue, 6);
+    });
+
+    it(`${testCase.metric}: rank is the position in the descending order`, () => {
+      expect(rank().map((entry) => [entry.car.slug, entry.rank])).toEqual([
+        ['a-tie', 1],
+        ['b-tie', 2],
+        ['c-lowest', 3],
+      ]);
+    });
+  });
+
+  it('is the exact reverse of the ascending order when no two values are equal', () => {
+    const ranked = rankCars(CATALOG, makePrices(), makeAssumptions(), 'price', {}, 'desc');
+    expect(slugs(ranked)).toEqual([...ALL_BY_PRICE].reverse());
+    expect(ranked.map((entry) => entry.value)).toEqual([
+      300000, 250000, 200000, 120000, 115000, 75000, 70000,
+    ]);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('keeps ties by slug ascending among distinct higher and lower values', () => {
+    const cars = [
+      makeCar({ id: 1, slug: 'mid', listPricePln: 100000 }),
+      makeCar({ id: 2, slug: 'zz-top', listPricePln: 200000 }),
+      makeCar({ id: 3, slug: 'low', listPricePln: 50000 }),
+      makeCar({ id: 4, slug: 'aa-top', listPricePln: 200000 }),
+      makeCar({ id: 5, slug: 'mm-top', listPricePln: 200000 }),
+    ];
+    const ranked = rankCars(cars, makePrices(), makeAssumptions(), 'price', {}, 'desc');
+    expect(slugs(ranked)).toEqual(['aa-top', 'mm-top', 'zz-top', 'mid', 'low']);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('orders four identical cars by slug ascending, as "asc" does', () => {
+    const cars = ['zeta', 'alpha', 'mid', 'alpha-2'].map((slug, index) =>
+      makeCar({ id: index + 1, slug }),
+    );
+    const desc = rankCars(cars, makePrices(), makeAssumptions(), 'totalCost', {}, 'desc');
+    const asc = rankCars(cars, makePrices(), makeAssumptions(), 'totalCost', {}, 'asc');
+    expect(slugs(desc)).toEqual(['alpha', 'alpha-2', 'mid', 'zeta']);
+    expect(slugs(asc)).toEqual(['alpha', 'alpha-2', 'mid', 'zeta']);
+    expect(desc.map((entry) => entry.rank)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('applies the filters and renumbers the ranks from 1', () => {
+    const ranked = rankCars(
+      CATALOG,
+      makePrices(),
+      makeAssumptions(),
+      'price',
+      { transmission: 'automatic' },
+      'desc',
+    );
+    expect(slugs(ranked)).toEqual(['volvo-xc60', 'bmw-i4', 'skoda-kodiaq', 'toyota-corolla']);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('a filter that matches nothing, or no cars at all, gives an empty ranking', () => {
+    expect(
+      rankCars(CATALOG, makePrices(), makeAssumptions(), 'price', { query: 'lamborghini' }, 'desc'),
+    ).toEqual([]);
+    expect(rankCars([], makePrices(), makeAssumptions(), 'totalCost', {}, 'desc')).toEqual([]);
+  });
+
+  it('does not reorder the input array', () => {
+    const cars = [
+      makeCar({ id: 1, slug: 'cheap', listPricePln: 50000 }),
+      makeCar({ id: 2, slug: 'expensive', listPricePln: 300000 }),
+    ];
+    rankCars(cars, makePrices(), makeAssumptions(), 'price', {}, 'desc');
+    expect(cars.map((car) => car.slug)).toEqual(['cheap', 'expensive']);
+  });
+});
+
+describe('rankCars - cars without a value, in both directions', () => {
+  // The phev has the lowest litres value and the evs have no litres value: in the
+  // consumption ranking without an "only electric" filter none of them has a place.
+  const cars: Car[] = [
+    makeCarOfFuel('petrol', { id: 1, slug: 'fc-petrol', fuelL100: 6.0 }),
+    makeCarOfFuel('diesel', { id: 2, slug: 'fc-diesel', fuelL100: 5.0 }),
+    makeCarOfFuel('lpg', { id: 3, slug: 'fc-lpg', fuelL100: 8.0 }),
+    makeCarOfFuel('hybrid', { id: 4, slug: 'fc-hybrid', fuelL100: 4.5 }),
+    makeCarOfFuel('phev', { id: 5, slug: 'fc-phev', fuelL100: 1.5, electricKwh100: 16 }),
+    makeCarOfFuel('ev', { id: 6, slug: 'fc-ev-a', electricKwh100: 17 }),
+    makeCarOfFuel('ev', { id: 7, slug: 'fc-ev-b', electricKwh100: 15 }),
+  ];
+  const rank = (filters: RankingFilters, direction?: 'asc' | 'desc') =>
+    rankCars(cars, makePrices(), makeAssumptions(), 'fuelConsumption', filters, direction);
+
+  it('"asc": phev and ev are not in the list', () => {
+    const ranked = rank({}, 'asc');
+    expect(slugs(ranked)).toEqual(['fc-hybrid', 'fc-diesel', 'fc-petrol', 'fc-lpg']);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('"desc": phev and ev are not in the list either, not even at the end', () => {
+    const ranked = rank({}, 'desc');
+    expect(slugs(ranked)).toEqual(['fc-lpg', 'fc-petrol', 'fc-diesel', 'fc-hybrid']);
+    expect(ranked.map((entry) => entry.value)).toEqual([8.0, 6.0, 5.0, 4.5]);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('"desc" with only electric cars selected ranks the evs by the highest kWh/100 km', () => {
+    const ranked = rank({ fuelTypes: ['ev'] }, 'desc');
+    expect(slugs(ranked)).toEqual(['fc-ev-a', 'fc-ev-b']);
+    expect(ranked.map((entry) => entry.value)).toEqual([17, 15]);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2]);
+  });
+
+  it('"desc" with only plug-in hybrids selected gives an empty ranking', () => {
+    expect(rank({ fuelTypes: ['phev'] }, 'desc')).toEqual([]);
+  });
+});
+
+describe('rankCars - direction omitted or "asc"', () => {
+  const metrics: RankingMetric[] = ['price', 'totalCost', 'fuelConsumption', 'insurance'];
+
+  it.each(metrics)('%s: no direction gives the same result as "asc"', (metric) => {
+    const omitted = rankCars(CATALOG, makePrices(), makeAssumptions(), metric, {});
+    const asc = rankCars(CATALOG, makePrices(), makeAssumptions(), metric, {}, 'asc');
+    expect(omitted.length).toBeGreaterThan(0);
+    expect(omitted).toEqual(asc);
+  });
+
+  it('"asc" puts the lowest value first, as before', () => {
+    const ranked = rankCars(CATALOG, makePrices(), makeAssumptions(), 'price', {}, 'asc');
+    expect(slugs(ranked)).toEqual(ALL_BY_PRICE);
+    expect(ranked.map((entry) => entry.rank)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  });
+
+  it('an explicit undefined direction is ascending', () => {
+    const ranked = rankCars(CATALOG, makePrices(), makeAssumptions(), 'price', {}, undefined);
+    expect(slugs(ranked)).toEqual(ALL_BY_PRICE);
+  });
+});

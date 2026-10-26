@@ -12,6 +12,9 @@ import {
   listTitle,
   openAssumptions,
   openFilters,
+  orderRadio,
+  panelClearButton,
+  panelClearStatus,
   rankingList,
   toggleCarName,
   visit,
@@ -65,6 +68,50 @@ const screens: Screen[] = [
       await expect(rankingList(page, listTitle(locale, "totalCost")).getByRole("listitem")).toHaveCount(10);
       const { panel } = await openFilters(page);
       await expect(panel.getByRole("checkbox", { checked: true })).toHaveCount(1);
+    },
+  },
+  {
+    name: "rankings in the order of the highest value",
+    open: async (page, locale) => {
+      await visit(page, `/${locale}/rankings?dir=desc`);
+      await expect(rankingList(page, listTitle(locale, "totalCost"), "desc").getByRole("listitem")).toHaveCount(10);
+      await expect(orderRadio(page, "desc")).toBeChecked();
+    },
+  },
+  {
+    name: "rankings in the order of the highest value with filters on",
+    open: async (page, locale) => {
+      await visit(page, `/${locale}/rankings?metric=price&dir=desc&fuel=hybrid&body=suv`);
+      await expect(rankingList(page, listTitle(locale, "price"), "desc").getByRole("listitem")).toHaveCount(10);
+      const { panel } = await openFilters(page);
+      await expect(panelClearButton(panel, locale)).not.toHaveAttribute("aria-disabled", "true");
+    },
+  },
+  {
+    name: "rankings with the filters open and no filter on",
+    open: async (page, locale) => {
+      await visit(page, `/${locale}/rankings?dir=desc`);
+      const { panel } = await openFilters(page);
+      await expect(panelClearButton(panel, locale)).toHaveAttribute("aria-disabled", "true");
+    },
+  },
+  {
+    name: "rankings with the filters open right after clearing them",
+    open: async (page, locale) => {
+      await visit(page, `/${locale}/rankings?dir=desc&fuel=ev`);
+      const { panel } = await openFilters(page);
+      const clear = panelClearButton(panel, locale);
+      await interactive(clear);
+      await clear.click();
+      await expect(panelClearStatus(panel)).toHaveText(msg(locale, "filters.cleared"));
+      await expect(clear).toBeFocused();
+      // The status is set at once; the check waits until the page of the cleared address has arrived.
+      await expect(page).toHaveURL(`/${locale}/rankings?dir=desc`);
+      await expect(
+        page.getByRole("main").getByText(msg(locale, "common.cars", { count: ranking("totalCost").length }), { exact: true }),
+      ).toBeVisible();
+      // While the new page is put in place the document title is replaced (removed and added again).
+      await expect.poll(() => page.evaluate(() => document.querySelector("head title")?.textContent ?? "")).not.toBe("");
     },
   },
   {

@@ -106,8 +106,27 @@ export async function expectQuery(page: Page, expected: string[]): Promise<void>
 // ---------------------------------------------------------------------------
 // Rankings
 
-export function rankingList(page: Page, title: string): Locator {
-  return page.getByRole("main").getByRole("list", { name: title, exact: true });
+export type SortDirection = "asc" | "desc";
+
+/** The order the address asks for: only "dir=desc" is highest first. */
+export function directionOf(page: Page): SortDirection {
+  return new URL(page.url()).searchParams.get("dir") === "desc" ? "desc" : "asc";
+}
+
+/** The accessible name of the rankings page list: its title and the order ("…, od najniższej"). */
+export function orderedListName(locale: Locale, title: string, direction: SortDirection): string {
+  return msg(locale, "rankings.listLabel", { title, dir: direction });
+}
+
+/**
+ * A ranking list by its title. On the rankings page the list's name also says the order:
+ * `direction`, or else the order of the address at the time of the call. Other lists
+ * (home page) are named by their title alone.
+ */
+export function rankingList(page: Page, title: string, direction?: SortDirection): Locator {
+  const onRankings = /^\/(pl|en)\/rankings\/?$/.test(new URL(page.url()).pathname);
+  const name = onRankings ? orderedListName(localeOf(page), title, direction ?? directionOf(page)) : title;
+  return page.getByRole("main").getByRole("list", { name, exact: true });
 }
 
 /** The title of the rankings list for a metric and period. */
@@ -247,6 +266,31 @@ export async function chooseMetric(page: Page, metric: RankingMetric): Promise<v
     await interactive(select);
     await select.selectOption({ label });
   }
+}
+
+/** A radio button of the order switch ("Kolejność") beside the list title. */
+export function orderRadio(page: Page, direction: SortDirection): Locator {
+  const locale = localeOf(page);
+  return page
+    .getByRole("main")
+    .getByRole("group", { name: msg(locale, "rankings.order.legend"), exact: true })
+    .getByRole("radio", { name: msg(locale, `rankings.order.${direction}`), exact: true });
+}
+
+export async function chooseOrder(page: Page, direction: SortDirection): Promise<void> {
+  const radio = orderRadio(page, direction);
+  await interactive(radio);
+  await radio.check();
+}
+
+/** The "clear filters" button at the top of the filter panel (sidebar or sheet header). */
+export function panelClearButton(panel: Locator, locale: Locale): Locator {
+  return panel.locator("[data-clear-filters]").getByRole("button", { name: msg(locale, "filters.clear"), exact: true });
+}
+
+/** The status region beside the panel's "clear filters" button. */
+export function panelClearStatus(panel: Locator): Locator {
+  return panel.locator("[data-clear-filters]").getByRole("status");
 }
 
 // ---------------------------------------------------------------------------
