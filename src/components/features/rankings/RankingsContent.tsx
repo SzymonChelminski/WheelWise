@@ -3,6 +3,7 @@ import { AssumptionsSummary } from "@/components/ui/AssumptionsPanel";
 import { EmptyState } from "@/components/ui/Feedback";
 import { EstimateNote, InfoNote } from "@/components/ui/Markers";
 import { RankingList } from "@/components/ui/RankingItem";
+import { FiltersHeading } from "@/components/ui/FiltersPanel";
 import { SheetDisclosure } from "@/components/ui/Sheet";
 import { h2Class, linkClass, panelClass } from "@/components/ui/styles";
 import { rankCars } from "@/lib/costs";
@@ -18,6 +19,7 @@ import { ListError } from "../ListError";
 import { LiveLink } from "../LiveLink";
 import { PowerNote } from "../car/PowerNote";
 import { ActiveFiltersControl } from "./ActiveFiltersControl";
+import { ClearFiltersControl } from "./ClearFiltersControl";
 import { MetricSelectorControl } from "./MetricSelectorControl";
 import {
   BODY_TYPES,
@@ -32,6 +34,7 @@ import {
 import { RankingFilters, type FilterOptionData, type FilterOptions } from "./RankingFilters";
 import { ResultsFocus, ResultsLink } from "./results-focus";
 import { isPeriodIndependent, metricAmount, RankingRow } from "./RankingRow";
+import { SortDirectionControl } from "./SortDirectionControl";
 
 function countBy(values: string[], order?: readonly string[]): FilterOptionData[] {
   const counts = new Map<string, number>();
@@ -82,10 +85,12 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
     raw,
     catalog ? [...new Set(catalog.cars.map((car) => car.make))] : undefined,
   );
-  const { metric, limit } = params;
+  const { metric, direction, limit } = params;
 
   // A failing catalogue costs the list only: the filters and assumptions stay usable.
-  const ranked = catalog ? rankCars(catalog.cars, catalog.prices, assumptions, metric, toFilters(params)) : [];
+  const ranked = catalog
+    ? rankCars(catalog.cars, catalog.prices, assumptions, metric, toFilters(params), direction)
+    : [];
   const visible = ranked.slice(0, limit);
   const maxAmount = Math.max(0, ...visible.map((item) => metricAmount(item, metric, period)));
   const electricOnly = isElectricOnly(params);
@@ -98,6 +103,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
     ? metricLabel
     : t("rankings.listTitle", { metric: metricLabel, period: periodText });
   const carsText = (count: number) => t("common.cars", { count });
+  const clearFilters = <ClearFiltersControl makes={options.make.map((make) => make.value)} />;
 
   const methodologyLink = (
     <LiveLink to={{ kind: "carry", path: "/methodology" }} className={linkClass}>
@@ -117,7 +123,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
       <div className="mt-6 grid gap-8 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
         <aside aria-label={t("filters.title")} className="hidden lg:block">
           <div className={`${panelClass} p-5`}>
-            <h2 className="mb-4 font-display text-xl font-semibold text-ink">{t("filters.title")}</h2>
+            <FiltersHeading title={t("filters.title")} action={clearFilters} />
             <RankingFilters options={options} />
           </div>
         </aside>
@@ -148,19 +154,22 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
                 {catalog && carsText(ranked.length)}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Below 640 px the controls fill the row; from 640 px each has its own width. */}
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <SheetDisclosure
-                className="lg:hidden"
+                className="max-sm:grow lg:hidden"
                 triggerLabel={t("filters.title")}
                 triggerIcon="sliders"
                 badge={activeCount > 0 ? String(activeCount) : undefined}
                 title={t("filters.title")}
                 closeLabel={t("common.close")}
                 applyLabel={t("filters.apply", { count: ranked.length })}
+                headerAction={clearFilters}
               >
                 <RankingFilters options={options} />
               </SheetDisclosure>
-              {!isPeriodIndependent(metric) && <PeriodSwitch />}
+              {!isPeriodIndependent(metric) && <PeriodSwitch fullWidth="narrow" className="max-sm:grow" />}
+              <SortDirectionControl />
             </div>
           </div>
 
@@ -183,7 +192,7 @@ export async function RankingsContent({ searchParams }: { searchParams: Promise<
               </EmptyState>
             ) : (
               <>
-                <RankingList label={title}>
+                <RankingList label={t("rankings.listLabel", { title, dir: direction })}>
                   {visible.map((item) => (
                     <RankingRow
                       key={item.car.slug}

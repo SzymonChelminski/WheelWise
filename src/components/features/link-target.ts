@@ -5,6 +5,7 @@ import {
   withQuery,
 } from "@/lib/state/assumption-params";
 import {
+  clearFilterParams,
   DEFAULT_METRIC,
   FILTER_PARAMS,
   PAGE_SIZE,
@@ -27,7 +28,7 @@ export type LinkTarget =
   | { kind: "clear" };
 
 const RANKINGS = "/rankings";
-const KEPT_ON_RANKINGS = ["metric", "limit", ...FILTER_PARAMS, ...ASSUMPTION_PARAM_KEYS];
+const KEPT_ON_RANKINGS = ["metric", "dir", "limit", ...FILTER_PARAMS, ...ASSUMPTION_PARAM_KEYS];
 
 /** The parameters of the rankings page that `query` holds, repeats included. */
 function rankingParams(query: string): URLSearchParams {
@@ -68,7 +69,7 @@ export function resolveTarget(target: LinkTarget, query: string): string {
     }
     case "clear": {
       const params = rankingParams(query);
-      for (const key of [...FILTER_PARAMS, "limit"]) params.delete(key);
+      clearFilterParams(params);
       return withQuery(RANKINGS, params);
     }
   }

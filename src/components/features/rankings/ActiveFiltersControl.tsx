@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { ActiveFilters } from "@/components/ui/FiltersPanel";
 import { formatPln, type Locale } from "@/lib/format";
 import { useIntendedQuery, useQueryWriter } from "@/lib/state/intended-query";
-import { FILTER_PARAMS, listValues, parseRankingParams, setListValues } from "./params";
+import { clearFilterParams, listValues, parseRankingParams, setListValues } from "./params";
 import { focusChipAfterUpdate, focusHeadingAfterUpdate, settleFocus } from "./results-focus";
 
 interface ActiveFilterItem {
@@ -74,10 +74,7 @@ export function ActiveFiltersControl({
 
   function clear() {
     focusHeadingAfterUpdate();
-    write((params) => {
-      for (const param of FILTER_PARAMS) params.delete(param);
-      params.delete("limit");
-    });
+    write(clearFilterParams);
   }
 
   return (

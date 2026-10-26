@@ -250,6 +250,7 @@
     "activeList": "Active filters",
     "remove": "Remove filter",
     "clear": "Clear filters",
+    "cleared": "Filters cleared",
     "activeQuery": "“{query}”",
     "activePriceMin": "from {price}",
     "activePriceMax": "up to {price}"
@@ -291,6 +292,12 @@
     "listTitle": "{metric}, {period}",
     "showing": "Showing {shown} of {total}",
     "showMore": "Show 10 more",
+    "order": {
+      "legend": "Order",
+      "asc": "Lowest first",
+      "desc": "Highest first"
+    },
+    "listLabel": "{title}, {dir, select, desc {highest first} other {lowest first}}",
     "estimateNote": "marks an estimate for your assumptions.",
     "priceNote": "Car prices are indicative: they are French list prices converted to złoty.",
     "consumptionCaption": "WLTP",

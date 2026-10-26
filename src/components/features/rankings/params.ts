@@ -1,9 +1,9 @@
-import type { RankingFilters, RankingMetric } from "@/lib/costs";
+import type { RankingFilters, RankingMetric, SortDirection } from "@/lib/costs";
 import type { BodyType, FuelType, Segment, Transmission } from "@/lib/domain/types";
 import { toSearchParams, type RawParams } from "@/lib/state/assumption-params";
 
 /*
- * The query parameters of the rankings page: metric, filters, text, page size.
+ * The query parameters of the rankings page: metric, order, filters, text, page size.
  * Pure functions, used by the server (to rank) and by the browser (to show the
  * state of the filters). Unknown or invalid values are ignored.
  */
@@ -41,6 +41,12 @@ const MAX_PRICE = 10_000_000;
 /** Filter parameters; each takes a list as repeated or comma-separated values. */
 export const FILTER_PARAMS = ["make", "segment", "body", "fuel", "gear", "pmin", "pmax", "q"] as const;
 
+/** Removes every filter and the page size, keeping metric, order, period and assumptions. */
+export function clearFilterParams(params: URLSearchParams): void {
+  for (const param of FILTER_PARAMS) params.delete(param);
+  params.delete("limit");
+}
+
 export interface RankingSelection {
   makes: string[];
   segments: Segment[];
@@ -54,6 +60,8 @@ export interface RankingSelection {
 
 export interface RankingParams extends RankingSelection {
   metric: RankingMetric;
+  /** Only "desc" is written to the URL; anything else reads as the default "asc". */
+  direction: SortDirection;
   /** Number of results to show, a multiple of PAGE_SIZE. */
   limit: number;
 }
@@ -102,6 +110,7 @@ export function parseRankingParams(
 
   return {
     metric: RANKING_METRICS.find((item) => item === metric) ?? DEFAULT_METRIC,
+    direction: params.get("dir") === "desc" ? "desc" : "asc",
     makes: makes
       ? [...new Set(requestedMakes.flatMap((make) => knownMakes.get(make.toLowerCase()) ?? []))]
       : requestedMakes,

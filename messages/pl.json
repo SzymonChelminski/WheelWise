@@ -250,6 +250,7 @@
     "activeList": "Włączone filtry",
     "remove": "Usuń filtr",
     "clear": "Wyczyść filtry",
+    "cleared": "Filtry wyczyszczone",
     "activeQuery": "„{query}”",
     "activePriceMin": "od {price}",
     "activePriceMax": "do {price}"
@@ -291,6 +292,12 @@
     "listTitle": "{metric}, {period}",
     "showing": "Pokazano {shown} z {total}",
     "showMore": "Pokaż kolejne 10",
+    "order": {
+      "legend": "Kolejność",
+      "asc": "Od najniższej",
+      "desc": "Od najwyższej"
+    },
+    "listLabel": "{title}, {dir, select, desc {od najwyższej} other {od najniższej}}",
     "estimateNote": "oznacza szacunek dla Twoich założeń.",
     "priceNote": "Ceny aut są orientacyjne: to francuskie ceny katalogowe przeliczone na złote.",
     "consumptionCaption": "WLTP",

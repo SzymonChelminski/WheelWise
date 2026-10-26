@@ -31,6 +31,8 @@ export interface RankingFilters {
   query?: string;
 }
 
+export type SortDirection = 'asc' | 'desc';
+
 export interface RankedCar {
   car: Car;
   costs: CostBreakdown;
@@ -101,13 +103,17 @@ function metricValue(
   }
 }
 
-/** Filtered cars sorted ascending by the metric, ties by slug. Rank starts at 1. */
+/**
+ * Filtered cars sorted by the metric, lowest value first or (`desc`) highest first. Ties are
+ * always by slug ascending. Cars without a value are not ranked. Rank is the 1-based position.
+ */
 export function rankCars(
   cars: Car[],
   prices: MarketPrices,
   a: Assumptions,
   metric: RankingMetric,
   filters: RankingFilters,
+  direction: SortDirection = 'asc',
 ): RankedCar[] {
   const entries: Omit<RankedCar, 'rank'>[] = [];
 
@@ -118,6 +124,7 @@ export function rankCars(
     if (value !== null) entries.push({ car, costs, value });
   }
 
-  entries.sort((x, y) => x.value - y.value || (x.car.slug < y.car.slug ? -1 : 1));
+  const sign = direction === 'desc' ? -1 : 1;
+  entries.sort((x, y) => sign * (x.value - y.value) || (x.car.slug < y.car.slug ? -1 : 1));
   return entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
