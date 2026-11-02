@@ -115,7 +115,7 @@ export function Header({
                   hrefLang={code}
                   aria-current={code === locale ? "true" : undefined}
                   className={cn(
-                    "inline-flex min-h-8 min-w-10 items-center pointer-coarse:min-h-11 pointer-coarse:min-w-11 justify-center rounded-sm px-2 text-sm font-semibold transition-colors duration-(--duration-fast)",
+                    "relative inline-flex min-h-8 min-w-10 items-center justify-center rounded-sm px-2 text-sm font-semibold transition-colors duration-(--duration-fast) pointer-coarse:after:absolute pointer-coarse:after:-inset-y-1.5 pointer-coarse:after:inset-x-0 pointer-coarse:after:content-['']",
                     code === locale
                       ? "bg-surface text-brand-strong"
                       : "text-on-brand hover:bg-brand",
